@@ -1,0 +1,38 @@
+{
+  "skill_name": "symfony-skills",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "In a Symfony API project, add a new POST /api/books endpoint that maps a CreateBookDto, checks authorization, creates the Book through a service, and returns a response DTO. Follow the repository's controller/service/entity conventions.",
+      "expected_output": "A thin single-action controller that uses request DTO mapping, delegates mutation to a service, authorizes through the project's voter style, and avoids exposing entities directly in JSON.",
+      "files": [],
+      "expectations": [
+        "Controller logic is limited to input mapping, authorization, service delegation, and response construction.",
+        "Authorization style matches the existing project convention rather than mixing DTO-subject and action-constant voters arbitrarily.",
+        "Entity creation and persistence are delegated to a service."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review a Doctrine repository method that filters trials by multiple query DTO fields, searches names case-insensitively, joins related entities for ordering, and returns a paginated result. Identify improvements and likely bugs.",
+      "expected_output": "A repository-focused review that checks parameter binding, optional filter guards, whitelisted ordering, pagination offset conventions, duplicate ordering, return types, and whether business logic leaked into the repository.",
+      "files": [],
+      "expectations": [
+        "Review focuses on query-builder correctness rather than controller or service concerns.",
+        "Ordering fields are treated as whitelisted values, not raw user input.",
+        "Pagination offset convention and duplicate addOrderBy calls are explicitly checked."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Implement an external ISBN lookup integration for a Symfony app. It should call a remote provider, normalize the response into an ExternalBookDto, map categories/languages through local mapping entities, and create or update local Book entities through services.",
+      "expected_output": "A design or implementation that separates third-party HTTP client code, external DTO normalization, mapping repository behavior, and local entity mutation through application services.",
+      "files": [],
+      "expectations": [
+        "Third-party transport details are isolated behind a provider/client class or interface.",
+        "External data is normalized into DTOs before mutating Doctrine entities.",
+        "Missing or ignored mapping behavior is handled deliberately and flush timing is explicit."
+      ]
+    }
+  ]
+}
