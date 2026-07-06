@@ -1,0 +1,23 @@
+{
+  "skill_name": "phpunit-functional-tests",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "In this Symfony API project, add functional tests for a new POST /api/books endpoint. The project already has AbstractWebTestCase, fixture users, JWT auth helpers, and BookTestDataGenerator. Cover anonymous, basic user, and admin user access, and assert that a successful admin request creates a Book in the repository.",
+      "expected_output": "A PHPUnit functional controller test in the existing project style, using the local base class/auth helpers, a DataProvider for role access, JSON_THROW_ON_ERROR payload encoding, response status assertions, and a repository side-effect assertion.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "Add a functional test for a GET /api/secrets search endpoint. Existing tests use WebTestCase, generateServerParamByEmail(), fixture users, and decoded JSON arrays with data/meta keys. Make sure the test creates deterministic searchable data and checks that normalized search text matches the expected secret only.",
+      "expected_output": "A focused functional GET test that creates deterministic test data through available generators or fixtures, authenticates with the local helper, asserts HTTP success, decodes JSON safely, and checks stable data/meta fields without brittle whole-response assertions.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Write tests for an endpoint that uploads a CSV/XLSX file in a Symfony API. The repo has tests/files fixtures and nearby upload tests that use UploadedFile. Cover a valid upload and a validation failure, and keep fixture files safe from mutation.",
+      "expected_output": "A PHPUnit functional upload test using UploadedFile, files from tests/files or temp copies, local BrowserKit request conventions, status assertions for success and validation failure, and any stable repository/response assertions used by the project.",
+      "files": []
+    }
+  ]
+}
