@@ -1,9 +1,9 @@
 ---
-name: phpunit-functional-tests
+name: symfony-phpunit-functional-tests
 description: Create, edit, or review PHPUnit functional tests for Symfony/PHP API projects. Use this skill whenever the user asks for functional tests, controller/API endpoint tests, WebTestCase/KernelBrowser tests, Symfony PHPUnit tests, auth/permission matrix tests, fixture-backed database tests, upload/download tests, mailer assertions, or repository side-effect checks in PHP projects, even if they only say "add tests" for an endpoint or service behavior.
 ---
 
-# PHPUnit Functional Tests
+# Symfony PHPUnit Functional Tests
 
 Use this skill to add Symfony/PHPUnit functional tests that fit the project's existing test suite. These repositories share a strong convention: functional tests should look like the local tests around them, use the project's base test classes and fixtures, and verify behavior through HTTP responses plus important database side effects.
 
