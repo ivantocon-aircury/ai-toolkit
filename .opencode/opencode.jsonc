@@ -10,7 +10,7 @@
   "small_model": "openai/gpt-5.4-mini",
 
   "instructions": [
-    ".opencode/instructions/executor-agent.md"
+    ".opencode/instructions/subagent-delegation.md"
   ],
 
   "compaction": {
@@ -38,8 +38,18 @@
     "executor": {
       "mode": "subagent",
       "model": "openai/gpt-5.4-mini",
-      "description": "Use this agent for shell commands, Docker commands, tests, linters, type checks, builds and command-output analysis. It does not edit files.",
-      "prompt": "Execute shell commands and summarize results concisely. Do not edit files. Prefer safe, read-only commands unless verification requires execution. Use the minimum useful output. Focus on test failures, linting issues, stack traces and actionable fixes only.",
+      "description": "Execute commands and analyze their output. Never edit files.",
+      "prompt": "Execute shell commands only. Never edit files. If the project uses Docker or Docker Compose, execute PHP, Composer, Symfony, Node, npm, pnpm, yarn, tests, linters, type checks and build commands inside the appropriate container. Prefer existing project wrappers such as Make targets when they already encapsulate Docker. Before running tooling commands, inspect the project setup if necessary using read-only commands. Run the minimum number of commands required. Keep output concise and summarize failures, warnings, stack traces and actionable next steps. Avoid printing large logs unless explicitly requested.",
+      "permission": {
+        "edit": "deny"
+      }
+    },
+
+    "search": {
+      "mode": "subagent",
+      "model": "openai/gpt-5.4-mini",
+      "description": "Search the codebase efficiently. Never edit files.",
+      "prompt": "Search the project using fast search tools such as rg, grep, find or git grep. Never edit files. Prefer targeted searches over opening many files. Return only relevant files, symbols, usages, implementations and concise summaries. Include line numbers when helpful. Never dump entire files unless explicitly requested.",
       "permission": {
         "edit": "deny"
       }
@@ -50,17 +60,25 @@
     "bash": {
       "*": "ask",
 
+      "pwd*": "allow",
       "ls*": "allow",
+      "tree*": "allow",
       "cat*": "allow",
+      "head*": "allow",
+      "tail*": "allow",
       "grep*": "allow",
       "rg*": "allow",
       "find*": "allow",
+      "wc*": "allow",
+      "sort*": "allow",
 
       "git status*": "allow",
       "git diff*": "allow",
       "git log*": "allow",
       "git show*": "allow",
       "git branch*": "allow",
+      "git grep*": "allow",
+      "git fetch*": "allow",
 
       "docker ps*": "allow",
       "docker compose ps*": "allow",
@@ -73,10 +91,24 @@
       "docker compose exec*": "allow",
       "docker compose run*": "allow",
 
+      "make*": "ask",
+
+      "php*": "deny",
+      "composer*": "deny",
+      "symfony*": "deny",
+      "node*": "deny",
+      "npm*": "deny",
+      "pnpm*": "deny",
+      "yarn*": "deny",
+
       "git push*": "deny",
+      "git pull*": "ask",
+      "git merge*": "deny",
       "git rebase*": "deny",
       "git reset*": "deny",
       "git clean*": "deny",
+      "git checkout*": "ask",
+      "git switch*": "ask",
 
       "docker compose push*": "deny",
       "docker system prune*": "deny",
