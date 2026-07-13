@@ -10,6 +10,7 @@
   "small_model": "openai/gpt-5.4-mini",
 
   "instructions": [
+    ".opencode/instructions/language.md",
     ".opencode/instructions/subagent-delegation.md"
   ],
 
