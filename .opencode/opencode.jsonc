@@ -10,8 +10,8 @@
   "small_model": "openai/gpt-5.6-luna",
 
   "instructions": [
-    ".opencode/instructions/language.md",
-    ".opencode/instructions/subagent-delegation.md"
+    "~/.config/opencode/instructions/language.md",
+    "~/.config/opencode/instructions/subagent-delegation.md"
   ],
 
   "compaction": {
