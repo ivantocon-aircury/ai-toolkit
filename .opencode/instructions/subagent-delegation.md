@@ -42,6 +42,8 @@ If the project uses Docker or Docker Compose, all PHP, Composer, Symfony, Node, 
 
 Prefer existing project wrappers (such as `make test`, `make lint`, `make build`) when they already execute commands inside Docker.
 
+For automated checks, do not publish host ports. Prefer `docker compose run --rm` without `--service-ports`; Compose does not publish a run container's service ports by default. Do not use `docker compose up` merely to run tests, because it starts services with their configured port mappings. If a test needs dependent services, use the project's documented port-free test profile or override, or start only the required dependencies without published ports.
+
 If the project structure is unknown, inspect it first using read-only commands before executing tooling commands.
 
 Never execute language tooling directly on the host when Docker is available.

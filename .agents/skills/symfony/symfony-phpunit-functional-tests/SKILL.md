@@ -188,6 +188,8 @@ Use the Makefile as documentation, not as the command runner. These projects usu
 - Run PHPUnit, Symfony console, migrations, fixture loading, and any project command inside the container every time.
 - Use the same service name, user, and working directory shown by the Makefile or nearby project docs.
 - Prefer targeted PHPUnit paths inside the container when verifying a focused test change.
+- Prefer `docker compose run --rm` for isolated checks. Do not pass `--service-ports`: service ports are not published by default for `run`, and automated tests do not need host access.
+- Do not use `docker compose up` solely to run tests, because it applies the stack's configured host port mappings. If tests need dependencies, use the project's documented port-free test profile or override, or start only required dependencies without published ports.
 
 Examples of the expected shape, adapted to the current project:
 
