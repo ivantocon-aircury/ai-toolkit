@@ -179,8 +179,8 @@
       "git checkout *": "ask",
       "git switch *": "ask",
 
-      "docker compose exec *": "ask",
-      "docker compose run *": "ask",
+      "docker compose exec *": "allow",
+      "docker compose run *": "allow",
       "make *": "ask",
 
       "php *": "deny",
