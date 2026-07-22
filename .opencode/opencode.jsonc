@@ -74,10 +74,13 @@
     "bash": {
       "*": "ask",
 
+      "pwd": "allow",
       "pwd *": "allow",
       "printf *": "allow",
 
+      "ls": "allow",
       "ls *": "allow",
+      "tree": "allow",
       "tree *": "allow",
 
       "cat *": "allow",
@@ -87,7 +90,9 @@
       "sed -n *": "allow",
 
       "grep *": "allow",
+      "rg": "allow",
       "rg *": "allow",
+      "find": "allow",
       "find *": "allow",
 
       "wc *": "allow",
@@ -103,7 +108,9 @@
       "dirname *": "allow",
       "basename *": "allow",
 
+      "du": "allow",
       "du *": "allow",
+      "df": "allow",
       "df *": "allow",
 
       "which *": "allow",
@@ -111,9 +118,13 @@
       "type *": "allow",
       "command -v *": "allow",
 
+      "whoami": "allow",
       "whoami *": "allow",
+      "id": "allow",
       "id *": "allow",
+      "uname": "allow",
       "uname *": "allow",
+      "date": "allow",
       "date *": "allow",
       "printenv *": "allow",
 
@@ -123,19 +134,27 @@
 
       "jq *": "allow",
 
+      "git status": "allow",
       "git status *": "allow",
+      "git diff": "allow",
       "git diff *": "allow",
+      "git log": "allow",
       "git log *": "allow",
+      "git show": "allow",
       "git show *": "allow",
       "git grep *": "allow",
 
       "git rev-parse *": "allow",
+      "git ls-files": "allow",
       "git ls-files *": "allow",
       "git ls-tree *": "allow",
       "git cat-file *": "allow",
+      "git describe": "allow",
       "git describe *": "allow",
 
+      "git remote": "allow",
       "git remote *": "allow",
+      "git tag": "allow",
       "git tag *": "allow",
 
       "git branch": "allow",
@@ -149,13 +168,18 @@
       "git branch -v *": "allow",
       "git branch -vv *": "allow",
 
+      "docker ps": "allow",
       "docker ps *": "allow",
 
+      "docker compose ps": "allow",
       "docker compose ps *": "allow",
       "docker compose config *": "allow",
+      "docker compose images": "allow",
       "docker compose images *": "allow",
+      "docker compose top": "allow",
       "docker compose top *": "allow",
       "docker compose port *": "allow",
+      "docker compose version": "allow",
       "docker compose version *": "allow",
       "docker compose logs *": "allow",
 
