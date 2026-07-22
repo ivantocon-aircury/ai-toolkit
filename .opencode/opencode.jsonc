@@ -84,6 +84,7 @@
       "head *": "allow",
       "tail *": "allow",
       "less *": "allow",
+      "sed -n *": "allow",
 
       "grep *": "allow",
       "rg *": "allow",
