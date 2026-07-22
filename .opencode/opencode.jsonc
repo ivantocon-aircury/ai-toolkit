@@ -6,8 +6,19 @@
   "formatter": true,
   "lsp": false,
 
-  "model": "openai/gpt-5.6-terra",
-  "small_model": "openai/gpt-5.6-luna",
+  "provider": {
+    "openai": {
+      "models": {
+        "gpt-5.6-luna": {
+          "options": {
+            "reasoningEffort": "xhigh"
+          }
+        }
+      }
+    }
+  },
+
+  "model": "openai/gpt-5.6-luna",
 
   "instructions": [
     "~/.config/opencode/instructions/language.md",
@@ -39,6 +50,7 @@
     "executor": {
       "mode": "subagent",
       "model": "openai/gpt-5.6-luna",
+      "variant": "low",
       "description": "Execute commands and analyze their output. Never edit files.",
       "prompt": "Execute shell commands only. Never edit files. For reading project files, prefer native shell utilities (cat, head, tail, sed, grep, rg) instead of invoking Python or other scripting languages unless the task explicitly requires them. If the project uses Docker or Docker Compose, execute PHP, Composer, Symfony, Node, npm, pnpm, yarn, tests, linters, type checks and build commands inside the appropriate container. Prefer existing project wrappers such as Make targets when they already encapsulate Docker. Before running tooling commands, inspect the project setup if necessary using read-only commands. Run the minimum number of commands required. Keep output concise and summarize failures, warnings, stack traces and actionable next steps. Avoid printing large logs unless explicitly requested.",
       "permission": {
@@ -49,6 +61,7 @@
     "search": {
       "mode": "subagent",
       "model": "openai/gpt-5.6-luna",
+      "variant": "xhigh",
       "description": "Search the codebase efficiently. Never edit files.",
       "prompt": "Search the project using fast search tools such as rg, grep, find or git grep. Never edit files. Prefer targeted searches over opening many files. Return only relevant files, symbols, usages, implementations and concise summaries. Include line numbers when helpful. Never dump entire files unless explicitly requested.",
       "permission": {
