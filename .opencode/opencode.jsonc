@@ -118,6 +118,8 @@
       "type *": "allow",
       "command -v *": "allow",
 
+      "true": "allow",
+
       "whoami": "allow",
       "whoami *": "allow",
       "id": "allow",
@@ -138,8 +140,10 @@
       "git status *": "allow",
       "git diff": "allow",
       "git diff *": "allow",
+      "git diff-tree *": "allow",
       "git log": "allow",
       "git log *": "allow",
+      "git rev-list *": "allow",
       "git show": "allow",
       "git show *": "allow",
       "git grep *": "allow",
