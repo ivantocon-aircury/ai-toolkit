@@ -120,6 +120,8 @@
       "command -v *": "allow",
 
       "true": "allow",
+      "exit": "allow",
+      "exit *": "allow",
 
       "whoami": "allow",
       "whoami *": "allow",
