@@ -78,6 +78,7 @@
       "pwd": "allow",
       "pwd *": "allow",
       "printf *": "allow",
+      "set -o pipefail": "allow",
 
       "ls": "allow",
       "ls *": "allow",
