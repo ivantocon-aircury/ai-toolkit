@@ -1,0 +1,27 @@
+{
+  "skill_name": "nextjs-app-router",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Create a protected App Router detail page for a record identified by an ID. The page should authenticate on the server, return a 404 for a confirmed missing record, provide route metadata, and render an interactive feature component without turning the page into a Client Component.",
+      "expected_output": "A thin version-aware server page that validates params, performs server-side access control, maps confirmed missing data to notFound, defines metadata, and passes serializable data to a separately interactive client component.",
+      "files": [],
+      "expectations": [
+        "The page remains a thin server component with version-appropriate params handling and server-side access control.",
+        "Confirmed missing data maps to notFound while unexpected failures are not silently converted to 404.",
+        "Metadata is defined and only a separately interactive child receives a client boundary and serializable props."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Add route-level loading and recoverable error UI for a nested dashboard segment. The error UI should allow retry, the loading UI should preserve the page shell, and successful empty data should remain an in-page empty state rather than a 404.",
+      "expected_output": "The correct App Router file conventions with a server-compatible loading component, a client error boundary with reset behavior, and a clear distinction between request failure, missing resources, and successful empty results.",
+      "files": [],
+      "expectations": [
+        "The route segment has the correct loading and error file conventions.",
+        "The error boundary is a Client Component with a reset/retry action, while loading preserves the shell.",
+        "Successful empty data remains an in-page empty state and is not treated as a 404 or generic error."
+      ]
+    }
+  ]
+}

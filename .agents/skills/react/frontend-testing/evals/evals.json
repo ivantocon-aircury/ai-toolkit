@@ -1,0 +1,27 @@
+{
+  "skill_name": "frontend-testing",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Write component tests for a form that shows field validation, submits a valid record, disables the action while saving, and displays a server error. Use the test runner and setup already present in the frontend project.",
+      "expected_output": "Focused behavior tests using the existing runner, user-like input and submission, semantic labels/roles or established stable selectors, deterministic API-boundary mocks, and assertions for validation, pending, success, and server-error states.",
+      "files": [],
+      "expectations": [
+        "Tests use the existing runner/setup and interact through user-visible fields and actions.",
+        "API behavior is mocked at an appropriate boundary with deterministic state reset.",
+        "Assertions cover validation, pending/duplicate-submit prevention, success, and server-error states."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Write a browser test for a protected list route. An unauthenticated visitor should be redirected, an authenticated visitor should see the list, and a failed API request should show the screen's error state. Avoid arbitrary sleeps and CSS selectors.",
+      "expected_output": "An isolated browser test using existing auth/data fixtures, meaningful URL and visible-state assertions, semantic locators or configured stable selectors, and request-aware async waits with no arbitrary delays.",
+      "files": [],
+      "expectations": [
+        "The browser test uses existing authentication and data fixtures and remains isolated.",
+        "Redirect, successful list rendering, and API error UI are asserted through URLs or visible state.",
+        "The test uses semantic/stable locators and meaningful async waits without arbitrary sleeps or CSS selectors."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "skill_name": "frontend-styling",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Make an existing data table screen responsive. On mobile the filters should wrap, actions should remain reachable, long values should not break the page, and loading, empty, error, hover, focus, and disabled states should remain clear. Use the project's existing styling system and shared primitives.",
+      "expected_output": "A minimal styling change that reuses existing tokens and class composition helpers, works at mobile and desktop widths, handles overflow intentionally, and preserves accessible interaction states without introducing a new styling system.",
+      "files": [],
+      "expectations": [
+        "The solution reuses the existing styling system, tokens, primitives, and class composition helper.",
+        "The layout handles mobile wrapping, desktop layout, long content, and overflow intentionally.",
+        "Focus, hover, loading, empty, error, and disabled states remain visible and accessible."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Add a primary/secondary variant to the shared button primitive and use it on a new form action. Match the existing theme, preserve keyboard focus visibility, support a pending disabled state, and avoid duplicating button classes in feature components.",
+      "expected_output": "A token-based shared button variant with conditional class composition, visible focus and pending states, explicit button behavior, and feature usage through the shared primitive rather than copied classes.",
+      "files": [],
+      "expectations": [
+        "Variants are implemented in the shared button primitive using existing tokens and object-based conditional class composition, with class names as keys and booleans as values.",
+        "Focus visibility and pending/disabled behavior are represented in the primitive.",
+        "The feature uses the shared primitive rather than duplicating button styling classes."
+      ]
+    }
+  ]
+}

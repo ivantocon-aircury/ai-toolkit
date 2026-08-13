@@ -1,0 +1,27 @@
+{
+  "skill_name": "react-hook-form-yup",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Add a create/edit form for a record with a required name, a controlled category selector, an optional date, and an optional upload. Use the frontend's existing form controls, validate with Yup, show translated errors, and submit the exact API payload shape.",
+      "expected_output": "A typed React Hook Form using yupResolver, explicit default values, register for native fields, Controller for controlled fields, accessible shared controls, deliberate edit normalization, and explicit payload conversion at submit time.",
+      "files": [],
+      "expectations": [
+        "The form uses typed React Hook Form state with yupResolver and explicit default values.",
+        "Native fields use register and controlled selector/date/file fields use Controller or the established equivalent.",
+        "Edit normalization and explicit conversion into the API payload are handled at the form boundary."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Add an asynchronous uniqueness check for a username field in an existing React Hook Form. The endpoint should not be called on every keystroke, stale responses must not overwrite newer input, and the submit button must prevent duplicate submissions.",
+      "expected_output": "A debounced or otherwise controlled async validation flow integrated with form errors, protection against stale results, and submission behavior tied to the form's pending state.",
+      "files": [],
+      "expectations": [
+        "Uniqueness requests are debounced or otherwise prevented from firing on every keystroke.",
+        "Stale async responses cannot overwrite the result for newer input.",
+        "The submit action reflects pending state and prevents duplicate submissions."
+      ]
+    }
+  ]
+}

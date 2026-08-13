@@ -1,0 +1,27 @@
+{
+  "skill_name": "react-components",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Create a reusable React confirmation dialog for deleting a record. It should accept a title, description, pending state, confirm callback, and cancel callback, and it should work inside an existing TypeScript frontend with shared UI primitives.",
+      "expected_output": "A default-exported PascalCase function component with typed local props, explicit button types, accessible dialog semantics, a client directive only if required by the chosen dialog primitive, and an intentional pending state.",
+      "files": [],
+      "expectations": [
+        "The component is declared as an exported default PascalCase function and has typed props.",
+        "The dialog and its controls have an accessible name, semantic action elements, and explicit button types.",
+        "Pending state prevents duplicate confirmation and communicates progress without breaking cancellation semantics."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Refactor this feature screen into a page component and two feature modules: a filter bar and a results list. Keep the route server-rendered where possible, make only interactive code client-side, and add stable selectors for the filter input and result actions.",
+      "expected_output": "A feature-oriented component structure with default function declarations, a minimal client boundary, typed props, stable list keys, semantic markup, and selectors that are not tied to CSS classes or array indexes.",
+      "files": [],
+      "expectations": [
+        "The screen is split into feature-oriented components with default function declarations and typed props.",
+        "Only interactive code uses a client boundary; the route/page remains server-compatible where possible.",
+        "Lists use stable domain keys and important controls use semantic or stable non-CSS selectors."
+      ]
+    }
+  ]
+}
