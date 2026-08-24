@@ -12,6 +12,7 @@ Use this skill for App Router file conventions and route composition. Inspect th
 - Use `react-components` for feature component structure, props, and client boundaries.
 - Use `frontend-styling` for layout and responsive presentation.
 - Use `react-query-api` for server prefetching, client queries, and hydration.
+- Use `next-auth-app-router` for NextAuth/Auth.js session lifecycle, token forwarding, and role guards.
 - Use `frontend-testing` for route and navigation behavior tests.
 
 ## Route Structure
@@ -62,6 +63,7 @@ export default async function Page({ params, searchParams }: PageProps) {
 - Treat middleware as supplemental routing behavior, not the only authorization boundary.
 - Re-check authorization close to protected data and actions. Do not rely on hidden UI controls for security.
 - Keep redirect targets and route construction centralized and correctly encoded.
+- If a shared protected layout bootstraps the current user, pass only the serializable session data needed by client providers and keep the authoritative guard on the server.
 
 ## Not Found And Errors
 

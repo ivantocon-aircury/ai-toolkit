@@ -1,0 +1,27 @@
+{
+  "skill_name": "react-toastify",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Add feedback to an API-backed save mutation using the existing React Toastify setup. Show a translated success toast only after the request succeeds, show a useful failure message for transport errors, preserve field validation errors inline, and avoid duplicate notifications.",
+      "expected_output": "Mutation-owned Toastify feedback with centralized container reuse, translated success/error messages, separation of field errors from transport failures, and duplicate prevention.",
+      "files": [],
+      "expectations": [
+        "Success feedback is emitted only from confirmed mutation success and uses the existing centralized container.",
+        "Field validation remains inline while transport/domain failure gets one concise actionable notification.",
+        "The implementation has a single notification owner and prevents duplicate success/error toasts."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Test a long-running file export that shows toast progress and then resolves or fails. Use the existing frontend test runner and assert user-visible notification behavior without depending on Toastify internals.",
+      "expected_output": "A deterministic notification test covering loading-to-success/error transitions, visible roles/text, cleanup, and existing provider/timer conventions.",
+      "files": [],
+      "expectations": [
+        "The test renders the existing toast container/harness and asserts visible notification text or roles.",
+        "The test covers progress resolution and failure paths without inspecting Toastify implementation internals.",
+        "Timers and notification state are reset or cleaned up so the test remains isolated."
+      ]
+    }
+  ]
+}

@@ -12,8 +12,12 @@ Use this skill to build React components in a consistent, feature-oriented style
 - Use `frontend-styling` for visual layout, responsive behavior, design tokens, and class composition.
 - Use `react-hook-form-yup` for forms and validation.
 - Use `react-query-api` for server-state fetching, mutations, and API modules.
+- Use `react-tanstack-table` for TanStack Table column definitions, grid state, and table behavior.
+- Use `react-controlled-form-widgets` for React Select, date pickers, editors, files, switches, and other controlled field adapters.
+- Use `react-toastify` for toast provider placement, mutation feedback, dismissal, and notification testing.
 - Use `frontend-testing` when adding or changing behavior tests.
 - Use `nextjs-app-router` for pages, layouts, route segments, metadata, and server/client route boundaries.
+- Use `next-auth-app-router` for NextAuth/Auth.js session and protected-route behavior.
 
 ## Component Declaration
 
@@ -70,8 +74,10 @@ export default function NoticePanel({ title, onClose }: Props) {
 - Avoid boolean prop combinations that permit invalid states; use a union or a small variant type when the states have different contracts.
 - Derive display values during render when possible instead of synchronizing duplicate state with an effect.
 - Use stable domain identifiers for list keys. Never use array indexes for reorderable or mutable lists.
+- Never use `Math.random()`, timestamps, or another changing value as a React key. Changing keys remount components and can lose input state.
 - Handle meaningful loading, error, empty, disabled, and success states instead of rendering only the happy path.
 - Keep event handlers intention-revealing and close to the interaction they serve. Move reusable domain logic to a hook or service.
+- Do not use `JSON.stringify(...)` as a shortcut for hook dependency tracking. Prefer stable references, normalized state, or explicit primitive dependencies so changes are intentional and cheap to reason about.
 
 ## Accessibility
 
@@ -96,4 +102,5 @@ export default function NoticePanel({ title, onClose }: Props) {
 - Route, API, and domain concerns are not unnecessarily embedded in presentational JSX.
 - Loading, error, empty, disabled, and success states are represented where relevant.
 - Semantics, labels, button types, focus behavior, and ARIA state are correct.
-- Lists use stable keys and important interactions have stable selectors when needed.
+- Lists use stable domain keys, never random or index keys, and important interactions have stable selectors when needed.
+- Effects do not hide unstable dependency handling behind `JSON.stringify(...)`.

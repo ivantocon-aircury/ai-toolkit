@@ -12,6 +12,8 @@ Use this skill to coordinate server state in React frontends. Inspect the projec
 - Use `react-components` for component structure and client boundaries.
 - Use `react-hook-form-yup` for form state, validation, and payload conversion.
 - Use `nextjs-app-router` for server prefetching, route pages, and hydration boundaries.
+- Use `react-tanstack-table` for table column definitions and grid state; keep transport and cache ownership here.
+- Use `react-toastify` for user-facing mutation success and failure feedback.
 - Use `frontend-testing` for query, mutation, loading, and error behavior tests.
 
 ## API Boundary
@@ -22,6 +24,8 @@ Use this skill to coordinate server state in React frontends. Inspect the projec
 - Prefer intention-revealing named operations such as `getRecords`, `postCreateRecord`, `putUpdateRecord`, and `deleteRecord`, unless the project already uses another consistent module style.
 - Keep endpoint-specific response mapping in the API module or a focused mapper, not scattered across render branches.
 - Do not duplicate auth headers, base URLs, error parsing, or retry policy in individual components.
+- Preserve the connector's cancellation and error contract. Pass an `AbortSignal` when the client supports it and do not swallow 401, validation, or network errors into a generic empty response.
+- Keep multipart upload and blob download handling in the API module, returning a typed domain result or raw response only when headers or binary data are required.
 
 ## Query Keys
 
@@ -40,6 +44,7 @@ export const RECORD_QUERY_KEYS = {
 - Keep key parameters serializable and normalized. Avoid hidden mutable state or values that change identity without changing meaning.
 - Reuse the exact same key factory in queries, mutations, prefetching, invalidation, and hydration.
 - Do not use a query for ephemeral UI state that is not server state.
+- Treat a query key as a public contract inside the frontend. If a query and invalidation build parameter objects differently, they can silently leave stale data; use one factory rather than reconstructing keys inline.
 
 ## Queries
 
@@ -50,6 +55,7 @@ export const RECORD_QUERY_KEYS = {
 - Render explicit loading, error, empty, and success states. Do not hide an error behind an empty table.
 - Select or map small response-to-option transformations in the query configuration when that keeps the component simple and typed.
 - Keep shared QueryClient defaults centralized. Do not override retry, stale time, or focus behavior in every query without a reason.
+- Guard response-dependent rendering with query state before dereferencing data. Avoid non-null assertions that only happen to work after the loading branch.
 
 ## Mutations And Cache
 
@@ -85,6 +91,7 @@ const updateMutation = useMutation({
 - Reset or clamp the current page when a filter can make the current page invalid.
 - Keep the table usable while a background request is running; show a refetch indicator without replacing valid rows with a blank screen.
 - Make empty results distinguishable from request failures.
+- Keep table sorting, filtering, and pagination parameters normalized before they enter a key. The table skill owns the interaction model; this skill owns the request and cache contract.
 
 ## Review Checklist
 

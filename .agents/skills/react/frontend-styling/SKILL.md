@@ -10,6 +10,7 @@ Use this skill to make UI changes that fit the existing visual language and rema
 ## Related Skills
 
 - Use `react-components` for component structure, props, exports, and client boundaries.
+- Use `tailwindcss` for Tailwind utility, theme, variant, plugin, and configuration mechanics.
 - Use `nextjs-app-router` for route layouts and page composition.
 - Use `frontend-testing` for visual behavior, interaction, and accessibility tests.
 - Use `react-hook-form-yup` for form structure and validation behavior.
@@ -19,8 +20,11 @@ Use this skill to make UI changes that fit the existing visual language and rema
 - Check the package manifest, Tailwind or other theme configuration, global styles, class-merging helper, and nearby components before adding classes.
 - Reuse existing buttons, links, inputs, alerts, loaders, tables, dialogs, typography, and layout primitives.
 - Follow the local choice between Tailwind, Sass, CSS Modules, and styled-components. Do not introduce a second styling boundary for convenience.
+- When styled-components is already established, preserve its server-side registry/provider and hydration setup; do not import styled primitives into a server path that cannot render them safely.
 - Use the project's configured import alias and class composition helper rather than creating local replacements.
 - Treat existing tokens as the visual contract. Extend the token source when a value is a real design token, not for one-off decoration.
+- Preserve intentional hybrid boundaries: use Tailwind for feature layout and responsive utilities, shared styled primitives where the project uses them, and Sass/global CSS only for established global or third-party overrides.
+- When styling a portaled dialog, select, tooltip, or menu, check the portal container, stacking context, z-index, and focus behavior rather than relying on the trigger's ancestor styles.
 
 ## Layout And Tokens
 
@@ -62,6 +66,7 @@ Use this skill to make UI changes that fit the existing visual language and rema
 - Preserve readable contrast, usable touch targets, and clear disabled/loading affordances.
 - Use semantic elements first; styling a `div` to look like a button does not provide button behavior or keyboard support.
 - Keep motion brief and purposeful, and respect reduced-motion preferences where animation is meaningful.
+- For headless primitives, style state through their documented data attributes or state props so keyboard and controlled behavior remain owned by the primitive.
 
 ## Visual Quality
 

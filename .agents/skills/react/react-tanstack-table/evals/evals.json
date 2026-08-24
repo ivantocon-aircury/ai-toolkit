@@ -1,0 +1,27 @@
+{
+  "skill_name": "react-tanstack-table",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Build an API-backed TanStack Table for records with typed columns, server-side pagination, sortable headers, a debounced search filter, and an empty/error/loading state. The existing query layer already exposes list data and pagination metadata.",
+      "expected_output": "A typed manual/server-side table with stable columns and row IDs, normalized query parameters, debounced search, synchronized pagination/sorting state, and distinct loading/refetch/error/empty/populated rendering.",
+      "files": [],
+      "expectations": [
+        "Columns and row identifiers are typed and stable, with accessible sortable headers and labeled row actions.",
+        "Pagination, sorting, and debounced search are normalized and synchronized with the existing query contract.",
+        "Initial loading, background refetch, empty success, error, and populated states are distinct."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Add row selection and a bulk archive action to an existing paginated table. Clarify whether selection is page-local, prevent archiving with no selected rows, and clear or reconcile selection after the mutation and filter changes.",
+      "expected_output": "A table selection model with an explicit scope, accessible selection controls, a guarded bulk action, mutation-pending behavior, and deliberate cache/selection reconciliation after success.",
+      "files": [],
+      "expectations": [
+        "Selection scope is explicit and row/header selection controls expose accessible state.",
+        "The bulk action is unavailable or guarded when no rows are selected and is disabled while pending.",
+        "Selection and affected query data are reconciled after mutation success and relevant filter/page changes."
+      ]
+    }
+  ]
+}

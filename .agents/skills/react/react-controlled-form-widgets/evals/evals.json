@@ -1,0 +1,27 @@
+{
+  "skill_name": "react-controlled-form-widgets",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Connect a React Select field and an async dependent selector to an existing React Hook Form. The form stores IDs, the UI uses option objects, option requests must be debounced, clearing the parent must clear the child, and validation errors must remain accessible.",
+      "expected_output": "Typed Controller adapters that map option objects to IDs, debounce and guard dependent option loading, clear dependent values intentionally, and preserve labels, errors, keyboard behavior, and ARIA wiring.",
+      "files": [],
+      "expectations": [
+        "React Select values are translated explicitly between option objects and form/API IDs through Controller.",
+        "Dependent async options are debounced, guarded by the parent value, and stale responses cannot win.",
+        "Labels, errors, clear behavior, keyboard interaction, and ARIA associations remain accessible."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Add a date-range and file field to an edit form that uses a browser-only date picker. Keep the page server-compatible, normalize existing API values, preserve empty/null semantics, and submit a safe multipart payload.",
+      "expected_output": "Client-only widget adapters with explicit date-range and file normalization, edit reset behavior, accessible errors, and multipart conversion at the API boundary without leaking browser-only imports into server modules.",
+      "files": [],
+      "expectations": [
+        "The browser-only picker is isolated behind the smallest client adapter and does not leak into server modules.",
+        "Existing date/file values, cleared values, null semantics, and range ordering are normalized explicitly.",
+        "The API boundary constructs the multipart payload and preserves accessible labels and field errors."
+      ]
+    }
+  ]
+}

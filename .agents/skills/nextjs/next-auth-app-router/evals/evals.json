@@ -1,0 +1,27 @@
+{
+  "skill_name": "next-auth-app-router",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Implement a protected App Router dashboard using the installed NextAuth/Auth.js version. Users without a session should be redirected, authenticated users should receive typed role data, and the client provider should receive only serializable non-sensitive session information.",
+      "expected_output": "Version-aware server session usage, a server-enforced protected layout/page, typed session augmentation, safe redirects, and a minimal client provider boundary without exposing tokens or secrets.",
+      "files": [],
+      "expectations": [
+        "The protected route checks the server session before rendering or fetching private data.",
+        "Session and role data are typed, while access/refresh tokens and secrets do not cross into client props.",
+        "Redirect behavior uses a validated internal return URL and the client provider is placed at the smallest required boundary."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Handle an expired authenticated API token in a Next.js frontend. The shared API connector should stop treating 401 responses as empty data, the user should be signed out or shown a re-authentication path, and private React Query cache data must not remain visible after identity changes.",
+      "expected_output": "Centralized 401/session-expiry handling, explicit error behavior, logout or re-authentication UX, and query-cache cleanup scoped to the affected identity.",
+      "files": [],
+      "expectations": [
+        "The shared connector treats 401 as an authentication failure rather than an empty successful response.",
+        "Session expiry leads to a consistent sign-out or re-authentication path with pending/error states.",
+        "Private query/cache state is cleared or scoped when the session identity changes."
+      ]
+    }
+  ]
+}

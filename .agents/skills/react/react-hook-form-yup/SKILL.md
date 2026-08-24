@@ -10,6 +10,7 @@ Use this skill for forms whose UI values need validation, controlled widgets, as
 ## Related Skills
 
 - Use `react-components` for component declarations, props, and client boundaries.
+- Use `react-controlled-form-widgets` for adapters around React Select, date pickers, editors, files, switches, and other controlled inputs.
 - Use `frontend-styling` for form layout and visual states.
 - Use `react-query-api` for API functions, mutations, query invalidation, and server state.
 - Use `frontend-testing` for validation, submission, and accessibility tests.
@@ -61,6 +62,7 @@ const form = useForm<FormValues>({
 - Convert numeric strings, dates, option objects, nullable values, and files at this boundary.
 - Keep API calls in a domain API module or mutation hook. The form may call an injected submit function or a mutation hook, but should not duplicate HTTP setup.
 - Display server validation errors in the same field error system when the API returns field-level violations.
+- Map non-field server failures to a form-level or submit-level error. Do not attach an unrelated API error to the first field just to make it visible.
 - Preserve user input when submission fails unless the server explicitly requires a reset.
 
 ```tsx
@@ -86,6 +88,8 @@ const onSubmit = form.handleSubmit(async (values) => {
 - Disable only controls that cannot safely operate during submission; keep error recovery possible.
 - For dependent fields, clear or revalidate values when the controlling field changes.
 - For file fields, validate type and size before upload when practical and never mutate the source fixture or browser file object.
+- Use `useFieldArray` for repeatable fields and stable item identifiers for rows. Do not use array indexes as React keys when items can be inserted, removed, or reordered.
+- Treat Formik or another legacy form abstraction as existing-code compatibility. Use the project's current React Hook Form pattern for new forms unless migration is explicitly requested.
 
 ## Review Checklist
 

@@ -12,6 +12,9 @@ Use this skill to add focused, deterministic frontend tests that survive refacto
 - Use `react-components` for component boundaries and accessible markup.
 - Use `react-hook-form-yup` for form validation and submit behavior.
 - Use `react-query-api` for API-backed query and mutation behavior.
+- Use `react-tanstack-table` for table behavior and grid state assertions.
+- Use `next-auth-app-router` for session, redirect, token-expiry, and protected-route behavior.
+- Use `react-toastify` for notification assertions and toast-container harness setup.
 - Use `nextjs-app-router` for route, redirect, metadata, and boundary behavior.
 
 ## Choose The Existing Runner
@@ -20,6 +23,7 @@ Use this skill to add focused, deterministic frontend tests that survive refacto
 - Use the project's configured browser runner for navigation, authentication, API-backed flows, and cross-component behavior.
 - Do not introduce a new test framework because it is familiar. Follow the existing scripts, setup files, fixtures, and test naming.
 - Put tests beside the existing feature or in the project's established `tests` area; preserve the local organization.
+- Build a reusable provider harness when components need QueryClient, router, i18n, auth, theme, or form context. Keep provider setup out of every individual test.
 
 ## Test Behavior
 
@@ -36,6 +40,7 @@ Use this skill to add focused, deterministic frontend tests that survive refacto
 - Add stable selectors to important fields, submit actions, table actions, dynamic rows, and stateful controls when required by the existing test style.
 - Never select by Tailwind class, generated DOM structure, brittle text fragments, or array index.
 - Keep selectors specific enough to identify the intended control but not coupled to visual copy that is expected to change.
+- For portaled selectors, dialogs, and menus, query the document-level role or configured stable selector rather than the trigger's subtree.
 
 ## API And State Boundaries
 
@@ -44,6 +49,7 @@ Use this skill to add focused, deterministic frontend tests that survive refacto
 - For browser tests, use request contexts or existing setup helpers for deterministic authentication and data creation when available.
 - Assert the outcome of requests through visible UI, URLs, or response effects rather than inspecting private query-cache internals.
 - Make tests independent. A test must not rely on execution order or data created by a previous test unless the existing fixture system explicitly guarantees isolation.
+- Use the project's network mocking layer or API fixtures consistently. Do not mix real network calls and module mocks in one test without a clear boundary.
 
 ## Async Behavior
 
@@ -51,6 +57,7 @@ Use this skill to add focused, deterministic frontend tests that survive refacto
 - Do not use arbitrary sleeps to hide race conditions. If timing is unstable, identify the missing state or request assertion.
 - Use the runner's async query and assertion APIs consistently.
 - Verify that loading indicators disappear or that previous data remains visible during background refetch when that is part of the feature contract.
+- Use fake timers only for debounce/throttle behavior, and restore them after each test. Prefer asserting the user-visible result over asserting an implementation-specific timer count.
 
 ## Test Data
 

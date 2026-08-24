@@ -1,0 +1,28 @@
+{
+  "skill_name": "tailwindcss",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Refactor a shared button's Tailwind classes to support primary, secondary, loading, and disabled states. Use the project's existing class helper if one exists; otherwise add a typed cn helper with the appropriate dependencies. Keep focus visible and avoid dynamically interpolated class names.",
+      "expected_output": "A shared button implementation using existing Tailwind tokens and helper conventions, or a typed clsx/tailwind-merge cn helper when no helper exists, with object-based conditional class maps, complete interaction states, and static or intentionally safelisted utility classes.",
+      "files": [],
+      "expectations": [
+        "Conditional classes use objects with class names as keys and boolean expressions as values.",
+        "Primary, secondary, loading, disabled, and focus-visible states are represented using existing theme tokens.",
+        "The implementation avoids unsafe dynamic utility interpolation and does not duplicate the class helper.",
+        "When no helper exists, cn uses clsx and tailwind-merge with direct dependency entries added through the project's existing package manager and a typed ClassValue signature."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Fix a Tailwind-styled portaled select menu that is hidden behind the page header and loses its width and error styling. Keep the trigger accessible and preserve the project's Tailwind/Sass boundary.",
+      "expected_output": "A portal-aware styling fix that targets the rendered menu, stacking context, width, and error state without moving unrelated styles into a new global system.",
+      "files": [],
+      "expectations": [
+        "The fix styles the portaled content rather than relying only on trigger ancestor styles.",
+        "Stacking order, menu width, and error/focus presentation are handled intentionally.",
+        "Existing Tailwind/Sass boundaries and accessibility behavior are preserved."
+      ]
+    }
+  ]
+}
