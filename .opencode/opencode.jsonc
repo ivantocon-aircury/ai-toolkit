@@ -66,6 +66,7 @@
       "pwd": "allow",
       "pwd *": "allow",
       "printf *": "allow",
+      "test -f *": "allow",
       "set -o pipefail": "allow",
 
       "ls": "allow",
@@ -74,6 +75,7 @@
       "tree *": "allow",
 
       "cat *": "allow",
+      "nl *": "allow",
       "head *": "allow",
       "tail *": "allow",
       "less *": "allow",
@@ -206,6 +208,10 @@
       "* > *": "ask",
       "* >> *": "ask",
       "*>*": "ask",
+      "*2>/dev/null*": "deny",
+      "*2> /dev/null*": "deny",
+      "*>/dev/null*": "deny",
+      "*> /dev/null*": "deny",
 
       "git branch *": "ask",
       "git fetch *": "ask",
@@ -231,6 +237,7 @@
       "git rebase *": "deny",
       "git reset *": "deny",
       "git clean *": "deny",
+      "awk *": "deny",
 
       "docker compose push *": "deny",
       "docker system prune *": "deny",
