@@ -10,8 +10,7 @@
 
   "instructions": [
     "~/.config/opencode/instructions/language.md",
-    "~/.config/opencode/instructions/subagent-delegation.md",
-    ".opencode/instructions/shell-commands.md"
+    "~/.config/opencode/instructions/subagent-delegation.md"
   ],
 
   "compaction": {
@@ -60,151 +59,56 @@
   },
 
   "permission": {
+    // Native tools: read-only project work that does not need a shell.
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+
+    // OpenCode session utilities with no OS-level side effects.
+    "todowrite": "allow",
+    "skill": "allow",
+
     "bash": {
+      // All shell commands require approval unless explicitly listed below.
       "*": "ask",
 
+      // Safe, argument-free shell inspection.
       "pwd": "allow",
-      "pwd *": "allow",
-      "printf *": "allow",
-      "test -f *": "allow",
-      "set -o pipefail": "allow",
-
       "ls": "allow",
-      "ls *": "allow",
-      "tree": "allow",
-      "tree *": "allow",
-
-      "cat *": "allow",
-      "nl *": "allow",
-      "head *": "allow",
-      "tail *": "allow",
-      "less *": "allow",
-      "sed -n *": "allow",
-
-      "grep *": "allow",
-      "rg": "allow",
-      "rg *": "allow",
-      "find": "allow",
-      "find *": "allow",
-
-      "wc *": "allow",
-      "sort *": "allow",
-      "uniq *": "allow",
-      "cut *": "allow",
-      "diff *": "allow",
-
-      "stat *": "allow",
-      "file *": "allow",
-      "readlink *": "allow",
-      "realpath *": "allow",
-      "dirname *": "allow",
-      "basename *": "allow",
-
       "du": "allow",
-      "du *": "allow",
       "df": "allow",
-      "df *": "allow",
+      "whoami": "allow",
+      "id": "allow",
+      "uname": "allow",
+      "date": "allow",
 
-      "which *": "allow",
-      "whereis *": "allow",
-      "type *": "allow",
-      "command -v *": "allow",
+      // Safe, argument-free Git inspection.
+      "git status": "allow",
+      "git diff": "allow",
+      "git remote": "allow",
+      "git tag": "allow",
+      "git branch": "allow",
 
+      // Safe, argument-free Docker inspection.
+      "docker ps": "allow",
+      "docker compose ps": "allow",
+      "docker compose images": "allow",
+      "docker compose version": "allow",
+
+      // Shell bookkeeping with no filesystem or process effects.
       "true": "allow",
       "exit": "allow",
-      "exit *": "allow",
 
-      "whoami": "allow",
-      "whoami *": "allow",
-      "id": "allow",
-      "id *": "allow",
-      "uname": "allow",
-      "uname *": "allow",
-      "date": "allow",
-      "date *": "allow",
-      "printenv *": "allow",
+      // Argument-bearing commands that should always be reviewed.
+      "git branch *": "ask",
+      "git fetch *": "ask",
+      "git pull *": "ask",
+      "git checkout *": "ask",
+      "git switch *": "ask",
+      "make *": "ask",
 
-      "sha256sum *": "allow",
-      "sha1sum *": "allow",
-      "md5sum *": "allow",
-
-      "jq *": "allow",
-
-      "git status": "allow",
-      "git status *": "allow",
-      "git diff": "allow",
-      "git diff *": "allow",
-      "git diff-tree *": "allow",
-      "git log": "allow",
-      "git log *": "allow",
-      "git rev-list *": "allow",
-      "git show": "allow",
-      "git show *": "allow",
-      "git grep *": "allow",
-
-      "git rev-parse *": "allow",
-      "git ls-files": "allow",
-      "git ls-files *": "allow",
-      "git ls-tree *": "allow",
-      "git cat-file *": "allow",
-      "git describe": "allow",
-      "git describe *": "allow",
-
-      "git remote": "allow",
-      "git remote *": "allow",
-      "git tag": "allow",
-      "git tag *": "allow",
-
-      "git branch": "allow",
-      "git branch --show-current": "allow",
-      "git branch --list *": "allow",
-      "git branch --contains *": "allow",
-      "git branch --merged *": "allow",
-      "git branch --no-merged *": "allow",
-      "git branch -a *": "allow",
-      "git branch -r *": "allow",
-      "git branch -v *": "allow",
-      "git branch -vv *": "allow",
-
-      "docker ps": "allow",
-      "docker ps *": "allow",
-
-      "docker compose ps": "allow",
-      "docker compose ps *": "allow",
-      "docker compose config *": "allow",
-      "docker compose images": "allow",
-      "docker compose images *": "allow",
-      "docker compose top": "allow",
-      "docker compose top *": "allow",
-      "docker compose port *": "allow",
-      "docker compose version": "allow",
-      "docker compose version *": "allow",
-      "docker compose logs *": "allow",
-
-      "tree * -o *": "ask",
-      "tree * --output *": "ask",
-      "tree * --output=*": "ask",
-
-      "sort * -o *": "ask",
-      "sort * --output *": "ask",
-      "sort * --output=*": "ask",
-
-      "find * -delete *": "ask",
-      "find * -exec *": "ask",
-      "find * -execdir *": "ask",
-      "find * -ok *": "ask",
-      "find * -okdir *": "ask",
-
-      "git diff * --output *": "ask",
-      "git diff * --output=*": "ask",
-      "git log * --output *": "ask",
-      "git log * --output=*": "ask",
-      "git show * --output *": "ask",
-      "git show * --output=*": "ask",
-
-      "docker compose config * --output *": "ask",
-      "docker compose config * --output=*": "ask",
-
+      // File output must be reviewed; never allow suppressed diagnostics.
       "* > *": "ask",
       "* >> *": "ask",
       "*>*": "ask",
@@ -213,16 +117,7 @@
       "*>/dev/null*": "deny",
       "*> /dev/null*": "deny",
 
-      "git branch *": "ask",
-      "git fetch *": "ask",
-      "git pull *": "ask",
-      "git checkout *": "ask",
-      "git switch *": "ask",
-
-      "docker compose exec *": "allow",
-      "docker compose run *": "allow",
-      "make *": "ask",
-
+      // Never run host language tooling; use a reviewed container command instead.
       "php *": "deny",
       "composer *": "deny",
       "symfony *": "deny",
@@ -232,6 +127,7 @@
       "pnpm *": "deny",
       "yarn *": "deny",
 
+      // Destructive or history-changing Git operations.
       "git push *": "deny",
       "git merge *": "deny",
       "git rebase *": "deny",
@@ -239,11 +135,25 @@
       "git clean *": "deny",
       "awk *": "deny",
 
+      // Destructive or publishing Docker operations.
       "docker compose push *": "deny",
       "docker system prune *": "deny",
 
+      // System-wide or irreversible host operations.
+      "printenv *": "deny",
       "rm -rf *": "deny",
       "sudo *": "deny"
+    },
+    "external_directory": {
+      // Ask before accessing paths outside the current project.
+      "*": "ask",
+
+      // Never access Windows mounts or credential/configuration directories.
+      "/mnt/c/**": "deny",
+      "/mnt/d/**": "deny",
+      "~/.ssh/**": "deny",
+      "~/.aws/**": "deny",
+      "~/.config/opencode/**": "deny"
     }
   },
 
@@ -253,7 +163,7 @@
       "command": [
         "npx",
         "-y",
-        "@upstash/context7-mcp"
+        "@upstash/context7-mcp@4.0.3"
       ]
     }
   }
