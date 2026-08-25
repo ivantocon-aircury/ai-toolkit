@@ -2,6 +2,7 @@
   "$schema": "https://opencode.ai/config.json",
 
   "share": "disabled",
+  "autoupdate": true,
   "snapshot": true,
   "formatter": true,
   "lsp": false,
@@ -10,7 +11,8 @@
 
   "instructions": [
     "~/.config/opencode/instructions/language.md",
-    "~/.config/opencode/instructions/subagent-delegation.md"
+    "~/.config/opencode/instructions/subagent-delegation.md",
+    "~/.config/opencode/instructions/native-tools.md"
   ],
 
   "compaction": {
@@ -40,7 +42,7 @@
       "model": "openai/gpt-5.6-luna",
       "variant": "low",
       "description": "Execute commands and analyze their output. Never edit files.",
-      "prompt": "Execute shell commands only. Never edit files. For reading project files, prefer native shell utilities (cat, head, tail, sed, grep, rg) instead of invoking Python or other scripting languages unless the task explicitly requires them. If the project uses Docker or Docker Compose, execute PHP, Composer, Symfony, Node, npm, pnpm, yarn, tests, linters, type checks and build commands inside the appropriate container. Prefer existing project wrappers such as Make targets when they already encapsulate Docker. Before running tooling commands, inspect the project setup if necessary using read-only commands. Run the minimum number of commands required. Keep output concise and summarize failures, warnings, stack traces and actionable next steps. Avoid printing large logs unless explicitly requested.",
+      "prompt": "Execute shell commands only. Never edit files. For repository inspection, use the native read, list, glob, and grep tools instead of Bash. Use Bash only when a native tool cannot perform the task. Do not use Python or other scripting languages unless the task explicitly requires them. If the project uses Docker or Docker Compose, execute PHP, Composer, Symfony, Node, npm, pnpm, yarn, tests, linters, type checks and build commands inside the appropriate container. Prefer existing project wrappers such as Make targets when they already encapsulate Docker. Before running tooling commands, inspect the project setup if necessary using native read-only tools. Run the minimum number of commands required. Keep output concise and summarize failures, warnings, stack traces and actionable next steps. Avoid printing large logs unless explicitly requested.",
       "permission": {
         "edit": "deny"
       }
@@ -49,9 +51,9 @@
     "search": {
       "mode": "subagent",
       "model": "openai/gpt-5.6-luna",
-      "variant": "xhigh",
+      "variant": "medium",
       "description": "Search the codebase efficiently. Never edit files.",
-      "prompt": "Search the project using fast search tools such as rg, grep, find or git grep. Never edit files. Prefer targeted searches over opening many files. Return only relevant files, symbols, usages, implementations and concise summaries. Include line numbers when helpful. Never dump entire files unless explicitly requested.",
+      "prompt": "Search the project using the native glob, grep, list, and read tools. Do not use Bash for repository inspection unless a native tool cannot perform the task. Never edit files. Prefer targeted searches over opening many files. Return only relevant files, symbols, usages, implementations and concise summaries. Include line numbers when helpful. Never dump entire files unless explicitly requested.",
       "permission": {
         "edit": "deny"
       }
