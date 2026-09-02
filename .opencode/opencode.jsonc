@@ -130,7 +130,6 @@
       "yarn *": "deny",
 
       // Destructive or history-changing Git operations.
-      "git push *": "deny",
       "git merge *": "deny",
       "git rebase *": "deny",
       "git reset *": "deny",
