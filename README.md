@@ -24,6 +24,7 @@ When adding a new skill, update this section with:
 
 ### Skill Index
 
+- `branch-commit-pr`: Captures a safe GitHub branch-to-PR workflow. Use when creating a branch from current changes, committing, pushing, and opening a pull request against a specified target branch. Location: `.agents/skills/git/branch-commit-pr/SKILL.md`.
 - `symfony-controllers`: Captures a reusable Symfony API controller style. Use when creating, editing, or reviewing single-action controllers under `src/Controller`. Location: `.agents/skills/symfony-controllers/SKILL.md`.
 - `symfony-entities`: Captures Doctrine entity and model object conventions. Use when creating, editing, or reviewing entities, ORM mappings, relationships, lifecycle fields, and entity invariants under `src/Entity`. Location: `.agents/skills/symfony-entities/SKILL.md`.
 - `symfony-repositories`: Captures Doctrine repository conventions. Use when creating, editing, or reviewing repositories, query builders, pagination, persistence helpers, and read/filter methods under `src/Repository`. Location: `.agents/skills/symfony-repositories/SKILL.md`.
