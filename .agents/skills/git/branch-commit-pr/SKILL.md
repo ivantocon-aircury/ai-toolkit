@@ -23,7 +23,7 @@ Do not create a PR whose head and target branches are the same. If the target br
 Use the supplied reference in every published identifier:
 
 - Branch: `<reference>_<branch-name>`, for example `PROJ-123_add-export`.
-- Commit subject: `<commit message> [<reference>]`, for example `Add CSV export [PROJ-123]`.
+- Commit subject: `[<reference>] <commit message>`, for example `[PROJ-123] Add CSV export`.
 - Pull request title: `<PR title> [<reference>]`, for example `Add CSV export [PROJ-123]`.
 
 If the reference contains characters Git does not permit in branch names, ask for a branch-safe reference or an approved branch-safe representation. Keep the original reference in the commit subject and PR title unless the user instructs otherwise.
@@ -54,13 +54,13 @@ git log --oneline -10
 
 ## Commit Changes
 
-If the `commit-changes` skill is available, load and follow it for the commit. It owns the commit-specific process and any project conventions.
+If the `commit-changes` skill is available, load and follow it for the commit. It owns the commit-specific process and any project conventions; provide the required commit subject format: `[<reference>] <commit message>`.
 
 Otherwise:
 
 - Stage only the reviewed current changes. When the user explicitly means every reviewed change, use `git add -A`; otherwise stage the agreed paths individually.
 - Re-check the staged diff with `git diff --cached` before committing.
-- Create one concise commit describing the actual change, with the reference suffix: `<commit message> [<reference>]`. Do not amend an existing commit unless the user explicitly requests it.
+- Create one concise commit describing the actual change, with the reference prefix: `[<reference>] <commit message>`. Do not amend an existing commit unless the user explicitly requests it.
 - If Git rejects the commit because hooks fail, report the failure and fix it only when it is within the user’s requested work. Never bypass hooks.
 
 ## Push And Open The Pull Request
