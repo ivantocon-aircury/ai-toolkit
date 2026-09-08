@@ -24,7 +24,7 @@ Use the supplied reference in every published identifier:
 
 - Branch: `<reference>_<branch-name>`, for example `PROJ-123_add-export`.
 - Commit subject: `[<reference>] <commit message>`, for example `[PROJ-123] Add CSV export`.
-- Pull request title: `<PR title> [<reference>]`, for example `Add CSV export [PROJ-123]`.
+- Pull request title: `[<reference>] <PR title>`, for example `[PROJ-123] Add CSV export`.
 
 If the reference contains characters Git does not permit in branch names, ask for a branch-safe reference or an approved branch-safe representation. Keep the original reference in the commit subject and PR title unless the user instructs otherwise.
 
@@ -69,7 +69,7 @@ Otherwise:
 - If the push is rejected because the remote branch has diverged, stop and ask how to proceed. Do not force-push.
 - Check for an existing open PR for the branch before creating a new one, for example with `gh pr list --head <branch-name> --state open`.
 - If no PR exists, create it with `gh pr create`, using the specified target with `--base <target-branch>` and the working branch with `--head <branch-name>`.
-- Use a clear title based on the committed change with the reference suffix: `<PR title> [<reference>]`. Include a short summary and tests run in the body; state `Not run (not requested)` when no checks were run. Do not invent test results, issue references, reviewers, labels, or draft status.
+- Use a clear title based on the committed change with the reference prefix: `[<reference>] <PR title>`. Include a short summary and tests run in the body; state `Not run (not requested)` when no checks were run. Do not invent test results, issue references, reviewers, labels, or draft status.
 - If `gh` reports that a PR already exists, return that PR rather than creating a duplicate.
 
 ## Completion Report
