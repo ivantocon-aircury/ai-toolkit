@@ -54,7 +54,7 @@ git log --oneline -10
 
 ## Commit Changes
 
-If the `commit-changes` skill is available, load and follow it for the commit. It owns the commit-specific process and any project conventions; provide the required commit subject format: `[<reference>] <commit message>`.
+If the `commit-changes` skill is available, load and follow it for the commit. It owns the commit-specific process and any project conventions. Tell it that the user-supplied reference is `<reference>` and prepend `[<reference>] ` to every commit subject it generates; for example, turn `feat(auth): add passkey sign-in` into `[PROJ-123] feat(auth): add passkey sign-in`. Do not ask it to generate the reference prefix itself or duplicate its commit-message conventions.
 
 Otherwise:
 
