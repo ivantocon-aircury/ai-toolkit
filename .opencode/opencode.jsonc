@@ -12,8 +12,7 @@
   "instructions": [
     "~/.config/opencode/instructions/language.md",
     "~/.config/opencode/instructions/subagent-delegation.md",
-    "~/.config/opencode/instructions/native-tools.md",
-    ".opencode/instructions/worktrees.md"
+    "~/.config/opencode/instructions/native-tools.md"
   ],
 
   "compaction": {
