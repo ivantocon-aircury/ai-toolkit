@@ -11,8 +11,7 @@
 
   "instructions": [
     "~/.config/opencode/instructions/language.md",
-    "~/.config/opencode/instructions/subagent-delegation.md",
-    "~/.config/opencode/instructions/native-tools.md"
+    "~/.config/opencode/instructions/subagent-delegation.md"
   ],
 
   "compaction": {
@@ -61,90 +60,29 @@
   },
 
   "permission": {
-    // Native tools: read-only project work that does not need a shell.
     "read": "allow",
+    "edit": "allow",
     "glob": "allow",
     "grep": "allow",
     "list": "allow",
-
-    // OpenCode session utilities with no OS-level side effects.
+    "task": "allow",
     "todowrite": "allow",
+    "question": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "lsp": "allow",
+    "doom_loop": "allow",
     "skill": "allow",
 
     "bash": {
-      // All shell commands require approval unless explicitly listed below.
-      "*": "ask",
-
-      // Safe, argument-free shell inspection.
-      "pwd": "allow",
-      "ls": "allow",
-      "du": "allow",
-      "df": "allow",
-      "whoami": "allow",
-      "id": "allow",
-      "uname": "allow",
-      "date": "allow",
-
-      // Safe, argument-free Git inspection.
-      "git status": "allow",
-      "git diff": "allow",
-      "git remote": "allow",
-      "git tag": "allow",
-      "git branch": "allow",
-
-      // Safe, argument-free Docker inspection.
-      "docker ps": "allow",
-      "docker compose ps": "allow",
-      "docker compose images": "allow",
-      "docker compose version": "allow",
-
-      // Shell bookkeeping with no filesystem or process effects.
-      "true": "allow",
-      "exit": "allow",
-
-      // Argument-bearing commands that should always be reviewed.
-      "git branch *": "ask",
-      "git fetch *": "ask",
-      "git pull *": "ask",
-      "git checkout *": "ask",
-      "git switch *": "ask",
-      "make *": "ask",
-
-      // File output must be reviewed; never allow suppressed diagnostics.
-      "* > *": "ask",
-      "* >> *": "ask",
-      "*>*": "ask",
-      "*2>/dev/null*": "deny",
-      "*2> /dev/null*": "deny",
-      "*>/dev/null*": "deny",
-      "*> /dev/null*": "deny",
-
-      // Never run host language tooling; use a reviewed container command instead.
-      "php *": "deny",
-      "composer *": "deny",
-      "symfony *": "deny",
-      "node *": "deny",
-      "npm *": "deny",
-      "npx *": "deny",
-      "pnpm *": "deny",
-      "yarn *": "deny",
-
-      // Destructive or history-changing Git operations.
-      "git merge *": "deny",
-      "git rebase *": "deny",
-      "git reset *": "deny",
+      "*": "allow",
+      "git reset --hard *": "deny",
       "git clean *": "deny",
-      "awk *": "deny",
-
-      // Destructive or publishing Docker operations.
-      "docker compose push *": "deny",
       "docker system prune *": "deny",
-
-      // System-wide or irreversible host operations.
-      "printenv *": "deny",
       "rm -rf *": "deny",
       "sudo *": "deny"
     },
+
     "external_directory": {
       // Ask before accessing paths outside the current project.
       "*": "ask",
