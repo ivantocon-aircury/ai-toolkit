@@ -36,8 +36,9 @@ Respect explicit user intent and higher-priority permission requirements. Do not
 4. Load `inspect-git-state` after implementation. Reconcile the actual changes with the task and identify unrelated, missing, or misplaced work.
 5. If commits are requested or required for publication, load `commit-changes`. Accept multiple logical commits and preserve unrelated work outside them.
 6. Run the project's required final checks through the responsible testing or executor workflow, then load `inspect-git-state` again.
-7. If publication is expected, load `push-branch`.
+7. If publication is expected, load `push-branch`. It rebases the local branch onto the user-selected remote-tracking base immediately before pushing; recommend `origin/main` when asking the user to choose.
 8. If a PR is expected, load `create-pull-request`.
+9. Once the PR URL has been confirmed, remove the task worktree while keeping its local branch. Run this only from a different worktree after verifying that the target is a registered, non-primary task worktree with no tracked or untracked changes. Use `git worktree remove <path>` without `--force`; if removal is unsafe or fails, report the reason and leave it intact. Do not delete the local branch as part of cleanup.
 
 The workflow may resume at a later stage for pre-existing work. Inspect current state first and skip only stages already completed correctly.
 
@@ -52,13 +53,14 @@ Before declaring the requested lifecycle complete, load `inspect-git-state` and 
 - Required checks ran and their real results are recorded.
 - The branch is pushed when publication was expected.
 - The pull request exists with the intended head and base when a PR was expected.
+- A task worktree was removed after its PR was confirmed, or the reason it was retained is explicit.
 - No unresolved divergence, detached `HEAD`, wrong-worktree state, or ambiguous Git ownership remains.
 
 If unrelated changes make branch or commit ownership ambiguous, ask whether they belong in a separate commit on the same branch or a separate task, branch, and worktree. Do not silently choose.
 
 ## Completion Report
 
-Report the worktree path, branch and base, created commits, checks, push state, PR URL when applicable, and any intentionally unfinished Git state. Completion means the endpoint established at the start was reached, not that every task must always produce a commit or PR.
+Report the worktree path and whether it was removed, preserved local branch and base, created commits, checks, push state, PR URL when applicable, and any intentionally unfinished Git state. Completion means the endpoint established at the start was reached, not that every task must always produce a commit or PR.
 
 ## Review Checklist
 
@@ -66,4 +68,5 @@ Report the worktree path, branch and base, created commits, checks, push state, 
 - Worktree isolation was considered before implementation for every modifying task.
 - Commit count followed logical change boundaries rather than task count.
 - Publication matched user intent and was verified.
+- Confirmed PR worktrees were safely removed without deleting their local branches.
 - All unfinished or unrelated Git state is explicit.
