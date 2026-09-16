@@ -60,8 +60,16 @@
   },
 
   "permission": {
-    "read": "allow",
-    "edit": "allow",
+    "read": {
+      "*": "allow",
+      "**/.env": "ask",
+      "**/.env*": "ask"
+    },
+    "edit": {
+      "*": "allow",
+      "**/.env": "ask",
+      "**/.env*": "ask"
+    },
     "glob": "allow",
     "grep": "allow",
     "list": "allow",
@@ -86,6 +94,13 @@
     "external_directory": {
       // Ask before accessing paths outside the current project.
       "*": "ask",
+
+      // All development projects and worktrees live here.
+      "~/work/**": "allow",
+
+      // Secrets require explicit approval even within the development workspace.
+      "~/work/**/.env": "ask",
+      "~/work/**/.env*": "ask",
 
       // Never access Windows mounts or credential/configuration directories.
       "/mnt/c/**": "deny",
