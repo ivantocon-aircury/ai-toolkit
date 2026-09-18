@@ -111,6 +111,8 @@
     }
   },
 
+  "plugin": ["opencode-wakatime"],
+
   "mcp": {
     "context7": {
       "type": "local",
