@@ -42,12 +42,25 @@ Derive the project folder from the repository root. For `feature/user-settings` 
 6. If the destination exists but is not the matching registered worktree, stop. Never delete it or choose an alternate branch or path merely to bypass a collision.
 7. Do not move, copy, stash, discard, or commit pre-existing changes as part of worktree creation. Return control to the caller if changes must be assigned or migrated first.
 
+## Seed Runtime Dependencies
+
+After creating a new worktree, copy dependency directories from the checkout that invoked this skill so the new worktree is runnable immediately.
+This applies only to newly created worktrees; never overwrite dependencies in a reused worktree.
+
+- If the source checkout has a non-symlink `node_modules/` directory, copy it into the new worktree with `cp -a --reflink=auto -- <source-path>/node_modules <worktree-path>/`.
+- If the source checkout has a non-symlink `vendor/` directory, copy it into the new worktree with `cp -a --reflink=auto -- <source-path>/vendor <worktree-path>/`.
+- Use copies, not symlinks or hard links, so package-manager writes in one worktree cannot modify another. `--reflink=auto` uses copy-on-write storage when the filesystem supports it and otherwise performs a normal independent copy. Preserve internal dependency symlinks, such as executable shims, because they remain local to the copied directory.
+- Do not copy other ignored files, caches, environment files, build outputs, or generated artifacts. Those may be branch-specific or contain secrets.
+- If either directory is absent, continue without it. If a copy fails, report the failure and continue creating the worktree; the caller can install dependencies using the target project's documented command.
+- This dependency seeding is not migration of Git changes and is the sole exception to the no-copy rule above.
+
 ## Verify And Handoff
 
 After creation or reuse:
 
 - Load `inspect-git-state` for the selected path.
 - Verify that its repository root, branch, `HEAD`, base ancestry, and registration in `git worktree list` match the intended result.
+- Report whether `node_modules/` and `vendor/` were seeded or absent, including any copy failure.
 - Report the absolute worktree path, branch, and base ref.
 - Require every subsequent analysis, edit, test, build, commit, push, and PR command for the task to use the selected worktree as its working directory.
 - Do not continue task work from the checkout that invoked this skill. A shell `cd` is not a persistent handoff; callers must pass the worktree path as `workdir` or equivalent on every operation.
@@ -60,4 +73,5 @@ Never remove a worktree or delete its branch as part of this skill.
 - The base ref and any local/remote difference were made explicit.
 - No branch or path collision was bypassed.
 - The worktree is registered, on the intended branch, and based on the intended ref.
+- Available `node_modules/` and `vendor/` directories were copied independently into a newly created worktree.
 - The caller has the absolute path and will continue all task work there.
