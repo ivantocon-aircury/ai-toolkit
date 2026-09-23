@@ -24,13 +24,13 @@ Use this atomic skill to execute worktree creation or reuse. The caller owns the
 
 ## Resolve The Location
 
-Use the existing location convention unless the repository documents another one:
+Create worktrees under the shared worktree root unless the repository documents another location:
 
 ```text
-../<project-folder-name>_worktrees/<branch-name-with-slashes-replaced-by-dashes>
+~/work/worktrees/<project-folder-name>/<branch-name-with-slashes-replaced-by-dashes>
 ```
 
-Derive the project folder from the repository root. For `feature/user-settings` in `my-app`, use `../my-app_worktrees/feature-user-settings`.
+Derive the project folder from the repository root. For `feature/user-settings` in `my-app`, use `~/work/worktrees/my-app/feature-user-settings`.
 
 ## Create Or Reuse Safely
 
