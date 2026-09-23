@@ -1,13 +1,13 @@
 ---
 name: commit-changes
-description: Analyses git changed files in the workspace and makes atomic, functional, and semantic commits using conventional commits format with a supplied work reference prefix. Use when the user asks to commit changes, create commits from staged/unstaged files, or organise working tree changes into meaningful commits.
+description: Use ONLY when the user explicitly asks to commit changes, create commits from staged or unstaged files, or organise changes into commits. Makes atomic, functional, and semantic commits using conventional commit format with a supplied work reference prefix.
 license: MIT
 metadata:
   author: Aircury
   version: "1.0"
 ---
 
-When committing changes, follow this workflow:
+Do not commit because implementation is complete, tests pass, a branch exists, or another skill refers to this one. Commit only after an explicit user request. When committing changes, follow this workflow:
 
 1. **Analyze the workspace**: Run `git status` and `git diff` (staged and unstaged) to understand all changes.
 

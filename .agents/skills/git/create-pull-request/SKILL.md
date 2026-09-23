@@ -1,11 +1,11 @@
 ---
 name: create-pull-request
-description: Use when creating or locating a GitHub pull request for a pushed branch. Verifies the head and base, reviews the complete commit and file diff, avoids duplicate PRs, creates an accurate title and body, and returns the confirmed PR URL.
+description: Use ONLY when the user explicitly asks to create or locate a GitHub pull request for a pushed branch. Verifies the head and base, reviews the complete commit and file diff, avoids duplicate PRs, creates an accurate title and body, and returns the confirmed PR URL.
 ---
 
 # Create Pull Request
 
-Use this atomic skill to create or find a GitHub pull request for a coherent pushed branch. A pull request may contain multiple logical commits.
+Use this atomic skill only after an explicit user request to create or locate a GitHub pull request. A completed implementation or pushed branch does not authorize PR creation. A pull request may contain multiple logical commits.
 
 ## Related Skills
 

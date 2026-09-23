@@ -1,11 +1,11 @@
 ---
 name: push-branch
-description: Use when preparing and pushing a Git branch to a remote. Verifies the intended worktree, rebases unpublished work onto a user-selected base immediately before publication, checks branch/upstream/remote/commits/divergence, sets upstream tracking when needed, and never force-pushes or resolves divergence implicitly.
+description: Use ONLY when the user explicitly asks to push or publish a Git branch. Verifies the intended worktree, rebases unpublished work onto a user-selected base immediately before publication, checks branch/upstream/remote/commits/divergence, sets upstream tracking when needed, and never force-pushes or resolves divergence implicitly.
 ---
 
 # Push Branch
 
-Use this atomic skill to publish the intended local branch safely. It does not create commits or pull requests.
+Use this atomic skill only after an explicit user request to publish the intended local branch. A commit, completed implementation, or anticipated pull request does not authorize a push. It does not create commits or pull requests.
 
 ## Related Skills
 

@@ -1,11 +1,13 @@
 ---
 name: development-lifecycle
-description: Use when coordinating the Git lifecycle of an implementation task from isolation through completion. Trigger for direct requests such as "implement X" or "fix X", significant refactors, and OpenSpec or Spec Kit workflows that will implement changes. Orchestrates worktree selection, logical commits, final checks, push, and pull request creation without implementing the feature itself.
+description: Use ONLY when the user explicitly requests Git lifecycle work, such as committing, pushing, opening a pull request, or preparing a branch for review. Do not trigger for implementation, fixes, refactors, or specification workflows alone. Coordinates the requested Git steps without implementing the feature itself.
 ---
 
 # Development Lifecycle
 
-Use this orchestration skill to coordinate Git state around a development task. It does not design or implement the requested feature; the main agent or calling domain workflow owns implementation and verification.
+Use this orchestration skill only for Git steps the user explicitly requested. It does not design or implement the requested feature; the main agent or calling domain workflow owns implementation and verification.
+
+An implementation request never implies permission to commit, push, create a pull request, or remove a worktree. Leave changes uncommitted unless the user explicitly asks for one of those actions.
 
 ## Related Skills
 
@@ -26,7 +28,7 @@ At the start, determine the requested endpoint of the Git workflow:
 - A pushed branch.
 - A pull request.
 
-Respect explicit user intent and higher-priority permission requirements. Do not publish, commit, or create a PR merely because this skill can coordinate those actions. Record the intended base branch, remote, work reference, and PR expectation when supplied; ask only for information needed for the next irreversible or remote step.
+Perform only the endpoint(s) explicitly requested by the user and permitted by higher-priority instructions. Do not infer that commits, publication, a PR, or worktree cleanup are expected from an implementation task, a branch name, or prior workflow stages. Record the intended base branch, remote, work reference, and PR expectation when supplied; ask only for information needed for the next explicitly requested irreversible or remote step.
 
 ## Sequence
 
@@ -34,11 +36,11 @@ Respect explicit user intent and higher-priority permission requirements. Do not
 2. Pass the resulting absolute worktree path to the implementing agent or workflow. Require all implementation, tests, and later Git operations to use that path.
 3. Allow the responsible implementation workflow to make and verify the code changes. This skill coordinates state but does not implement features.
 4. Load `inspect-git-state` after implementation. Reconcile the actual changes with the task and identify unrelated, missing, or misplaced work.
-5. If commits are requested or required for publication, load `commit-changes`. Accept multiple logical commits and preserve unrelated work outside them.
+5. Load `commit-changes` only when the user explicitly requests commits. Accept multiple logical commits and preserve unrelated work outside them.
 6. Run the project's required final checks through the responsible testing or executor workflow, then load `inspect-git-state` again.
-7. If publication is expected, load `push-branch`. It rebases the local branch onto the user-selected remote-tracking base immediately before pushing; recommend `origin/main` when asking the user to choose.
-8. If a PR is expected, load `create-pull-request`.
-9. Once the PR URL has been confirmed, remove the task worktree while keeping its local branch. Run this only from a different worktree after verifying that the target is a registered, non-primary task worktree with no tracked or untracked changes. Use `git worktree remove <path>` without `--force`; if removal is unsafe or fails, report the reason and leave it intact. Do not delete the local branch as part of cleanup.
+7. Load `push-branch` only when the user explicitly requests a push or branch publication. It rebases the local branch onto the user-selected remote-tracking base immediately before pushing; recommend `origin/main` when asking the user to choose.
+8. Load `create-pull-request` only when the user explicitly requests a pull request.
+9. Remove a task worktree only when the user explicitly requests cleanup. Run this only from a different worktree after verifying that the target is a registered, non-primary task worktree with no tracked or untracked changes. Use `git worktree remove <path>` without `--force`; if removal is unsafe or fails, report the reason and leave it intact. Do not delete the local branch as part of cleanup.
 
 The workflow may resume at a later stage for pre-existing work. Inspect current state first and skip only stages already completed correctly.
 
