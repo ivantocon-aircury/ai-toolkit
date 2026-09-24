@@ -1,0 +1,40 @@
+{
+  "skill_name": "php-method-formatting",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "In a modern PHP 8.3 entity, add a getter for the private nullable property `private ?DateTimeImmutable $publishedAt = null;`. Return only the PHP method.",
+      "expected_output": "A multiline getter with the accurate nullable native return type.",
+      "files": [],
+      "expectations": [
+        "The getter declaration, body, and closing brace each occupy separate lines.",
+        "The getter has the native return type `?DateTimeImmutable`.",
+        "The getter directly returns `$this->publishedAt`."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Write the `create` method for an `InvoiceFactory`. It accepts `Customer $customer`, `array $lineItems`, `DateTimeImmutable $issuedAt`, and `bool $sendEmail`, and returns an `Invoice`. `lineItems` is a list of `InvoiceLineInput` objects. Return only the PHPDoc and method signature with an empty multiline body.",
+      "expected_output": "A native-typed, multiline signature with each of four parameters on its own line and PHPDoc that specifies the array element type.",
+      "files": [],
+      "expectations": [
+        "The signature has native types for all four parameters and the `Invoice` return type.",
+        "Each of the four parameters appears on its own line, with a trailing comma.",
+        "PHPDoc declares `$lineItems` as `list<InvoiceLineInput>`.",
+        "The empty method body is multiline."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Refactor this PHP method to meet the repository's method formatting rules. Preserve its behavior and return only the revised method: `public function setTags(array $tags){$this->tags=$tags;return $this;}`. The property represents a list of `Tag` objects and fluent setters in this project return `static`.",
+      "expected_output": "A multiline fluent setter with the static return type and non-redundant PHPDoc describing the Tag list.",
+      "files": [],
+      "expectations": [
+        "The setter declaration, body, and closing brace each occupy separate lines.",
+        "The setter has the native parameter type `array` and return type `static`.",
+        "PHPDoc declares `$tags` as `list<Tag>`.",
+        "The method assigns `$tags` to `$this->tags` and returns `$this`."
+      ]
+    }
+  ]
+}
