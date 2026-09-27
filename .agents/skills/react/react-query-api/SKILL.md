@@ -1,11 +1,13 @@
 ---
 name: react-query-api
-description: Use whenever adding or reviewing TanStack Query or React Query data fetching, API modules, query keys, mutations, cache invalidation, server prefetching, hydration, paginated filters, or API-backed tables in Next.js frontends. Trigger for requests to connect a screen to an endpoint, load data, add CRUD, refresh a list after editing, or handle API-backed loading and error states, even when the user does not explicitly say React Query. Keep transport out of JSX, use complete typed query keys, narrow invalidation, and match server/client query contracts.
+description: Use when TanStack Query or React Query is installed, already used by the feature, or explicitly requested. Covers typed transport boundaries, query keys, mutations, cache behavior, prefetching, hydration, and server-state UI.
 ---
 
 # React Query API
 
-Use this skill to coordinate server state in React frontends. Inspect the project's TanStack Query version and existing provider before choosing APIs; the examples below use the v5 style commonly used by current projects.
+Repository instructions, the installed TanStack Query version, provider defaults,
+API client, and neighboring hooks take precedence. Do not introduce this library
+into projects using another server-state approach unless explicitly requested.
 
 ## Related Skills
 
@@ -21,7 +23,8 @@ Use this skill to coordinate server state in React frontends. Inspect the projec
 - Keep HTTP transport in a domain API module, never inline in JSX.
 - Use the existing shared connector for base URL, authentication headers, serialization, response parsing, and unauthorized handling.
 - Export typed request parameters, payloads, and response contracts at the API boundary.
-- Prefer intention-revealing named operations such as `getRecords`, `postCreateRecord`, `putUpdateRecord`, and `deleteRecord`, unless the project already uses another consistent module style.
+- Follow the API module's established operation naming; use intention-revealing
+  names without encoding HTTP verbs unless that is the local convention.
 - Keep endpoint-specific response mapping in the API module or a focused mapper, not scattered across render branches.
 - Do not duplicate auth headers, base URLs, error parsing, or retry policy in individual components.
 - Preserve the connector's cancellation and error contract. Pass an `AbortSignal` when the client supports it and do not swallow 401, validation, or network errors into a generic empty response.
@@ -35,6 +38,7 @@ Use this skill to coordinate server state in React frontends. Inspect the projec
 ```ts
 export const RECORD_QUERY_KEYS = {
   all: ['records'] as const,
+  lists: ['records', 'list'] as const,
   list: (params: RecordListParams) => ['records', 'list', params] as const,
   detail: (id: string) => ['records', 'detail', id] as const,
 }
@@ -70,7 +74,7 @@ export const RECORD_QUERY_KEYS = {
 const updateMutation = useMutation({
   mutationFn: (payload: UpdateRecordPayload) => updateRecord(recordId, payload),
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: RECORD_QUERY_KEYS.all })
+    await queryClient.invalidateQueries({ queryKey: RECORD_QUERY_KEYS.lists })
     await queryClient.invalidateQueries({ queryKey: RECORD_QUERY_KEYS.detail(recordId) })
   },
 })

@@ -1,11 +1,13 @@
 ---
 name: react-controlled-form-widgets
-description: Use whenever integrating React Hook Form with React Select, AsyncSelect, date pickers, date ranges, file inputs, rich-text editors, switches, checkboxes, reCAPTCHA, or other controlled form widgets in React and Next.js projects. Trigger when a field does not behave like a native input, when a browser-only selector needs SSR handling, or when option loading, portals, value normalization, accessibility, and API payload conversion must be coordinated.
+description: Use when integrating an established React form library with non-native controlled widgets such as selects, date pickers, files, editors, switches, or captcha. Covers adapters, normalization, portals, SSR, accessibility, and stale async options.
 ---
 
 # React Controlled Form Widgets
 
-Use this skill for adapters between form state and non-native controls. Use `react-hook-form-yup` for schema validation and form lifecycle, `react-query-api` for option-loading transport, and `frontend-testing` for interaction coverage.
+Repository instructions, installed widget/form versions, shared adapters, and
+neighboring fields take precedence. Load `react-hook-form-yup` only when that
+specific stack is present.
 
 ## Adapter Contract
 

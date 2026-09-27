@@ -1,11 +1,13 @@
 ---
 name: next-auth-app-router
-description: Use whenever creating, editing, or reviewing NextAuth.js or Auth.js authentication in Next.js App Router projects. Trigger for credentials or OAuth providers, JWT/session callbacks, typed session data, server guards, middleware, client session providers, protected layouts, token forwarding, 401 handling, logout, impersonation, or session-expiry behavior. Keep authorization server-side, keep tokens out of client props, and align server, client, API, and cache lifecycles.
+description: Use when NextAuth.js or Auth.js is installed or explicitly requested in a Next.js App Router project. Covers providers, callbacks, typed sessions, server guards, proxy or middleware behavior, token handling, logout, and expiry.
 ---
 
 # NextAuth App Router
 
-Use this skill for authentication lifecycle and session boundaries. Use `nextjs-app-router` for generic route composition and `react-query-api` for ordinary server-state fetching after authentication is established.
+Repository instructions and installed Next.js/Auth.js versions take precedence.
+Do not apply this skill to another authentication provider merely because a route
+is protected.
 
 ## Related Skills
 
@@ -16,7 +18,9 @@ Use this skill for authentication lifecycle and session boundaries. Use `nextjs-
 
 ## Inspect The Installed Version
 
-- Inspect the installed NextAuth/Auth.js version and existing config before choosing APIs. `auth()`, `getServerSession()`, route handlers, middleware, and provider patterns differ across major versions.
+- Inspect installed versions and existing config before choosing APIs. `auth()`,
+  `getServerSession()`, route handlers, `proxy.ts` or middleware, and provider
+  patterns differ across major versions.
 - Read the existing session type augmentation, provider tree, callbacks, and API connector before adding a second auth path.
 - Preserve the project's session strategy, cookie settings, secret handling, and provider conventions unless the task explicitly changes them.
 

@@ -11,8 +11,8 @@
 
   "instructions": [
     "~/.config/opencode/instructions/language.md",
-    "~/.config/opencode/instructions/subagent-delegation.md",
-    "~/.config/opencode/instructions/native-tools.md"
+    "~/.config/opencode/instructions/development.md",
+    "~/.config/opencode/instructions/subagent-delegation.md"
   ],
 
   "compaction": {
@@ -36,40 +36,31 @@
     ]
   },
 
-  "agent": {
-    "executor": {
-      "mode": "subagent",
-      "model": "openai/gpt-5.6-luna",
-      "variant": "low",
-      "description": "Execute commands and analyze their output. Never edit files.",
-      "prompt": "Execute shell commands only. Never edit files. For repository inspection, use the native read, list, glob, and grep tools instead of Bash. Use Bash only when a native tool cannot perform the task. Do not use Python or other scripting languages unless the task explicitly requires them. If the project uses Docker or Docker Compose, execute PHP, Composer, Symfony, Node, npm, pnpm, yarn, tests, linters, type checks and build commands inside the appropriate container. Prefer existing project wrappers such as Make targets when they already encapsulate Docker. Before running tooling commands, inspect the project setup if necessary using native read-only tools. Run the minimum number of commands required. Keep output concise and summarize failures, warnings, stack traces and actionable next steps. Avoid printing large logs unless explicitly requested.",
-      "permission": {
-        "edit": "deny"
-      }
-    },
-
-    "search": {
-      "mode": "subagent",
-      "model": "openai/gpt-5.6-luna",
-      "variant": "medium",
-      "description": "Search the codebase efficiently. Never edit files.",
-      "prompt": "Search the project using the native glob, grep, list, and read tools. Do not use Bash for repository inspection unless a native tool cannot perform the task. Never edit files. Prefer targeted searches over opening many files. Return only relevant files, symbols, usages, implementations and concise summaries. Include line numbers when helpful. Never dump entire files unless explicitly requested.",
-      "permission": {
-        "edit": "deny"
-      }
-    }
-  },
-
   "permission": {
     // Native tools: read-only project work that does not need a shell.
-    "read": "allow",
+    "read": {
+      "*": "allow",
+      "**/.env": "ask",
+      "**/.env*": "ask"
+    },
+    "edit": {
+      "*": "ask",
+      "**/.env": "deny",
+      "**/.env*": "deny"
+    },
     "glob": "allow",
     "grep": "allow",
     "list": "allow",
 
     // OpenCode session utilities with no OS-level side effects.
     "todowrite": "allow",
+    "question": "allow",
     "skill": "allow",
+    "task": "allow",
+    "webfetch": "ask",
+    "websearch": "ask",
+    "context7_resolve-library-id": "ask",
+    "context7_query-docs": "ask",
 
     "bash": {
       // All shell commands require approval unless explicitly listed below.
@@ -119,19 +110,19 @@
       "*>/dev/null*": "deny",
       "*> /dev/null*": "deny",
 
-      // Never run host language tooling; use a reviewed container command instead.
-      "php *": "deny",
-      "composer *": "deny",
-      "symfony *": "deny",
-      "node *": "deny",
-      "npm *": "deny",
-      "npx *": "deny",
-      "pnpm *": "deny",
-      "yarn *": "deny",
+      // Host language tooling always requires explicit review.
+      "php *": "ask",
+      "composer *": "ask",
+      "symfony *": "ask",
+      "node *": "ask",
+      "npm *": "ask",
+      "npx *": "ask",
+      "pnpm *": "ask",
+      "yarn *": "ask",
 
       // Destructive or history-changing Git operations.
-      "git merge *": "deny",
-      "git rebase *": "deny",
+      "git merge *": "ask",
+      "git rebase *": "ask",
       "git reset *": "deny",
       "git clean *": "deny",
       "awk *": "deny",
@@ -141,8 +132,12 @@
       "docker system prune *": "deny",
 
       // System-wide or irreversible host operations.
+      "env": "deny",
+      "printenv": "deny",
       "printenv *": "deny",
+      "set": "deny",
       "rm -rf *": "deny",
+      "rm -rf": "deny",
       "sudo *": "deny"
     },
     "external_directory": {

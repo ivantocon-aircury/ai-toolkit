@@ -1,19 +1,22 @@
 ---
 name: commit-changes
-description: Use ONLY when the user explicitly asks to commit changes, create commits from staged or unstaged files, or organise changes into commits. Makes atomic, functional, and semantic commits using conventional commit format with a supplied work reference prefix.
-license: MIT
-metadata:
-  author: Aircury
-  version: "1.0"
+description: Use ONLY when the user explicitly asks to commit changes or organise them into commits. Creates coherent commits that follow repository-specific message and issue-reference conventions, with Conventional Commits as the fallback.
 ---
 
-Do not commit because implementation is complete, tests pass, a branch exists, or another skill refers to this one. Commit only after an explicit user request. When committing changes, follow this workflow:
+Do not commit because implementation is complete, tests pass, a branch exists,
+or another skill refers to this one. Commit only after an explicit user request.
+Repository instructions and recent commit history override the defaults below.
 
-1. **Analyze the workspace**: Run `git status` and `git diff` (staged and unstaged) to understand all changes.
+1. Load `inspect-git-state` and inspect staged, unstaged, untracked, and recent
+   commit state in the intended worktree.
 
-2. **Group changes semantically**: Identify logical units of work. Each commit must be atomic — one functional change per commit. Group related files that together implement a single concern.
+2. Group related files into the smallest coherent functional commits. Preserve
+   unrelated user changes outside those groups.
 
-3. **Write conventional commit messages**: Use the format `[<reference>] <type>(<scope>): <description>` without a body. For example, `[PROJ-123] feat(auth): add passkey sign-in`. Use the supplied work reference for every commit. Never invent a reference; if the calling workflow requires one and none was supplied, ask the user. Allowed types:
+3. Follow the repository's documented and demonstrated message style. If none
+   exists, use `<type>(<scope>): <description>` with a concise imperative subject.
+   Include a supplied issue reference where the project requires it. Never invent
+   one or ask for one unless the project requires it. Conventional fallback types:
    - `feat`: new feature
    - `fix`: bug fix
    - `refactor`: code restructuring without behavior change
@@ -26,10 +29,12 @@ Do not commit because implementation is complete, tests pass, a branch exists, o
    - `build`: build system changes
    - `revert`: reverting a previous commit
 
-4. **Commit rules**:
-   - One-line messages only — never use a commit body.
-   - Never include commit bodies, trailers, co-author lines, AI/tool attribution, generated-by markers, bot signatures, or metadata implying AI involvement.
-   - Use `git add` for specific files per commit, never `git add .` unless all changes belong to one commit.
-   - After each commit, run `git log -1 --format=%B` and verify the final message contains no AI-related attribution or metadata, then run `git status` to verify success.
+4. Before each commit, stage only its exact paths and inspect the staged diff.
+   Do not use `git add .` unless every change belongs to the same commit.
 
-5. **Execution order**: Stage and commit one group at a time. Do not skip ahead.
+5. Write the message using the repository's established body and trailer
+   conventions. Never add AI/tool attribution, generated-by markers, bot
+   signatures, or invented co-authors.
+
+6. After each commit, verify the resulting message and load `inspect-git-state`
+   to confirm the intended paths were committed and unrelated work remains intact.

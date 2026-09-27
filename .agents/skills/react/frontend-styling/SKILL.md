@@ -1,11 +1,13 @@
 ---
 name: frontend-styling
-description: Use whenever creating, editing, or reviewing visual React UI, Tailwind classes, responsive layouts, shared primitives, Sass styles, styled-components, CSS Modules, colors, spacing, typography, or interactive states in Next.js projects. Trigger for requests to style a component, improve a screen, make a layout responsive, or match an existing visual system, even when the user does not name the styling technology. Preserve established tokens, class-merging helpers, styling boundaries, accessibility, and desktop/mobile behavior instead of inventing a parallel design system.
+description: Use when creating, editing, or reviewing visual React UI, responsive layouts, shared primitives, CSS Modules, Sass, CSS-in-JS, Tailwind, tokens, typography, or interactive states. Preserves the project's visual system and desktop/mobile behavior.
 ---
 
 # Frontend Styling
 
-Use this skill to make UI changes that fit the existing visual language and remain usable across viewport sizes. Inspect the project's styling setup before editing; the rules below are defaults, not a reason to replace an established system.
+Repository instructions, existing visual tokens, styling boundaries, shared
+primitives, and neighboring screens take precedence. Do not invent a parallel
+design system.
 
 ## Related Skills
 

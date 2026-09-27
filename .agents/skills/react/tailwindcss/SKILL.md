@@ -1,11 +1,12 @@
 ---
 name: tailwindcss
-description: Use whenever creating, editing, or reviewing Tailwind CSS configuration, utility classes, responsive layouts, variants, theme tokens, plugins, global Tailwind styles, or class composition in React and Next.js projects. Trigger for requests to add Tailwind classes, customize tailwind.config, fix responsive or variant behavior, style headless primitives, or refactor utility strings. Reuse the project's tokens and class helper, prefer object-based conditional classes, and avoid dynamic utilities that Tailwind cannot detect.
+description: Use when Tailwind CSS is installed or explicitly requested and the task changes utilities, responsive variants, tokens, plugins, global Tailwind CSS, source detection, or class composition. Adapts to Tailwind v3, v4, and project helpers.
 ---
 
 # Tailwind CSS
 
-Use this skill for Tailwind mechanics. Use `frontend-styling` for broader visual hierarchy, responsive design quality, accessibility, and choosing between styling systems.
+Repository instructions, the installed Tailwind version, local tokens, and class
+composition conventions take precedence. Use `frontend-styling` for visual design.
 
 ## Related Skills
 
@@ -16,16 +17,20 @@ Use this skill for Tailwind mechanics. Use `frontend-styling` for broader visual
 
 ## Inspect First
 
-- Inspect the installed Tailwind version, `tailwind.config`, global CSS, content globs, plugins, dark-mode strategy, and the project's class helper before changing styles.
+- Inspect the installed Tailwind version first. For v3, inspect configuration,
+  content globs, plugins, and safelists. For v4, inspect CSS-first `@theme`,
+  automatic source detection, and any `@source` directives. Also inspect global
+  CSS, dark mode, and the project's class helper.
 - Identify whether the project uses `cn`, `classnames`, `clsx`, `tailwind-merge`, a variant utility, or a local equivalent. Reuse it; do not create a competing helper.
 - Preserve the existing boundary between Tailwind utilities, Sass/global CSS, CSS Modules, and styled-components. A new utility is not a reason to move an existing primitive to another system.
 - Check whether shared tokens are consumed by JavaScript libraries, portals, or styled primitives before renaming or removing them.
 
-## `cn` Helper
+## Class Helpers
 
 - If the project already has a class helper, use its existing import and behavior. Do not add a second `cn` implementation.
-- If no suitable helper exists, add `clsx` and `tailwind-merge` as direct runtime dependencies using the package manager already used by the project. Detect it from the lockfile or `packageManager` field; never introduce a second package manager. Use the equivalent command, for example `npm install clsx tailwind-merge`, `pnpm add clsx tailwind-merge`, `yarn add clsx tailwind-merge`, or `bun add clsx tailwind-merge`.
-- Add the helper in the project's established shared utility location, such as `src/lib/cn.ts` or `src/util/cn.ts`:
+- Do not add a class-merging dependency merely because none exists. Add one only
+  when the task needs reusable conditional merging and the project accepts the
+  dependency. Place it in the established utility location.
 
 ```ts
 import { clsx, type ClassValue } from 'clsx'
@@ -50,7 +55,8 @@ export function cn(...inputs: ClassValue[]) {
 ## Conditional Classes
 
 - Use the configured class helper for merging and conflict resolution.
-- Prefer objects with class names as keys and boolean expressions as values for conditional classes.
+- Follow the helper's established string, array, object, or variant API. Keep full
+  class names statically discoverable.
 
 ```tsx
 className={cn('rounded-md px-4 py-2', {
@@ -60,7 +66,9 @@ className={cn('rounded-md px-4 py-2', {
 })}
 ```
 
-- Do not build utilities through interpolated fragments such as `` `bg-${color}-500` `` unless the complete values are safelisted and the project deliberately supports that pattern.
+- Do not build utilities through interpolated fragments such as
+  `` `bg-${color}-500` `` unless complete values are explicitly sourced or
+  safelisted using the installed Tailwind version's mechanism.
 - Prefer complete static class strings in maps when a value is selected dynamically.
 - Keep base, variant, and state classes distinguishable. Avoid long opaque strings that make it difficult to see which state wins.
 
@@ -81,7 +89,8 @@ className={cn('rounded-md px-4 py-2', {
 
 ## Validation
 
-- Confirm all new classes are covered by content globs or an intentional safelist.
+- Confirm v3 content globs/safelist or v4 source detection/`@source` covers all
+  new classes.
 - Check class conflicts after merging responsive and state variants.
 - Verify keyboard focus, disabled behavior, reduced motion, contrast, and content overflow.
 - Run the project's formatter, lint, type check, and build checks when available.
@@ -90,7 +99,7 @@ className={cn('rounded-md px-4 py-2', {
 
 - Existing Tailwind version, theme, helper, plugins, and styling boundaries were inspected.
 - Repeated design values use semantic tokens rather than arbitrary utilities.
-- Conditional classes use object maps with class names as keys and booleans as values.
+- Conditional classes follow the existing helper and remain statically detectable.
 - Dynamic utilities are static or intentionally safelisted.
 - Responsive, state, focus, and disabled variants are complete and accessible.
 - Headless and portaled primitives are styled through their state/portal contract.

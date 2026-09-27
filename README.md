@@ -1,72 +1,122 @@
-# OpenCode Skills
+# OpenCode Development Toolkit
 
-This repository centralizes reusable OpenCode skills, conventions, and working patterns.
+This repository contains reusable global defaults for software development with
+OpenCode. It uses OpenCode's native configuration, instructions, agents, skills,
+permissions, and MCP support without adding an installation framework.
 
-It includes composable development workflows and technology-specific guidance that should be applied consistently across projects.
+## Precedence
 
-## Purpose
+Behavior is resolved from most specific to most general:
 
-- Keep reusable OpenCode skills in one place.
-- Document how each skill should be used.
-- Capture preferred development and technology-specific workflows.
-- Make future automation and guidance easier to discover and maintain.
+1. The current user request.
+2. Instructions and conventions in the active project.
+3. Global instructions from this toolkit.
+4. Defaults in a relevant reusable skill.
+
+Skills are fallback procedures. They do not override a project's architecture,
+commands, versions, issue-reference format, or demonstrated conventions.
+
+## Profiles
+
+Both profile directories contain the same development instructions and agents.
+Install the desired profile as `~/.config/opencode` and expose this repository's
+`.agents/skills` as `~/.agents/skills`; OpenCode discovers that location natively.
+This repository intentionally does not prescribe a copy or installation script.
+
+- `.opencode-auto` is intended for isolated development environments. It allows
+  normal repository edits, commands, delegation, verification, and task worktrees
+  under `~/work/worktrees`. It denies common destructive command forms and native
+  access to credential directories, but it is not an OS sandbox: broad Bash access
+  can bypass path-based rules. Use this profile only in an isolated environment.
+- `.opencode-normal` is intended for environments containing personal or
+  unrelated files. Native project inspection is available, but edits, shell
+  commands, web or MCP documentation access, and external paths retain
+  conservative approval rules. Environment-file edits are denied.
+
+The auto-only Wakatime plugin and permission differences are intentional. Other
+models, MCP configuration, instructions, and agent definitions stay aligned.
+
+Restart OpenCode after installing or changing a profile because configuration,
+agents, and skills are loaded at startup.
+
+## Global Instructions
+
+- `instructions/language.md` selects the default user-facing language.
+- `instructions/development.md` defines precedence, focused implementation,
+  autonomous completion, native-tool preference, and verification principles.
+- `instructions/subagent-delegation.md` defines when to use the small subagent
+  set without moving implementation decisions away from the main agent.
+
+## Agents
+
+- `executor` runs clearly defined commands and analyzes output using the project's
+  documented execution environment. It does not author code edits, although an
+  explicitly requested formatter, generator, or Git command may change files.
+- `researcher` performs substantial read-only codebase or external investigation.
+- `reviewer` independently reviews completed work for defects, regressions,
+  missed requirements, security issues, convention drift, and missing tests.
+
+Agent files are duplicated between profiles because each directory is a complete,
+independently installable global configuration. Keep their contents aligned.
 
 ## Skills
 
-Each skill added to this repository should be documented here.
+Skills live under `.agents/skills/<area>/<name>/SKILL.md`. Keep each skill focused,
+load related skills only when the task includes their concern, and avoid creating
+a project skill with the same name merely to customize a global default. Project
+instructions should provide those overrides.
 
-When adding a new skill, update this section with:
+### Git Workflows
 
-- Skill name
-- Short description
-- When to use it
-- Location of the skill files
+- `inspect-git-state`: read-only repository and publication inspection.
+- `worktree-workflow`: decides whether modifying work benefits from isolation.
+- `create-worktree`: safely creates or reuses task worktrees under
+  `~/work/worktrees/<project>/<branch-or-task>`.
+- `verify-changes`: reviews the complete diff and runs discovered project checks.
+- `commit-changes`: creates coherent commits using project message conventions.
+- `push-branch`: safely publishes an intended branch without implicit force push.
+- `create-pull-request`: verifies and creates or locates a GitHub pull request.
+- `development-lifecycle`: composes the requested Git endpoint from atomic skills.
 
-### Skill Index
+### Project Knowledge
 
-#### Git Workflows
+- `extract-rule`: turns evidence from changes or review corrections into a
+  confirmed, discoverable project rule without imposing a global taxonomy.
 
-- `inspect-git-state`: Performs read-only repository, worktree, branch, change, remote, and publication inspection. Location: `.agents/skills/git/inspect-git-state/SKILL.md`.
-- `create-worktree`: Creates or reuses and verifies a task worktree after the isolation decision has been made. Location: `.agents/skills/git/create-worktree/SKILL.md`.
-- `worktree-workflow`: Decides whether modifying work needs worktree isolation and coordinates confirmation and creation. Location: `.agents/skills/git/worktree-workflow/SKILL.md`.
-- `commit-changes`: Groups actual changes into one or more coherent commits without mixing unrelated work. Location: `.agents/skills/git/commit-changes/SKILL.md`.
-- `push-branch`: Verifies and safely publishes an intended branch without rewriting history. Location: `.agents/skills/git/push-branch/SKILL.md`.
-- `create-pull-request`: Reviews the complete branch and creates or locates its GitHub pull request. Location: `.agents/skills/git/create-pull-request/SKILL.md`.
-- `development-lifecycle`: Coordinates isolation, implementation handoff, logical commits, final checks, push, and pull request state. Location: `.agents/skills/git/development-lifecycle/SKILL.md`.
+### PHP And Symfony
 
-#### Next.js
+- `php-code-style`: PHP syntax, native types, PHPDoc, and version-aware style.
+- `symfony-controllers`: HTTP boundaries, request mapping, authorization, and
+  responses.
+- `symfony-doctrine-migrations`: schema diffs, data migrations, and validation.
+- `symfony-entities`: Doctrine mapping, relationships, state, and invariants.
+- `symfony-repositories`: queries, filters, ordering, pagination, and persistence.
+- `symfony-services`: multi-step application workflows and transaction boundaries.
+- `symfony-voters`: authorization attributes, subjects, roles, and ownership.
+- `symfony-external-integrations`: third-party clients and normalization boundaries.
+- `symfony-test-data-generators`: deterministic fixtures, factories, and builders.
+- `symfony-phpunit-functional-tests`: behavior-focused Symfony functional tests.
 
-- `next-auth-app-router`: Covers Auth.js and NextAuth.js authentication in App Router projects. Location: `.agents/skills/nextjs/next-auth-app-router/SKILL.md`.
-- `nextjs-app-router`: Covers App Router pages, layouts, routing, metadata, guards, and server/client boundaries. Location: `.agents/skills/nextjs/nextjs-app-router/SKILL.md`.
+### React And Next.js
 
-#### PHP
-
-- `php-code-style`: Captures modern PHP language and code-style conventions. Location: `.agents/skills/php/php-code-style/SKILL.md`.
-
-#### React
-
-- `frontend-styling`: Covers visual React and Next.js styling, responsiveness, and design-system consistency. Location: `.agents/skills/react/frontend-styling/SKILL.md`.
-- `frontend-testing`: Covers behavior-focused React and Next.js tests. Location: `.agents/skills/react/frontend-testing/SKILL.md`.
-- `react-components`: Covers React component structure, boundaries, props, and accessibility. Location: `.agents/skills/react/react-components/SKILL.md`.
-- `react-controlled-form-widgets`: Integrates React Hook Form with non-native controlled widgets. Location: `.agents/skills/react/react-controlled-form-widgets/SKILL.md`.
-- `react-hook-form-yup`: Covers React forms, Yup validation, and submit flows. Location: `.agents/skills/react/react-hook-form-yup/SKILL.md`.
-- `react-query-api`: Covers TanStack Query data fetching, mutations, query keys, and cache behavior. Location: `.agents/skills/react/react-query-api/SKILL.md`.
-- `react-tanstack-table`: Covers typed TanStack Table grids and server-side table state. Location: `.agents/skills/react/react-tanstack-table/SKILL.md`.
-- `react-toastify`: Covers React Toastify notification behavior and integration. Location: `.agents/skills/react/react-toastify/SKILL.md`.
-- `tailwindcss`: Covers Tailwind CSS utilities, configuration, tokens, variants, and validation. Location: `.agents/skills/react/tailwindcss/SKILL.md`.
-
-#### Symfony
-
-- `symfony-controllers`: Captures a reusable Symfony API controller style. Use when creating, editing, or reviewing single-action controllers under `src/Controller`. Location: `.agents/skills/symfony/symfony-controllers/SKILL.md`.
-- `symfony-doctrine-migrations`: Covers Doctrine schema and data migration generation, review, and validation. Location: `.agents/skills/symfony/symfony-doctrine-migrations/SKILL.md`.
-- `symfony-entities`: Captures Doctrine entity and model object conventions. Use when creating, editing, or reviewing entities, ORM mappings, relationships, lifecycle fields, and entity invariants under `src/Entity`. Location: `.agents/skills/symfony/symfony-entities/SKILL.md`.
-- `symfony-repositories`: Captures Doctrine repository conventions. Use when creating, editing, or reviewing repositories, query builders, pagination, persistence helpers, and read/filter methods under `src/Repository`. Location: `.agents/skills/symfony/symfony-repositories/SKILL.md`.
-- `symfony-services`: Captures application service conventions. Use when creating, editing, or reviewing services, workflow orchestration, entity mutation, file handling, external integrations, and business logic under `src/Service`. Location: `.agents/skills/symfony/symfony-services/SKILL.md`.
-- `symfony-voters`: Captures Symfony voter conventions. Use when creating, editing, or reviewing voters, authorization calls, DTO-subject voter patterns, role checks, ownership rules, and access-group checks under `src/Security/Voter`. Location: `.agents/skills/symfony/symfony-voters/SKILL.md`.
-- `symfony-test-data-generators`: Captures fixture and test data generator conventions. Use when creating, editing, or reviewing project-local test data generator services under `src/Service/TestDataGenerator`. Location: `.agents/skills/symfony/symfony-test-data-generators/SKILL.md`.
-- `symfony-external-integrations`: Captures external integration conventions. Use when creating, editing, or reviewing API clients, import services, external DTO normalization, provider mapping entities/repositories, and third-party integrations. Location: `.agents/skills/symfony/symfony-external-integrations/SKILL.md`.
-- `symfony-phpunit-functional-tests`: Covers fixture-backed Symfony API and controller functional tests. Location: `.agents/skills/symfony/symfony-phpunit-functional-tests/SKILL.md`.
+- `react-components`: component boundaries, props, rendering, and accessibility.
+- `frontend-styling`: visual-system, responsive, and interaction-state guidance.
+- `frontend-testing`: behavior-focused React and Next.js automated tests.
+- `react-controlled-form-widgets`: non-native form control adapters.
+- `react-hook-form-yup`: forms using the confirmed React Hook Form and Yup stack.
+- `react-query-api`: TanStack Query transport, keys, mutations, and cache behavior.
+- `react-tanstack-table`: TanStack Table grids and explicit client/server state.
+- `react-toastify`: React Toastify container and notification behavior.
+- `tailwindcss`: version-aware Tailwind utilities, tokens, and source detection.
+- `nextjs-app-router`: version-aware App Router routes and server/client boundaries.
+- `next-auth-app-router`: Auth.js or NextAuth.js App Router authentication.
 
 ## Maintenance
 
-Keep this README updated whenever a skill is added, renamed, removed, or substantially changed.
+- Keep global instructions small and move detailed procedures into skills.
+- Keep both profiles aligned except for intentional security and privacy choices.
+- Validate configuration against `https://opencode.ai/config.json`.
+- Keep agent names and skill frontmatter names unique and discoverable.
+- Store evals beside the skill they exercise; do not create aggregate skill names
+  that OpenCode cannot discover.
+- Review the complete diff and run relevant validation after toolkit changes.

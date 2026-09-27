@@ -1,11 +1,13 @@
 ---
 name: react-tanstack-table
-description: Use whenever creating, editing, or reviewing TanStack Table or React Table grids in React and Next.js projects. Trigger for API-backed tables, typed columns, server-side pagination, sorting, filtering, row selection, bulk actions, table state synchronized with URLs or React Query, or migrations from legacy table APIs. Keep table state typed and explicit, use stable row identifiers, and distinguish client-side from manual server-side behavior.
+description: Use when TanStack Table or React Table is installed, already used by the feature, or explicitly requested. Covers typed columns, client/manual modes, pagination, sorting, filtering, selection, URLs, and API-backed state.
 ---
 
 # React TanStack Table
 
-Use this skill for data grids. Keep transport and cache contracts in `react-query-api`, form validation in `react-hook-form-yup`, and visual primitives in `frontend-styling` or `tailwindcss`.
+Repository instructions, the installed table version, shared wrappers, and nearby
+tables take precedence. Load related library skills only when those libraries are
+actually part of the feature.
 
 ## Related Skills
 
