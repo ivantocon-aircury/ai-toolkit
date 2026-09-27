@@ -1,11 +1,13 @@
 ---
 name: react-hook-form-yup
-description: Use whenever creating, editing, or reviewing React forms, validation schemas, controlled selectors, date pickers, file inputs, asynchronous uniqueness checks, or submit flows in Next.js frontends. Prefer this skill whenever the user asks to add a form or field, validate input, support create/edit mode, or connect a form to an API, even if they do not explicitly mention React Hook Form or Yup. Use the established React Hook Form plus Yup pattern, shared controls, translated errors, explicit payload transformation, and accessible test selectors.
+description: Use when a React form already uses, installs, or explicitly requests both React Hook Form and Yup. Covers schemas, create/edit lifecycle, controlled fields, async validation, payload conversion, and accessible errors without replacing another established form stack.
 ---
 
 # React Hook Form And Yup
 
-Use this skill for forms whose UI values need validation, controlled widgets, async checks, or conversion into an API payload. Keep the form responsible for input state and presentation; keep transport and cache ownership in the appropriate API or query layer.
+Use this skill only when React Hook Form and Yup are confirmed dependencies or
+explicit requirements. Repository instructions, installed versions, shared form
+primitives, and neighboring forms take precedence.
 
 ## Related Skills
 
@@ -89,7 +91,8 @@ const onSubmit = form.handleSubmit(async (values) => {
 - For dependent fields, clear or revalidate values when the controlling field changes.
 - For file fields, validate type and size before upload when practical and never mutate the source fixture or browser file object.
 - Use `useFieldArray` for repeatable fields and stable item identifiers for rows. Do not use array indexes as React keys when items can be inserted, removed, or reordered.
-- Treat Formik or another legacy form abstraction as existing-code compatibility. Use the project's current React Hook Form pattern for new forms unless migration is explicitly requested.
+- Do not migrate Formik, Zod, native forms, server actions, or another established
+  stack unless migration is explicitly requested.
 
 ## Review Checklist
 

@@ -1,11 +1,14 @@
 ---
 name: nextjs-app-router
-description: Use whenever creating, editing, or reviewing Next.js App Router routes, pages, layouts, route groups, dynamic segments, metadata, redirects, authentication guards, loading/error handling, or server/client boundaries. Apply this skill whenever the user asks for a Next.js page, route, layout, SEO metadata, protected screen, 404 behavior, or navigation change, even if they do not mention the App Router explicitly. Keep routes thin, server-first, version-aware, and composed from feature components.
+description: Use when creating, editing, or reviewing confirmed Next.js App Router pages, layouts, route groups, dynamic segments, metadata, redirects, guards, loading/error handling, proxy behavior, or server/client boundaries.
 ---
 
 # Next.js App Router
 
-Use this skill for App Router file conventions and route composition. Inspect the installed Next.js version and neighboring routes first because `params`, caching, and some APIs differ between major versions.
+Repository instructions, the installed Next.js version, route conventions, and
+neighboring files take precedence. Do not apply App Router APIs to Pages Router
+work. Route props, caching, middleware/proxy APIs, and server behavior are
+version-sensitive.
 
 ## Related Skills
 
@@ -18,7 +21,8 @@ Use this skill for App Router file conventions and route composition. Inspect th
 ## Route Structure
 
 - Keep framework route files under `app` and screen composition in feature-oriented components.
-- Keep `page.tsx` and `layout.tsx` files thin: resolve route input, authenticate/authorize, fetch or prefetch initial data, define metadata, and render a feature component.
+- Prefer focused `page.tsx` and `layout.tsx` boundaries, but follow local
+  composition when extracting a feature component would add indirection only.
 - Use route groups to share shells and access boundaries without changing the public URL.
 - Use dynamic segments for identifiers and slugs. Use nested layouts for shared navigation, headers, footers, and dashboard shells.
 - Centralize internal route construction and parameter encoding in a typed route helper when the project has more than a few internal URLs.
@@ -60,7 +64,8 @@ export default async function Page({ params, searchParams }: PageProps) {
 
 - Enforce access on the server in the route or layout that owns the protected boundary.
 - Use `redirect()` for unauthenticated users, role routing, canonical tabs, and other intentional navigation outcomes.
-- Treat middleware as supplemental routing behavior, not the only authorization boundary.
+- Treat `proxy.ts` or middleware, depending on the installed version, as
+  supplemental routing behavior rather than the only authorization boundary.
 - Re-check authorization close to protected data and actions. Do not rely on hidden UI controls for security.
 - Keep redirect targets and route construction centralized and correctly encoded.
 - If a shared protected layout bootstraps the current user, pass only the serializable session data needed by client providers and keep the authoritative guard on the server.

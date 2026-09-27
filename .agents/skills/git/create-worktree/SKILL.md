@@ -10,27 +10,36 @@ Use this atomic skill to execute worktree creation or reuse. The caller owns the
 ## Related Skills
 
 - Use `inspect-git-state` before and after creation.
-- Use `worktree-workflow` to decide whether isolation is appropriate and whether confirmation is required.
+- Use `worktree-workflow` to decide whether isolation is appropriate.
 - Return the selected branch and path to `development-lifecycle` or the calling implementation workflow.
 
 ## Resolve The Branch And Base
 
-- Prefer an explicit user-supplied branch name, then an established repository or issue-reference convention, then the repository's documented branch prefixes.
-- In this configuration repository's established convention, use `feature/<short-description>` for features, `fix/<short-description>` for bug fixes, and `refactor/<short-description>` for significant refactors. Use lowercase kebab-case for the description.
+- Prefer an explicit user-supplied branch name, then repository instructions and
+  demonstrated history, then the global fallback `feature/`, `fix/`, or
+  `refactor/` with a short lowercase kebab-case description.
 - Do not invent an issue reference. Preserve a supplied reference according to the target repository's demonstrated convention.
-- For other task types, follow a demonstrated repository convention. If none exists and the prefix is ambiguous, ask the user in interactive operation rather than guessing.
-- Use an explicitly selected base ref when provided. Otherwise inspect the repository's default branch, the current branch and upstream, and the task context. Ask when more than one base is plausible; do not silently update, reset, or switch the primary checkout.
+- If no local convention exists, choose the narrowest sensible global fallback.
+  Ask only when multiple materially different choices remain plausible.
+- Use an explicit base when supplied. Otherwise infer it from repository
+  instructions, the remote default branch, current branch and upstream, and task
+  context. Ask only when that evidence remains ambiguous; never reset or switch
+  the primary checkout.
 - Verify that the selected base resolves locally or as a remote-tracking ref. If local and remote-tracking versions differ, make the selected starting point explicit.
 
 ## Resolve The Location
 
-Create worktrees under the shared worktree root unless the repository documents another location:
+Unless the repository documents another location, create task worktrees under
+the shared worktree root:
 
 ```text
-~/work/worktrees/<project-folder-name>/<branch-name-with-slashes-replaced-by-dashes>
+~/work/worktrees/<project>/<branch-or-task>
 ```
 
-Derive the project folder from the repository root. For `feature/user-settings` in `my-app`, use `~/work/worktrees/my-app/feature-user-settings`.
+Derive `<project>` from the repository root folder and replace slashes in the
+branch or task name with hyphens. For `/work/my-app` and
+`feature/user-settings`, use
+`~/work/worktrees/my-app/feature-user-settings`.
 
 ## Create Or Reuse Safely
 

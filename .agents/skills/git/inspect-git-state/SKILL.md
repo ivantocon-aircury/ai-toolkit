@@ -9,7 +9,9 @@ Use this skill as the single source of truth for read-only Git inspection. Repor
 
 ## Delegation
 
-Delegate command execution and output analysis to the `executor` subagent, as required by the global subagent policy. Tell it the repository or worktree path and the specific inspection goal. Do not delegate workflow decisions to it.
+Use OpenCode's native task tool with the `executor` subagent when it is available.
+Tell it the repository or worktree path and the specific inspection goal. Do not
+delegate workflow decisions.
 
 ## Baseline Inspection
 
@@ -29,7 +31,9 @@ git log --oneline -10
 - Inspect the current branch's upstream and ahead/behind state when push or pull-request readiness matters.
 - Compare the current repository root with `git worktree list --porcelain` to identify the current checkout and whether it is the primary checkout or a linked worktree.
 - Add targeted read-only commands only when the caller needs more evidence, such as checking whether a ref exists or comparing the proposed PR head with its base.
-- Do not fetch unless the user or calling workflow has approved a network operation. State when remote conclusions rely only on local tracking refs.
+- Do not fetch by default. A publication workflow may fetch when its explicitly
+  requested remote operation requires current state. Otherwise state that remote
+  conclusions rely on local tracking refs.
 
 ## Report
 

@@ -1,11 +1,13 @@
 ---
 name: react-components
-description: Use whenever creating, editing, or reviewing React or TSX components, feature modules, page components, modals, form controls, hooks used by components, or reusable UI. Prefer this skill whenever the user asks to add a component, split a screen into components, refactor JSX, or build interactive React UI, even if they do not mention component architecture. Components should use default PascalCase function declarations, explicit client boundaries, local typed props, accessible markup, and stable test selectors.
+description: Use when creating, editing, or reviewing React or TSX components, feature UI, modals, controls, or component hooks. Follows the project's export, naming, rendering, compiler, and framework conventions while preserving accessible boundaries and stable behavior.
 ---
 
 # React Components
 
-Use this skill to build React components in a consistent, feature-oriented style. Preserve the project's existing component and import conventions where they differ, but keep the boundaries below unless there is a concrete reason not to.
+Repository instructions, the installed React version and framework, compiler
+configuration, and neighboring components take precedence. The rules below are
+defaults, not reasons to replace established exports, names, or folder structure.
 
 ## Related Skills
 
@@ -21,7 +23,8 @@ Use this skill to build React components in a consistent, feature-oriented style
 
 ## Component Declaration
 
-- Define React components with a named PascalCase function declaration and default-export the component.
+- Follow the project's function/arrow and named/default export conventions. Give
+  components useful PascalCase names for debugging and review.
 
 ```tsx
 interface Props {
@@ -41,10 +44,9 @@ export default function NoticePanel({ title, onClose }: Props) {
 }
 ```
 
-- Do not use `React.FC` for ordinary components.
-- Do not use `const Component = () => ...` for new components when a function declaration is sufficient.
-- Use `forwardRef` only for a reusable DOM primitive that genuinely needs to expose its ref, such as an input used by React Hook Form.
-- Default-export components. Use named exports for hooks, API functions, types, schemas, constants, and other non-component values.
+- Do not introduce `React.FC` where the project avoids it.
+- On React versions supporting ref as a prop, follow that pattern when established;
+  otherwise use `forwardRef` only when a component genuinely exposes a ref.
 - Keep a local `Props` interface near the component, typically after the implementation when that matches the surrounding files. Export it only when another module actually needs the type.
 - Keep a component focused on one visual or interaction responsibility. Split a large screen by feature responsibility, not by arbitrary fragments.
 - Do not add memoization, `useMemo`, or `useCallback` by default. Add it only when profiling, a stable child contract, or the project's React Compiler configuration justifies it.
@@ -57,12 +59,14 @@ export default function NoticePanel({ title, onClose }: Props) {
 - Keep API transport, route construction, and domain transformations out of JSX when they are reusable or independently testable.
 - Prefer the configured absolute import alias for cross-feature imports and relative imports for close siblings.
 - Follow the existing filename convention. For new feature components, PascalCase filenames are preferred; framework-reserved route filenames remain lowercase.
-- Name screen-level feature components with a `PageComponent` suffix. Use descriptive suffixes such as `Form`, `Modal`, `Table`, `Block`, `LayoutComponent`, and `Cell` when they clarify the component's role.
+- Follow established feature and screen naming. Use role suffixes only when they
+  add information rather than enforcing a global `PageComponent` pattern.
 
 ## Client Boundaries
 
-- Keep components server-compatible by default.
-- Add `'use client';` as the first statement only when the module uses hooks, event handlers, browser APIs, client context, or a browser-only library.
+- In React Server Component frameworks, keep components server-compatible by
+  default and add the framework's client directive only where client behavior is
+  required. Ignore this boundary in client-only React applications.
 - Keep the client boundary as low in the tree as practical. Do not turn a route page or an entire layout into a Client Component just to support one interactive control.
 - Pass serializable props from Server Components to Client Components. Keep server-only authentication, secrets, and filesystem/database access on the server side.
 - Use `startTransition`, `useDeferredValue`, or an effect event when the interaction benefits from interruptible updates or separating urgent from non-urgent work. Do not introduce them mechanically.
@@ -96,7 +100,7 @@ export default function NoticePanel({ title, onClose }: Props) {
 
 ## Review Checklist
 
-- Component uses `export default function PascalCaseName(...)` unless a concrete existing convention requires otherwise.
+- Component declarations, exports, files, and imports match the project.
 - Props are typed locally and the component has no unnecessary `React.FC` or memoization.
 - `'use client';` exists only where client behavior requires it.
 - Route, API, and domain concerns are not unnecessarily embedded in presentational JSX.

@@ -1,11 +1,13 @@
 ---
 name: frontend-testing
-description: Use whenever adding, editing, or reviewing tests for React or Next.js behavior, forms, routes, API-backed screens, analytics, loading states, or accessibility. Trigger when the user asks to test a frontend change or reproduce a UI flow, even if they do not name the test runner. Choose the runner already supported by the project, use semantic locators and stable existing selectors, mock at API boundaries, and verify meaningful behavior rather than implementation details.
+description: Use when adding, editing, or reviewing automated React or Next.js tests for components, routes, forms, API-backed screens, analytics, state handling, or accessibility. Reuses the project's runner and verifies behavior rather than implementation details.
 ---
 
 # Frontend Testing
 
-Use this skill to add focused, deterministic frontend tests that survive refactors. Inspect the package scripts, test configuration, fixtures, and nearby tests before choosing a file location or assertion style.
+Repository instructions, existing test runners, fixtures, selectors, and nearby
+tests take precedence. Do not add a runner or test layer when the request is only
+for manual diagnosis.
 
 ## Related Skills
 

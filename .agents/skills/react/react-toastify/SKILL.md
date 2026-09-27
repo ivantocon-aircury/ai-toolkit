@@ -1,11 +1,13 @@
 ---
 name: react-toastify
-description: Use whenever creating, editing, or reviewing React Toastify notifications, toast containers, mutation feedback, upload progress messages, authentication errors, or success/error alerts in React and Next.js projects. Trigger when a user asks to show a toast, standardize notifications, report an API result, or test a notification flow. Keep the container centralized, messages translated and actionable, notifications tied to real outcomes, and client-only behavior out of server modules.
+description: Use when React Toastify is installed, already used by the feature, or explicitly requested. Covers container ownership, transient mutation feedback, progress, deduplication, accessibility, and notification tests.
 ---
 
 # React Toastify
 
-Use this skill for transient notifications. Use inline alerts for persistent or field-specific problems; use `react-query-api` for the mutation/error contract that determines when a notification is justified.
+Repository instructions, the installed version, existing container, translation
+system, and feedback conventions take precedence. Prefer inline errors for
+persistent or field-specific problems.
 
 ## Related Skills
 
