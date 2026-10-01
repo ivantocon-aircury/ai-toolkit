@@ -83,6 +83,11 @@ instructions should provide those overrides.
 - `extract-rule`: turns evidence from changes or review corrections into a
   confirmed, discoverable project rule without imposing a global taxonomy.
 
+### Interaction
+
+- `ask-question`: collects a decision or confirmation through the native
+  structured question tool instead of guessing or using multiple-choice chat.
+
 ### PHP And Symfony
 
 - `php-code-style`: PHP syntax, native types, PHPDoc, and version-aware style.
