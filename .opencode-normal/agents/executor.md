@@ -1,7 +1,7 @@
 ---
 description: Execute clearly defined commands and analyze their output without authoring code or making architecture decisions.
 mode: subagent
-model: openai/gpt-5.6-luna
+model: openai/gpt-6-luna-fast
 variant: low
 permission:
   edit: deny
