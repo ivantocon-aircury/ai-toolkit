@@ -10,3 +10,10 @@ or agents, update both profiles and verify that their shared files remain equal.
 
 Global skills define adaptable defaults. They must defer to explicit user requests,
 project instructions, installed versions, and demonstrated project conventions.
+
+For branches, commits, and pull-request titles, preserve an explicitly supplied
+work reference in the repository's established format. When this repository has
+no more specific convention, use `[REF-123] Description` for commit and
+pull-request titles and `feature/REF-123_description` for branches. Never invent
+a reference or require one: when none is supplied, create the artifact without
+one. A worktree created for its branch needs no separate reference.
