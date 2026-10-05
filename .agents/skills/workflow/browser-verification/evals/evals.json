@@ -1,0 +1,26 @@
+{
+  "skill_name": "browser-verification",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Manually verify a changed checkout form on mobile and desktop. The project already has browser tooling, test users, a container startup wrapper, and a live websocket. Include failed submission and retry. Do not add automated tests.",
+      "expected_output": "Reuse project setup and browser tooling, exercise visible success/failure/recovery, inspect console/network behavior, and wait for specific states rather than network idle.",
+      "files": [],
+      "expectations": [
+        "Existing browser tools, container policy, test users, and the intended worktree are used.",
+        "Desktop/mobile and failed-submit/retry outcomes are checked beyond screenshots.",
+        "No blanket network-idle wait, arbitrary sleep, new runner, or committed test is prescribed."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Verify the new modal in a real browser, but this environment has no browser tooling and the app cannot start because a required test service is missing. You can read the component source.",
+      "expected_output": "Report the exact prerequisites and useful static observations without claiming browser interaction, screenshots, or tests were executed.",
+      "files": [],
+      "expectations": [
+        "Unavailable browser and service checks are explicit.",
+        "Static source inspection is not represented as an executed browser pass."
+      ]
+    }
+  ]
+}

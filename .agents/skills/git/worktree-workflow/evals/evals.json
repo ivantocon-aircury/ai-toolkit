@@ -1,0 +1,35 @@
+{
+  "skill_name": "worktree-workflow",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Update three tracked files in this clean primary checkout. I explicitly want you to work here, without creating a worktree. The project normally prefers worktrees. Explain your location decision before editing.",
+      "expected_output": "Honor the explicit current-checkout request after inspecting ownership; do not apply the default one-file exception or create isolation against the request.",
+      "files": [],
+      "expectations": [
+        "The explicit user request takes precedence over the project default and global worktree default.",
+        "The current checkout is inspected and selected without routine reconfirmation or creating a worktree."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Implement a multi-file feature. No working location is specified and there are no project location instructions. A registered linked worktree already belongs to this task and contains compatible task-owned changes.",
+      "expected_output": "Inspect and reuse existing task isolation, report its branch/path, and continue there without a second worktree.",
+      "files": [],
+      "expectations": [
+        "Task worktree isolation remains the default when no higher-priority location is specified.",
+        "The existing task worktree is reused and no redundant worktree is created."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Make a multi-file fix. I did not specify a location. AGENTS.md explicitly requires working in the current checkout. There are unrelated changes with unclear ownership in a file the fix would overwrite.",
+      "expected_output": "Honor the project location policy, but stop the conflicting edit and ask about ownership rather than discarding work or creating a worktree to bypass the policy.",
+      "files": [],
+      "expectations": [
+        "Project instructions override the global worktree default.",
+        "The overwrite conflict is clarified and unrelated work is preserved."
+      ]
+    }
+  ]
+}

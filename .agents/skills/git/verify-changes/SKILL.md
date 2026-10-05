@@ -30,6 +30,14 @@ the smallest relevant checks first, then broader checks when warranted:
 4. Linting and formatting checks.
 5. Build, packaging, migration, or smoke checks when the change affects them.
 
+Use `browser-verification` when changed web interactions need real-browser
+evidence beyond the available automated checks.
+Use `accessibility-review` or `performance-investigation` when those concerns are
+part of the request or changed behavior.
+Use `systematic-debugging` for unexplained failures and `ci-failure-diagnosis` for
+pipeline-specific failures.
+Do not load unrelated workflows just to fill a checklist.
+
 Do not run unrelated expensive checks merely to fill a checklist. Do not suppress
 failures. If a check cannot run, record the command, reason, and residual risk.
 

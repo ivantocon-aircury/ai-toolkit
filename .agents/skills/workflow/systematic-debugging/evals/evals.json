@@ -1,0 +1,26 @@
+{
+  "skill_name": "systematic-debugging",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "A save API intermittently creates duplicate records. We use existing integration fixtures. Two speculative fixes failed. Explain the next investigation and how you would prove a fix.",
+      "expected_output": "Establish a duplicate-specific reproduction, trace request/persistence boundaries, test one evidence-backed concurrency hypothesis, and verify a focused regression rather than stacking fixes.",
+      "files": [],
+      "expectations": [
+        "The feedback signal detects duplicate records, not just a successful response.",
+        "The plan tests a specific hypothesis and revisits assumptions after failed attempts.",
+        "Verification uses project-native fixtures and distinguishes confirmed cause from mitigation."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "A log clearly shows a typo in a local file path and the failing command reproduces it every time. Fix only that typo. Do not add a test framework or broad refactor.",
+      "expected_output": "Use the short existing reproduction, make the localized correction, and rerun the command without imposing an elaborate investigation or new tooling.",
+      "files": [],
+      "expectations": [
+        "Investigation is proportional to the clear evidence.",
+        "The existing failure command verifies the correction without new infrastructure or unrelated changes."
+      ]
+    }
+  ]
+}

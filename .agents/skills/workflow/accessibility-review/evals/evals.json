@@ -1,0 +1,26 @@
+{
+  "skill_name": "accessibility-review",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Audit a settings dialog using our existing UI primitives. An automated scan passes, but closing it loses keyboard focus and save errors are visible without an announcement. Suggest focused fixes and verification.",
+      "expected_output": "Identify the task impact of focus loss and missing error announcements, preserve shared primitives, and require focused keyboard/dynamic-feedback verification despite the clean scan.",
+      "files": [],
+      "expectations": [
+        "A clean scan is not treated as proof of accessibility.",
+        "Focus restoration and suitable error feedback are checked with concrete user impact.",
+        "Corrections use established primitives rather than replacing the UI system."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Review one component's accessibility from source only. No browser, screen reader, rendered theme colors, or accessibility scanner is available. Tell me if it is fully compliant.",
+      "expected_output": "Provide scoped source findings and explicitly limit conclusions; do not invent contrast measurements, screen-reader results, or full compliance.",
+      "files": [],
+      "expectations": [
+        "Code inspection is distinguished from browser, scan, and assistive-technology evidence.",
+        "Unmeasured contrast and full compliance are not claimed."
+      ]
+    }
+  ]
+}

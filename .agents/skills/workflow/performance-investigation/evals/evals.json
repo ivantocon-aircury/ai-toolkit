@@ -1,0 +1,26 @@
+{
+  "skill_name": "performance-investigation",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "A tenant-specific dashboard API got slower. We have request traces and a safe seeded staging database. Investigate before adding caching or indexes and explain how to compare a fix.",
+      "expected_output": "Measure representative latency and query behavior, trace the dominant cost, choose a targeted change, compare equivalent workloads, and preserve tenant isolation and correctness.",
+      "files": [],
+      "expectations": [
+        "A baseline and bottleneck evidence precede caching or index recommendations.",
+        "Before/after runs use equivalent workloads and relevant cache conditions.",
+        "Any caching accounts for tenant boundaries and invalidation; correctness is verified."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "I think this React component is slow, but we have no profiler or timings. Do not install dependencies. Can you promise that memoizing everything will improve it?",
+      "expected_output": "Decline the unsupported performance claim, identify a project-native measurement path, and label suspected costs as hypotheses without blanket memoization.",
+      "files": [],
+      "expectations": [
+        "No improvement is claimed without comparable measurements.",
+        "No blanket memoization or new profiler dependency is prescribed."
+      ]
+    }
+  ]
+}

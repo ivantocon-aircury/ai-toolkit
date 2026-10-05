@@ -1,11 +1,14 @@
 ---
 name: worktree-workflow
-description: Invoke before any task that may modify tracked repository files. It reuses or creates task worktrees by default and may explicitly approve the current checkout only for a one-file, low-risk change.
+description: Invoke before any task that may modify tracked repository files. Reuse or create task worktrees by default, respect explicit user requests and project instructions, and allow a one-file, low-risk current-checkout exception when neither specifies a location.
 ---
 
 # Worktree Workflow
 
-Invoke this orchestration skill before beginning any task that may modify tracked repository files, including code, tests, documentation, and configuration. It decides whether the current checkout qualifies for the narrow exception; otherwise it reuses or creates task isolation and delegates all creation mechanics to `create-worktree`.
+Invoke this orchestration skill before beginning any task that may modify tracked
+repository files, including code, tests, documentation, and configuration.
+Resolve explicit user requests and project instructions first.
+Otherwise prefer task isolation and delegate creation to `create-worktree`.
 
 ## Related Skills
 
@@ -15,7 +18,11 @@ Invoke this orchestration skill before beginning any task that may modify tracke
 
 ## Decide Whether Isolation Is Appropriate
 
-Use a task worktree for every tracked-file modification unless the current checkout is explicitly approved under the one-file, low-risk exception below. This includes:
+Use a task worktree for tracked-file modifications by default.
+An explicit user request takes precedence, followed by project instructions.
+When neither specifies a location, use the one-file, low-risk exception below
+or reuse or create task isolation.
+The default includes:
 
 - New features and bug fixes.
 - Significant refactors.
@@ -25,17 +32,30 @@ No worktree decision is needed for read-only investigation, explanation, plannin
 
 ### Current Checkout Exception
 
-Approve the current checkout only when all of the following are true:
+First honor an explicit user request or project instruction to use the current
+checkout, including multi-file work.
+Inspect existing changes and preserve work outside the task.
+Ask only if ownership is unclear or proceeding would overwrite unrelated work;
+do not ask for routine reconfirmation of the requested location.
+
+When neither the user nor the project specifies a location, approve the current
+checkout only when all of the following are true:
 
 - The task changes exactly one tracked file.
 - The change is low risk: it is localized, straightforward, easily reversible, and does not alter public interfaces, persisted data, dependencies, CI, deployment, security, or broad behavior.
 - Existing changes in the checkout are compatible with the task and have clear ownership.
 
-Record the explicit approval and its reason before implementation. If any condition is not met, reuse an existing task worktree or create one.
+Record the selected location and reason before implementation.
+If the default exception does not apply, reuse or create a task worktree.
 
 ## Detect Existing Isolation First
 
 Load `inspect-git-state` before proposing anything.
+
+Resolve a requested or project-specified location before considering other
+registered worktrees.
+Do not switch to another task worktree merely because one exists when the
+selected location is the current checkout.
 
 - Treat the current checkout as appropriate when it is already a linked worktree intentionally associated with the task and its branch and existing changes are compatible with that task. This is reusing task isolation, not the current-checkout exception.
 - Also accept an existing registered worktree clearly associated with the task, and hand its path to the caller after checking its status.
@@ -51,7 +71,8 @@ When appropriate isolation already exists, report the branch and absolute path a
   `create-worktree` and continue without asking for routine confirmation.
 - Use the native question tool only for a real ambiguity, collision, unsafe reuse,
   or destructive choice that cannot be resolved from user or repository context.
-- An explicit request to work in the current checkout does not waive the one-file, low-risk exception. Reuse or create a task worktree when the exception does not apply.
+- Do not create a worktree against an explicit user request or project instruction
+  to work in the current checkout.
 
 ## Handoff
 
@@ -66,7 +87,9 @@ This skill does not create commits, push branches, open pull requests, or implem
 
 - The decision was made before implementation began.
 - Any task that modifies tracked files invoked this skill first.
-- Current-checkout approval was limited to a one-file, low-risk change and recorded its reason.
+- Explicit user requests and project instructions determined the location first.
+- Without a specified location, current-checkout approval was limited to a
+  one-file, low-risk change and recorded its reason.
 - Existing task isolation was detected before proposing a new worktree.
 - Unambiguous safe creation did not cause an unnecessary pause.
 - `create-worktree` owned creation and verification.

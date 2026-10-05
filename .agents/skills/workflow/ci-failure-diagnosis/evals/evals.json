@@ -1,0 +1,26 @@
+{
+  "skill_name": "ci-failure-diagnosis",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "A browser test passes locally but fails in a Linux CI matrix job. Logs show a service-not-ready error before the locator timeout. The project uses containers. Diagnose it without adding sleeps, disabling tests, or printing secret values.",
+      "expected_output": "Inspect the failed revision/job and causal readiness error, reproduce container setup and matrix differences, fix meaningful readiness, and distinguish local verification from remote status.",
+      "files": [],
+      "expectations": [
+        "The first causal error is investigated rather than only the downstream locator timeout.",
+        "Revision, matrix, and container environment are part of the reproduction.",
+        "No arbitrary sleep, disabled check, or leaked secret is suggested."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "The CI provider is not GitHub. Remote logs are inaccessible. Local tests passed after a candidate fix, and a remote rerun is queued. Report whether CI is fixed without pushing or creating a PR.",
+      "expected_output": "Report local evidence, unavailable remote logs, and queued status without assuming GitHub tooling or claiming remote success; preserve the requested publication boundary.",
+      "files": [],
+      "expectations": [
+        "Local pass, missing logs, and queued remote run are distinguished.",
+        "No unobserved CI success, provider assumption, push, or PR creation is claimed."
+      ]
+    }
+  ]
+}

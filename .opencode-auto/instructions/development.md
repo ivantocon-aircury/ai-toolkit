@@ -18,5 +18,11 @@ Do not assume commands, package managers, containers, frameworks, or test tools.
 Discover them from project instructions and configuration. Prefer native OpenCode
 tools for reading, searching, editing, delegation, questions, and task tracking.
 
+Load focused quality workflows when the task needs them: `systematic-debugging`
+for uncertain failures, `browser-verification` for real-browser user flows,
+`accessibility-review` for accessibility audits, `performance-investigation` for
+measured slowdowns, and `ci-failure-diagnosis` for pipeline failures.
+Scale their depth to the task and reuse project-native tools.
+
 Never commit, push, create a pull request, or remove a worktree unless the user
 explicitly requests that Git lifecycle endpoint.

@@ -1,0 +1,49 @@
+{
+  "skill_name": "create-worktree",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Create an approved task worktree for a mixed PHP/JavaScript project. The source has vendor and node_modules, but the target branch has different lockfiles. Project instructions specify a container Composer install and a JavaScript workspace frozen-lockfile install. Describe dependency setup.",
+      "expected_output": "Copy both available dependency directories independently, then execute both project-native installs in the target worktree, respecting the target lockfiles and container/workspace setup.",
+      "files": [],
+      "expectations": [
+        "Both vendor and node_modules are copied only into the new worktree as independent directories.",
+        "Both installations run even after successful copies and use target-worktree commands and lockfiles.",
+        "No dependency update operation or silent lockfile rewrite is proposed."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Reuse the registered task worktree. It has JavaScript and Composer manifests but no dependency directories. The JavaScript install fails because network access is unavailable; Composer can run. What do you do and report?",
+      "expected_output": "Do not copy over a reused worktree, attempt both applicable installations independently, and report the failed JavaScript command and Composer result without claiming dependency readiness.",
+      "files": [],
+      "expectations": [
+        "Missing folders do not skip applicable installations and reused dependencies are not overwritten by source copies.",
+        "Composer is still attempted after the JavaScript failure.",
+        "The worktree is not described as dependency-ready when an applicable installation failed."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a task worktree for a monorepo with one JavaScript workspace lockfile, member manifests without leaf lockfiles, and an independent nested Composer project. The source node_modules includes an absolute link to a different checkout. Explain copying and installation.",
+      "expected_output": "Skip unsafe JavaScript seeding, use one documented workspace-root install for members and the independent Composer install, and inspect link isolation without requiring duplicate leaf installs or leaf lockfiles.",
+      "files": [],
+      "expectations": [
+        "External or absolute dependency links do not become unexamined shared dependencies in the target worktree.",
+        "Workspace members are covered by one workspace-root install rather than duplicate leaf installs.",
+        "The independently managed Composer project still receives its own installation."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Reuse a mixed project task worktree. JavaScript dependencies contain an unexplained external link that prevents establishing a safe local install. Composer has an intentional path package with documented setup that does not mutate the other checkout. Describe installation and readiness reporting.",
+      "expected_output": "Do not reseed the reused worktree. Clarify or block the unsafe JavaScript installation, follow documented safe Composer path-package setup and run its installation independently, and report that overall dependency readiness remains blocked.",
+      "files": [],
+      "expectations": [
+        "Unexplained external links block only the affected ecosystem instead of being followed blindly.",
+        "Documented safe intentional path packages are respected and the Composer installation proceeds independently.",
+        "No source dependencies overwrite the reused worktree and overall dependency readiness is not claimed."
+      ]
+    }
+  ]
+}

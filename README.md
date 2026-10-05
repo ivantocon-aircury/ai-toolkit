@@ -69,9 +69,13 @@ instructions should provide those overrides.
 ### Git Workflows
 
 - `inspect-git-state`: read-only repository and publication inspection.
-- `worktree-workflow`: decides whether modifying work benefits from isolation.
+- `worktree-workflow`: defaults modifying work to task isolation while respecting
+  explicit user requests and project instructions about the working location.
 - `create-worktree`: safely creates or reuses task worktrees under
   `~/work/worktrees/<project>/<branch-or-task>`.
+  Seeds new worktrees with independent copies of available `node_modules` and
+  `vendor`, then runs both applicable dependency installations using the target
+  project's tooling and lockfiles, including when reusing a worktree.
 - `verify-changes`: reviews the complete diff and runs discovered project checks.
 - `commit-changes`: creates coherent commits using project message conventions.
 - `push-branch`: safely publishes an intended branch without implicit force push.
@@ -82,6 +86,25 @@ instructions should provide those overrides.
 
 - `extract-rule`: turns evidence from changes or review corrections into a
   confirmed, discoverable project rule without imposing a global taxonomy.
+
+### Quality Workflows
+
+- `systematic-debugging`: defect-specific reproduction, evidence-backed
+  hypotheses, root-cause fixes, and regression verification.
+- `browser-verification`: real-browser user flows, responsive behavior,
+  console/network evidence, and project-native service lifecycle.
+- `accessibility-review`: scoped semantics, keyboard, focus, announcements,
+  contrast, reflow, and reduced-motion review with explicit evidence limits.
+- `performance-investigation`: representative baselines, bottleneck evidence,
+  comparable measurements, and correctness-preserving optimization.
+- `ci-failure-diagnosis`: failing revision and job evidence, environment
+  reproduction, flaky-test investigation, and accurate local/remote status.
+
+Use these workflows for the concerns present in the task.
+They complement framework skills and `verify-changes`; they do not require a new
+test framework, browser integration, or full audit for every change.
+Scenario evals beside each skill cover normal and constrained situations.
+They are evaluation inputs, not proof of executed application verification.
 
 ### Interaction
 

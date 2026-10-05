@@ -18,6 +18,9 @@ for manual diagnosis.
 - Use `next-auth-app-router` for session, redirect, token-expiry, and protected-route behavior.
 - Use `react-toastify` for notification assertions and toast-container harness setup.
 - Use `nextjs-app-router` for route, redirect, metadata, and boundary behavior.
+- Use `browser-verification` for real-browser checks and environment lifecycle.
+- Use `accessibility-review` for a scoped accessibility audit beyond assertions.
+- Use `ci-failure-diagnosis` for CI-only or flaky pipeline failures.
 
 ## Choose The Existing Runner
 
