@@ -18,5 +18,10 @@ Do not assume commands, package managers, containers, frameworks, or test tools.
 Discover them from project instructions and configuration. Prefer native OpenCode
 tools for reading, searching, editing, delegation, questions, and task tracking.
 
+An explicit skill activation, including selecting a skill or using its slash
+command, is a direct user request to execute that workflow. Do not treat the
+activation message as a mere mention of the skill or reject it based on a
+literal-command trigger check.
+
 Never commit, push, create a pull request, or remove a worktree unless the user
 explicitly requests that Git lifecycle endpoint.
