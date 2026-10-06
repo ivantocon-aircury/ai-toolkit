@@ -1,21 +1,23 @@
 ---
 name: clean-worktree
-description: Use ONLY when the user directly commands `clean-worktree` or `/clean-worktree` for an identified target. It removes one explicitly identified Git worktree, its verified Docker Compose containers and safe project networks, then force-deletes its local branch. Do not invoke for general cleanup requests, mentions of this skill, implementation completion, branch cleanup, or discussion of cleanup.
+description: Use ONLY when the user directly commands `clean-worktree` or `/clean-worktree`. It removes the chat's active linked worktree by default, or one explicitly identified target, along with its verified Docker Compose containers and safe project networks, then force-deletes its local branch. Do not invoke for general cleanup requests, mentions of this skill, implementation completion, branch cleanup, or discussion of cleanup.
 ---
 
 # Clean Worktree
 
 Use this destructive cleanup workflow only when the user directly commands
-`clean-worktree` or `/clean-worktree` for a target, for example,
-`/clean-worktree /absolute/path`.
+`clean-worktree` or `/clean-worktree`, optionally followed by a target, for
+example, `/clean-worktree /absolute/path`.
 The command form is a deliberate consent boundary: a mention of this skill in a
 question, document, review, negation, or discussion is not an invocation.
 Never infer it from a request to finish work, clean up, delete a branch, or
 remove a worktree.
 
-Clean exactly one user-identified target worktree at a time.
-Require an absolute target path or a branch that resolves to one registered
-linked worktree.
+Clean exactly one target worktree at a time.
+When no target is supplied, capture the repository root of the chat's active
+worktree before changing execution context and use it as the target.
+When a target is supplied, require an absolute path or a branch that resolves
+to one registered linked worktree.
 Do not sweep stale worktrees or choose a target from a list.
 
 ## Scope
@@ -40,7 +42,17 @@ because a disposable checkout is being removed.
 
 ## Preconditions
 
-Run all commands from a repository checkout other than the target.
+Capture the target path first and canonicalize it immediately. Match that
+canonical path against canonical registered-worktree paths, identify whether it
+is the primary checkout, and resolve its branch before changing execution
+context. Refuse a primary checkout at this stage, before inspecting or removing
+Docker resources.
+
+Then select a different registered checkout of the same repository and run
+every inspection and destructive command from that checkout. This handoff lets
+the skill remove the worktree that hosted the chat without deleting the shell's
+own working directory.
+
 Load `inspect-git-state` first and verify all of the following:
 
 - The target is a registered linked worktree, not the primary checkout.
@@ -51,9 +63,10 @@ Load `inspect-git-state` first and verify all of the following:
   --ignore-submodules=none`.
 - Its branch name is available from `git worktree list --porcelain`.
 
-If any precondition fails, explain the blocking condition and leave every
-resource unchanged.
+If any precondition fails before a destructive operation, explain the blocking
+condition and leave every resource unchanged.
 Never use `git worktree remove --force`, `rm -rf`, `git clean`, or Git reset.
+If the captured or supplied target is the primary checkout, refuse cleanup.
 
 ## Docker Compose Cleanup
 
@@ -71,17 +84,20 @@ does not lose the path needed to manage its running containers.
    `com.docker.compose.project.config_files` label exactly matches the resolved
    Compose file list, and it has `com.docker.compose.version`. Preserve and
    report every partial or conflicting match.
-3. Record the verified containers' IDs, names, project names, and Compose
-   config-file labels before changing anything, then force-remove only those
+3. Immediately re-check the target's Git status with the explicit status
+   options from the preconditions. If it is no longer clean, stop before any
+   container removal. Otherwise record the verified containers' IDs, names,
+   project names, and Compose config-file labels, then force-remove only those
    recorded containers. This is intentional: the user named this skill to
    dispose of the workspace and its containers.
 4. For each declared non-external network, list every container, including
    stopped containers, with the resolved project label. Remove the network only
    when every one is a verified target container, its Compose project and
    network labels match the resolved configuration, and network inspection
-   confirms it has no remaining endpoints. Preserve and report any network with
-   another worktree's container, an endpoint, missing labels, a mismatched
-   label, or ambiguous ownership.
+   confirms it has no remaining endpoints. Immediately re-check the target's
+   Git status before each network removal; stop if it is no longer clean.
+   Preserve and report any network with another worktree's container, an
+   endpoint, missing labels, a mismatched label, or ambiguous ownership.
 5. Re-list all containers matching the target path and resolved project, and
    stop before Git cleanup if any verified target container remains.
 
@@ -94,11 +110,14 @@ nothing to remove and continue.
 
 After Docker cleanup succeeds:
 
-1. Run `git worktree remove <target-path>` without `--force`.
-2. Confirm the target is absent from `git worktree list --porcelain`.
-3. Run `git branch -D <target-branch>` from the remaining checkout. The user
+1. Re-check the target's Git status with the explicit status options from the
+   preconditions. If it is no longer clean, report that Docker resources may
+   already be removed but retain the worktree and branch.
+2. Run `git worktree remove <target-path>` without `--force`.
+3. Confirm the target is absent from `git worktree list --porcelain`.
+4. Run `git branch -D <target-branch>` from the remaining checkout. The user
    explicitly chose this skill, so delete even an unmerged local branch.
-4. Confirm the local branch no longer resolves. `git worktree remove` has
+5. Confirm the local branch no longer resolves. `git worktree remove` has
    already removed the target's administrative metadata; do not run the
    repository-wide `git worktree prune` command.
 
