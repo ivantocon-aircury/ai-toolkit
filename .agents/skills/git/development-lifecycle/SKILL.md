@@ -18,7 +18,8 @@ An implementation request never implies permission to commit, push, create a pul
 - Load `push-branch` when branch publication is expected.
 - Load `create-pull-request` when a pull request is expected.
 - Load `clean-worktree` only when the user directly invokes `clean-worktree` or
-  `/clean-worktree` for a target, not when the skill name is merely mentioned.
+  `/clean-worktree`; without a target it cleans the chat's active linked
+  worktree, not when the skill name is merely mentioned.
 
 Do not copy the execution rules from these skills. Load them and pass the relevant task, path, branch, base, remote, and issue-reference context.
 
@@ -55,9 +56,9 @@ defaults. Ask only when a meaningful ambiguity remains.
    explicit PR request.
 8. Load `create-pull-request` only for an explicit PR request.
 9. Delegate cleanup only when the user directly invokes `clean-worktree` or
-   `/clean-worktree` for a target. Do not infer cleanup authorization from a
-   mention of the skill or a request to complete, publish, or otherwise finish
-   the task.
+   `/clean-worktree`. It captures the chat's active linked worktree when no
+   target is supplied. Do not infer cleanup authorization from a mention of the
+   skill or a request to complete, publish, or otherwise finish the task.
 
 The workflow may resume at a later stage for pre-existing work. Inspect current state first and skip only stages already completed correctly.
 
@@ -73,7 +74,8 @@ Before declaring the requested lifecycle complete, load `inspect-git-state` and 
 - The branch is pushed when publication was expected.
 - The pull request exists with the intended head and base when a PR was expected.
 - Worktree cleanup occurred only through a direct `clean-worktree` or
-  `/clean-worktree` invocation for a target.
+  `/clean-worktree` invocation, with an explicit target or the captured active
+  linked worktree.
 - No unresolved divergence, detached `HEAD`, wrong-worktree state, or ambiguous Git ownership remains.
 
 If unrelated changes make branch or commit ownership ambiguous, ask whether they belong in a separate commit on the same branch or a separate task, branch, and worktree. Do not silently choose.
