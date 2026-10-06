@@ -83,6 +83,9 @@
       // Ask before accessing paths outside the current project.
       "*": "ask",
 
+      // Load the trusted globally installed skill instructions without prompting.
+      "~/.agents/skills/**": "allow",
+
       // Task worktrees use the shared development worktree root.
       "~/work/worktrees/**": "allow",
 
