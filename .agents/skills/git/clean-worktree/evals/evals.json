@@ -1,0 +1,35 @@
+{
+  "skill_name": "clean-worktree",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run clean-worktree for /home/ivan/work/worktrees/storefront/feature-checkout. It is a registered, clean linked worktree on feature/checkout and has Docker Compose containers labelled with that exact working-directory path. Explain the operations you will perform, in order, and what you will preserve.",
+      "expected_output": "Uses the explicit skill, removes only target-labelled Compose resources, removes the worktree before force-deleting the local branch, and preserves volumes, images, remote branches, and unknown Docker resources.",
+      "files": [],
+      "expectations": [
+        "Checks the target is a clean registered non-primary worktree from another checkout before deletion.",
+        "Removes only containers labelled with the target working-directory path and preserves volumes and images.",
+        "Removes the worktree without force before force-deleting the local branch."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "The payment-api feature worktree is merged. Please clean it up, remove its branch, and stop its containers.",
+      "expected_output": "Does not invoke cleanup because the user did not literally name clean-worktree or /clean-worktree.",
+      "files": [],
+      "expectations": [
+        "Refuses to remove resources because the request does not literally name clean-worktree or /clean-worktree."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use clean-worktree on /home/ivan/work/worktrees/docs/feature-search. Git status shows an untracked notes.txt file. What do you remove?",
+      "expected_output": "Refuses to remove containers, the worktree, or the branch because the target has untracked content.",
+      "files": [],
+      "expectations": [
+        "States that an untracked file makes the target unclean.",
+        "Removes no containers, worktree, or branch."
+      ]
+    }
+  ]
+}

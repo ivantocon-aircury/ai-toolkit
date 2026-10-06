@@ -17,6 +17,8 @@ An implementation request never implies permission to commit, push, create a pul
 - Load `commit-changes` to create one or more logical commits.
 - Load `push-branch` when branch publication is expected.
 - Load `create-pull-request` when a pull request is expected.
+- Load `clean-worktree` only when the user directly invokes `clean-worktree` or
+  `/clean-worktree` for a target, not when the skill name is merely mentioned.
 
 Do not copy the execution rules from these skills. Load them and pass the relevant task, path, branch, base, remote, and issue-reference context.
 
@@ -52,7 +54,10 @@ defaults. Ask only when a meaningful ambiguity remains.
 7. Load `push-branch` only for an explicit push or as a prerequisite of an
    explicit PR request.
 8. Load `create-pull-request` only for an explicit PR request.
-9. Remove a task worktree only when the user explicitly requests cleanup. Run this only from a different worktree after verifying that the target is a registered, non-primary task worktree with no tracked or untracked changes. Use `git worktree remove <path>` without `--force`; if removal is unsafe or fails, report the reason and leave it intact. Do not delete the local branch as part of cleanup.
+9. Delegate cleanup only when the user directly invokes `clean-worktree` or
+   `/clean-worktree` for a target. Do not infer cleanup authorization from a
+   mention of the skill or a request to complete, publish, or otherwise finish
+   the task.
 
 The workflow may resume at a later stage for pre-existing work. Inspect current state first and skip only stages already completed correctly.
 
@@ -67,14 +72,19 @@ Before declaring the requested lifecycle complete, load `inspect-git-state` and 
 - Required checks ran and their real results are recorded.
 - The branch is pushed when publication was expected.
 - The pull request exists with the intended head and base when a PR was expected.
-- Worktree cleanup occurred only when explicitly requested.
+- Worktree cleanup occurred only through a direct `clean-worktree` or
+  `/clean-worktree` invocation for a target.
 - No unresolved divergence, detached `HEAD`, wrong-worktree state, or ambiguous Git ownership remains.
 
 If unrelated changes make branch or commit ownership ambiguous, ask whether they belong in a separate commit on the same branch or a separate task, branch, and worktree. Do not silently choose.
 
 ## Completion Report
 
-Report the worktree path and whether it was removed, preserved local branch and base, created commits, checks, push state, PR URL when applicable, and any intentionally unfinished Git state. Completion means the endpoint established at the start was reached, not that every task must always produce a commit or PR.
+Report the worktree path and whether it was removed, the local branch state,
+created commits, checks, push state, PR URL when applicable, and any
+intentionally unfinished Git state. Completion means the endpoint established
+at the start was reached, not that every task must always produce a commit or
+PR.
 
 ## Review Checklist
 
