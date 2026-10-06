@@ -72,6 +72,8 @@ instructions should provide those overrides.
 - `worktree-workflow`: decides whether modifying work benefits from isolation.
 - `create-worktree`: safely creates or reuses task worktrees under
   `~/work/worktrees/<project>/<branch-or-task>`.
+- `clean-worktree`: explicitly removes one clean task worktree, its
+  Docker Compose containers, and its local branch.
 - `verify-changes`: reviews the complete diff and runs discovered project checks.
 - `commit-changes`: creates coherent commits using project message conventions.
 - `push-branch`: safely publishes an intended branch without implicit force push.
