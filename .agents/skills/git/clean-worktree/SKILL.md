@@ -1,17 +1,27 @@
 ---
 name: clean-worktree
-description: Use ONLY when the user directly commands `clean-worktree` or `/clean-worktree`. It removes the chat's active linked worktree by default, or one explicitly identified target, along with its verified Docker Compose containers and safe project networks, then force-deletes its local branch. Do not invoke for general cleanup requests, mentions of this skill, implementation completion, branch cleanup, or discussion of cleanup.
+description: Use ONLY after the user explicitly invokes this skill or directly commands `clean-worktree` or `/clean-worktree`. It removes the chat's active linked worktree by default, or one explicitly identified target, along with its verified Docker Compose containers and safe project networks, then force-deletes its local branch. Do not invoke for general cleanup requests, mentions of this skill, implementation completion, branch cleanup, or discussion of cleanup.
 ---
 
 # Clean Worktree
 
-Use this destructive cleanup workflow only when the user directly commands
+## Activation Boundary
+
+Use this destructive workflow only after an explicit user invocation: selecting
+this skill through the available interface, or directly entering
 `clean-worktree` or `/clean-worktree`, optionally followed by a target, for
 example, `/clean-worktree /absolute/path`.
-The command form is a deliberate consent boundary: a mention of this skill in a
-question, document, review, negation, or discussion is not an invocation.
-Never infer it from a request to finish work, clean up, delete a branch, or
-remove a worktree.
+
+Skill interfaces can inject this file into the conversation without retaining
+the original command text. When the skill is loaded through an explicit user
+invocation, that invocation is the consent boundary: proceed with the workflow
+and do not require a second literal-command match in the remaining
+conversation.
+
+Do not treat a skill load inferred from a general cleanup request, a mention in
+a question, document, review, negation, or discussion as authorization. Never
+infer authorization from a request to finish work, clean up, delete a branch,
+or remove a worktree.
 
 Clean exactly one target worktree at a time.
 When no target is supplied, capture the repository root of the chat's active
@@ -134,8 +144,8 @@ remote branches, and unidentifiable Docker resources.
 
 ## Review Checklist
 
-- The user directly invoked `clean-worktree` or `/clean-worktree`; a mention or
-  negated use did not qualify.
+- The user explicitly invoked the skill or directly invoked `clean-worktree` or
+  `/clean-worktree`; a mention or negated use did not qualify.
 - Exactly one registered non-primary worktree was targeted.
 - The target was clean, and commands ran outside it.
 - Docker cleanup used target-path labels and did not remove volumes or images.
