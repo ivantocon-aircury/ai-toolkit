@@ -32,12 +32,30 @@ Do not sweep stale worktrees or choose a target from a list.
 
 ## Scope
 
-Remove the target's verified Docker containers, workspace-owned volumes and
+Stop verified target processes, remove verified Docker containers, volumes and
 networks, then its worktree registration if present, its folder, and its verified
 local branch (including an unmerged branch) when registration removal succeeds.
 Folder deletion includes ignored runtime dependencies and build outputs.
-Preserve images, remote branches, external or shared Docker resources, and caches
-outside the target.
+External bind-mount data and dedicated service resources require the separate
+ownership and consent checks below. Preserve images and build caches, remote
+branches, Git stashes, shared package caches, and shared databases or services.
+
+## Resumable Cleanup
+
+Treat an already-absent folder, container, volume, network, branch, or registration
+as completed, after confirming absence in the verified repository/runtime.
+Distinguish absence from inspection, permission, or connection failures.
+Never require a folder to exist just to finish its verified remaining cleanup.
+For a missing target, canonicalize its existing parent and retain the exact final
+path component; check for symlinks before resolving paths.
+
+Retain an execution inventory across phases: canonical target, owning repository,
+branch/ref identity, administrative entry, runtime endpoint, resource IDs and
+ownership evidence, approvals, and completed operations. Avoid secrets in reports
+or persisted notes. On retry, revalidate that inventory and approvals against the
+current state; do not trust names or reuse stale process IDs. If no prior inventory
+exists, reconstruct only identities that can still be verified. Report resources
+that can no longer be attributed rather than guessing them from a folder name.
 
 ## Target Inspection and Consent
 
@@ -60,19 +78,46 @@ outside the target.
    continue and permanently discard these changes, or cancel? Wait for explicit
    consent before removing any Docker resource or file. Cancellation leaves
    everything unchanged. Do not reset or clean files as a preliminary step.
-5. If Git cannot inspect a leftover folder, explain that its changes cannot be
+5. If Git cannot inspect an existing leftover folder, explain that its changes cannot be
    assessed and ask the same discard-or-cancel question before deletion.
    Do not describe an uninspectable folder as clean.
+
+Inspect worktree locks and their reasons before destructive action. Ask before
+unlocking the exact target; decline or unresolved ownership stops cleanup.
+Do not silently override a lock with repeated force options.
+
+Inspect the target for nested repositories, registered worktrees, and initialized
+submodules, including ignored directories. Outer Git status cannot establish
+their cleanliness. Ask before deleting nested repositories or submodules and
+inspect their changes separately. A separately registered nested worktree must
+be cleaned as its own target first; do not bypass the one-target rule.
+Inspect mount points at and beneath the target, including bind mounts on the same
+filesystem. Do not traverse them during recursive deletion or silently unmount
+them. Stop before destructive cleanup until the mounts are removed or the user
+selects a scope that excludes them. Apply these checks to external deletion paths
+too, and re-check immediately before folder removal.
 
 Record the approved status snapshot. Re-check before each destructive phase,
 including folder removal. If changes appear or differ from the approved snapshot,
 describe them and ask again. If the user cancels after cleanup has begun, retain
 the remaining resources and report what was already removed.
 
-## Resolve Docker Ownership
+## Runtime Discovery and Ownership
 
-Require a usable local Docker daemon. If Docker cannot be inspected, stop before
-deletion and report the blocker.
+Follow the project's actual runtime: Docker Compose, Podman, devcontainers, or
+documented wrappers. Apply the same ownership, sharing, consent, and retry rules
+to each; do not execute a devcontainer removal command that also removes the
+workspace before these checks. Do not require Docker for a project proven to use
+another runtime, or no runtime, exclusively.
+
+For Docker, determine the effective daemon from explicit flags, `DOCKER_CONTEXT`,
+`DOCKER_HOST`, context configuration, and project launch instructions. Record and
+pin the resolved endpoint for inspection and cleanup without changing the global
+context. Require a usable daemon when Docker is applicable. If it cannot be
+inspected, stop before deletion. If launch evidence points to another context,
+inspect that specific context rather than concluding there are no resources on
+the current daemon. Ask if the intended endpoint is ambiguous; do not sweep all
+contexts. A remote daemon's bind-mount paths belong to its host, not the client.
 
 Attempt to resolve the target's Compose configuration, including project name,
 config-file list, non-external networks, and non-external volumes. Missing files,
@@ -93,7 +138,13 @@ Build and retain an inventory of container IDs, labels, mounts, and networks:
 - Require `com.docker.compose.project.working_dir` to match the canonical target
   path, along with Compose project, config-file, and version labels.
 - With resolved configuration, require project and config-file labels to agree
-  with it. Preserve and report conflicting or partial matches.
+  with it for current resources. Also inventory every exact-target-path container
+  from older project names and config-file lists. Group these by historical
+  configuration identity and verify each separately using consistent labels and
+  available launch/configuration evidence. Apply the unresolved-configuration
+  confirmation to historical groups that cannot be resolved; do not silently
+  preserve them just because they differ from today's configuration. Preserve
+  genuinely conflicting or partial ownership matches and report them.
 - With unresolved configuration and consent to continue, use consistent Compose
   labels with the exact target path to identify containers. Do not infer ownership
   from a folder basename or project name alone.
@@ -114,7 +165,49 @@ Build and retain an inventory of container IDs, labels, mounts, and networks:
   Report resources that cannot be verified; missing configuration is not a reason
   to abandon the approved folder removal.
 
+Inventory declared volumes and networks even if all containers are already gone.
+Use resolved target-specific declarations or a revalidated prior inventory as
+ownership evidence. An empty container list alone proves neither ownership nor
+absence of remaining Docker resources.
+
+## Processes and External Dependencies
+
+Complete discovery, resolve hard blockers (locks, nested registered worktrees,
+mounts, and runtime access), and obtain required consent before stopping anything.
+Do not stop processes while folder cleanup is blocked. Inspect host
+development servers, watchers, workers, test runners, and project supervisors.
+Require ownership evidence such as an exact working directory under the target
+plus command/executable or supervisor metadata. A matching port, command name,
+or path string in arguments alone is insufficient. Exclude the agent, its shell,
+and unrelated process groups. Prefer the project's targeted graceful stop command;
+otherwise signal only verified processes, wait, and re-check identity before any
+further signal. Ask before force-killing survivors. Stop if owned processes still
+run or their ownership cannot be safely resolved; report suspected unrelated
+processes without killing them. Do not kill container processes via host PIDs.
+Re-check Git changes after shutdown because a process can write files as it exits.
+
+Inventory bind mounts and project-documented external workspace data. Report
+paths outside the target, including mount sources absent from today's config.
+Delete one only if it is a dedicated canonical path owned exclusively by this
+workspace, is not an ancestor of the target or another retained resource, and is
+unused by other containers/processes/configurations. Summarize the exact paths
+and data loss, then ask for separate consent before recursive deletion. Apply
+the target's path, nested-checkout, and mount protections. For remote runtimes,
+do not map daemon-host paths to similarly named local paths; use a documented
+host-side procedure or preserve and report them.
+
+For an external database, bucket, queue, or other service, use cleanup only when
+project documentation explicitly marks the exact resource as disposable and
+workspace-specific. Verify account/environment and identity, explain the effect,
+and ask separately before deleting it through the documented procedure. Preserve
+shared services and resources with uncertain ownership. Missing documentation is
+a reason to report an external resource, not to invent deletion commands.
+
 ## Docker Cleanup
+
+Run after host-process shutdown. Use the pinned runtime endpoint and equivalent
+verified operations for the selected runtime. Stop containers gracefully first;
+report a graceful-stop failure before force-removing verified target containers.
 
 1. Re-check Git changes and consent as described above. Force-remove only the
    recorded, verified target containers. Retain their mount inventory for cleanup
@@ -126,8 +219,8 @@ Build and retain an inventory of container IDs, labels, mounts, and networks:
    confirming there are no remaining endpoints.
 4. Re-list target containers and approved resources. If a verified cleanup
    operation fails or a verified target container remains, stop and report the
-   partial result. Ambiguous resources intentionally preserved under the approved
-   unresolved-configuration path do not block folder removal.
+   partial result. Intentionally preserved shared, external, or ambiguous resources
+   do not block folder removal once all applicable confirmations are satisfied.
 
 Do not use global Docker prune commands or an indiscriminate
 `docker compose down -v`. Bind-mounted paths outside the target are not removable
@@ -135,7 +228,8 @@ Docker volumes. If no verified Docker resources exist, report that and continue.
 
 ## Worktree and Folder Cleanup
 
-After Docker cleanup, re-check Git changes and consent, then revalidate the exact
+After runtime and approved external cleanup, re-check Git changes and consent,
+mounts and nested checkouts, then revalidate the exact
 canonical target and its registration before removal:
 
 1. For a valid registered linked worktree, run
@@ -149,8 +243,8 @@ canonical target and its registration before removal:
 3. If stale registration still names the target but its Git metadata is broken,
    first try targeted `git worktree remove` from the verified owning repository.
    If that fails because it is no longer a valid worktree, remove the validated
-   folder anyway. Report any stale administrative entry left behind; do not run
-   repository-wide `git worktree prune` or manually guess metadata to delete.
+   folder anyway. Then use the exact-entry procedure below. Do not run
+   repository-wide `git worktree prune` or guess metadata from the folder name.
    Other removal failures are blockers, not permission to bypass Git safeguards.
 4. Confirm the folder is absent and report whether registration remains.
    Only after folder and registration removal, delete a branch with
@@ -160,12 +254,37 @@ canonical target and its registration before removal:
 5. Verify branch deletion when attempted. If it fails, report the failure without
    trying alternative destructive Git commands.
 
+### Exact Stale Registration
+
+Prefer Git's targeted removal. If the folder is confirmed absent and targeted
+removal cannot clear its stale entry, inspect the owning repository's resolved
+Git common directory. Identify exactly one direct child of its `worktrees/`
+directory whose `gitdir` points to the validated target's `.git` path. Cross-check
+the registration, common-directory association, and recorded HEAD/branch when
+available. Verify this is a stale entry, not a moved checkout or unavailable
+mounted checkout. Do not follow symlinked administrative directories.
+
+Before deleting metadata, explain that the entry may contain per-worktree index,
+reflog, or other recovery state and ask for explicit consent to remove that exact
+entry. Respect any lock and its separate approval. Re-check the folder is still
+absent and no Git operation is using the entry; if this cannot be established,
+retain it. Remove only the verified direct child, never the common directory,
+`worktrees/` parent, object store, or another entry. Verify the registration is
+gone before branch deletion. If identity is ambiguous or consent is declined,
+retain and report the entry and branch; the folder may already be removed.
+
+Record the branch ref and commit before cleanup; re-check before branch deletion.
+If the ref changed, ask rather than deleting new work. Detached HEAD needs no
+branch deletion. An already-missing branch is complete, not a failure.
+
 ## Report
 
-State the target path and whether it was a valid worktree or leftover folder,
-consent decisions, removed containers, volumes and networks, preserved resources
-and reasons, folder/registration removal results, and branch deletion or skip
-reason. Clearly identify partial cleanup and unresolved Compose configuration.
+State the target path and whether it was a valid worktree, leftover, or absent
+folder; runtime/context; consent decisions; stopped processes; removed containers,
+volumes, networks and approved external resources; preserved resources and reasons;
+folder/registration removal results; and branch deletion or skip reason. Clearly
+identify already-absent resources, partial cleanup, unresolved configurations, and
+what evidence or action is needed to finish a retry.
 
 ## Review Checklist
 
@@ -174,6 +293,10 @@ reason. Clearly identify partial cleanup and unresolved Compose configuration.
 - Uncommitted or uninspectable changes required discard-or-cancel consent.
 - Unresolved Compose configuration required continue-or-cancel consent.
 - Docker ownership was verified; shared and external resources were preserved.
+- Historical Compose groups and resources without containers were considered.
+- Runtime endpoint was pinned; only verified host processes were stopped.
+- Nested checkouts, mounts, locks, and external deletion approvals were checked.
 - A leftover folder was removed even without valid worktree registration.
+- Retries accepted absence; stale metadata cleanup targeted one verified entry.
 - Branch deletion used verified identity only after folder/registration removal.
 - The report distinguishes removed, preserved, failed, and skipped resources.
