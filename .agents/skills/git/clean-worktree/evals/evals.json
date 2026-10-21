@@ -3,43 +3,76 @@
   "evals": [
     {
       "id": 0,
-      "prompt": "Run /clean-worktree with no target while this chat is operating in a registered linked worktree on feature/search. Explain how you choose the target and where the destructive commands run.",
-      "expected_output": "Captures the active linked worktree as the target, selects another registered checkout of the same repository for all cleanup commands, and refuses if the active checkout is primary.",
+      "prompt": "Dry-run only: Run /clean-worktree with no target while this chat is operating in a registered linked worktree on feature/search. Explain how you choose the target and where destructive commands would run.",
+      "expected_output": "Capture the active linked worktree, execute outside it, and refuse cleanup of a primary checkout.",
       "files": [],
       "expectations": [
         "Captures the chat's active linked worktree when no target is supplied.",
-        "Runs cleanup commands from another registered checkout.",
-        "Refuses if the captured target is the primary checkout."
+        "Runs cleanup outside the target and descendants, preferably in another owning-repository checkout.",
+        "Refuses a primary checkout."
       ]
     },
     {
       "id": 1,
-      "prompt": "Run clean-worktree for /home/ivan/work/worktrees/storefront/feature-checkout. It is a registered, clean linked worktree on feature/checkout and has Docker Compose containers labelled with that exact working-directory path. Explain the operations you will perform, in order, and what you will preserve.",
-      "expected_output": "Uses the explicit skill, removes only target-labelled Compose resources, removes the worktree before force-deleting the local branch, and preserves volumes, images, remote branches, and unknown Docker resources.",
+      "prompt": "Dry-run only: Run clean-worktree for /work/trees/storefront-checkout. It is a registered clean linked worktree on feature/checkout with verified target-labelled Compose containers and a dedicated non-external volume. Explain cleanup order and preserved resources.",
+      "expected_output": "Verify ownership, stop processes, remove verified runtime resources including the dedicated volume, remove the worktree, and then delete the verified branch. Preserve shared resources and images.",
       "files": [],
       "expectations": [
-        "Checks the target is a clean registered non-primary worktree from another checkout before deletion.",
-        "Removes only containers labelled with the target working-directory path and preserves volumes and images.",
-        "Removes the worktree without force before force-deleting the local branch."
+        "Verifies target and resource ownership before deletion.",
+        "Includes verified dedicated volumes while preserving shared or external resources and images.",
+        "Removes the clean worktree without force before deleting its verified unchanged branch."
       ]
     },
     {
       "id": 2,
       "prompt": "The payment-api feature worktree is merged. Please clean it up, remove its branch, and stop its containers.",
-      "expected_output": "Does not invoke cleanup because the user did not literally name clean-worktree or /clean-worktree.",
+      "expected_output": "Does not activate this skill from a general cleanup request without an explicit invocation.",
       "files": [],
       "expectations": [
-        "Refuses to remove resources because the request does not literally name clean-worktree or /clean-worktree."
+        "Does not treat the general cleanup request as explicit clean-worktree activation."
       ]
     },
     {
       "id": 3,
-      "prompt": "Use clean-worktree on /home/ivan/work/worktrees/docs/feature-search. Git status shows an untracked notes.txt file. What do you remove?",
-      "expected_output": "Refuses to remove containers, the worktree, or the branch because the target has untracked content.",
+      "prompt": "Dry-run only: Use clean-worktree on /work/trees/docs-search. Git status shows an untracked notes.txt file. What do you remove?",
+      "expected_output": "Explain the untracked change and ask whether to discard it or cancel before any destructive operation.",
       "files": [],
       "expectations": [
-        "States that an untracked file makes the target unclean.",
-        "Removes no containers, worktree, or branch."
+        "Reports the untracked file and requests explicit discard-or-cancel consent.",
+        "Removes nothing before consent and leaves everything unchanged on cancellation."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Dry-run only: /clean-worktree /work/trees/shop-task. The folder and containers were removed in a prior interrupted attempt. The owning repository still lists the target, and exactly one administrative gitdir points to /work/trees/shop-task/.git. The entry is unlocked and unused. A previous verified inventory records one dedicated volume and the branch ref. Describe the remaining checks, consent, and cleanup order without executing commands.",
+      "expected_output": "Treat confirmed absences as complete, revalidate runtime and volume ownership, ask before deleting the exact stale metadata entry and recovery state, remove only that entry, and verify the branch ref has not changed before deleting it. Never prune all worktrees or guess identity from a basename.",
+      "files": [],
+      "expectations": [
+        "Accepts confirmed missing resources and revalidates the prior inventory.",
+        "Requires separate consent for one verified stale administrative entry and never prunes globally.",
+        "Rechecks branch identity before deletion after registration removal."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Dry-run only: /clean-worktree /work/trees/shop-task. Today's Compose config resolves, but a remote Docker context used by the project also has stopped containers with the exact target working_dir and older project/config-file labels. The old config is missing. An old container mounts /srv/shop-task-data on the daemon host. Another checkout uses the same named database volume. Describe cleanup and required decisions without executing commands.",
+      "expected_output": "Resolve and pin the launch context, inventory current and historical groups, ask to continue with unresolved historical config, remove only verified target resources, preserve the shared volume, and require separate ownership checks and consent for external bind data. Never delete a matching local path for a remote mount source.",
+      "files": [],
+      "expectations": [
+        "Pins the intended remote endpoint and inventories historical configuration groups.",
+        "Requests confirmation for unresolved historical configuration and preserves the shared volume.",
+        "Requires separate consent and verified ownership for external data without deleting a similarly named local path."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Dry-run only: /clean-worktree /work/trees/shop-task. The worktree is locked for a stated reason, contains uncommitted changes, an ignored nested repository, a separately registered nested worktree, and a same-filesystem bind mount. A verified watcher would write files during shutdown, while an unrelated server uses the expected dev port. Explain what blocks cleanup and how to proceed after those blockers are resolved, without executing commands.",
+      "expected_output": "Discover blockers before destructive action, respect the lock and ask before unlocking, require separate cleanup of the registered nested worktree, inspect nested changes and get discard consent, and stop until mount removal or safe scope is established. Gracefully stop only verified target processes, never infer process ownership from the port, and recheck changes after shutdown with renewed consent for new changes.",
+      "files": [],
+      "expectations": [
+        "Resolves locks, nested registered worktrees, and mounts before stopping processes or removing resources.",
+        "Inspects nested changes and obtains discard consent.",
+        "Stops only verified target processes and rechecks shutdown writes for renewed consent."
       ]
     }
   ]
