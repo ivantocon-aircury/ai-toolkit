@@ -34,17 +34,24 @@ test("native task worktrees retain branch, dependency, reuse, and session behavi
   let denied = false
   let failMove = false
   let failAttach = false
+  let failRemove = false
   let creates = 0
+  let removes = 0
+  let deferredMove = false
+  const approvals = []
   const inventory = [{ directory: canonical }]
   const ctx = {
     location: { directory: canonical, project: { id: "test-project", canonical } },
-    permission: { assert: async () => { if (denied) throw new Error("Denied") } },
+    permission: { assert: async (request) => {
+      approvals.push(request)
+      if (denied) throw new Error("Denied")
+    } },
     tool: { transform: async (fn) => fn({ add: (value) => { definition = value } }) },
     session: {
       get: async () => ({ projectID: "test-project", location: { directory: current } }),
       move: async ({ directory }) => {
         if (failMove) throw new Error("Move unavailable")
-        current = directory
+        if (!deferredMove) current = directory
       },
     },
     worktree: {
@@ -62,6 +69,13 @@ test("native task worktrees retain branch, dependency, reuse, and session behavi
         inventory.push({ directory: destination, strategy: "git" })
         if (failAttach) await git(canonical, "branch", "feature/race")
         return { directory: destination }
+      },
+      remove: async ({ projectID, directory, force }) => {
+        assert.equal(projectID, "test-project")
+        removes++
+        if (failRemove) throw new Error("Native owner unavailable")
+        await git(canonical, "worktree", "remove", ...(force ? ["--force"] : []), "--", directory)
+        inventory.splice(inventory.findIndex((entry) => entry.directory === directory), 1)
       },
     },
   }
@@ -126,5 +140,48 @@ test("native task worktrees retain branch, dependency, reuse, and session behavi
     await run({ action: "select", directory })
     assert.equal(current, directory)
     assert.equal(await git(directory, "branch", "--show-current"), "feature/race")
+  })
+  await t.test("cleanup refuses active targets and waits for a completed session handoff", async () => {
+    const target = current
+    await assert.rejects(run({ action: "remove", directory: target }), /Session is inside/)
+    deferredMove = true
+    await run({ action: "leave" })
+    await assert.rejects(run({ action: "remove", directory: target }), /Session is inside/)
+    deferredMove = false
+    await run({ action: "leave" })
+    assert.equal(current, canonical)
+    await assert.rejects(run({ action: "remove", directory: canonical }), /canonical checkout/)
+    const alias = join(root, "target-link")
+    await symlink(target, alias)
+    await assert.rejects(run({ action: "remove", directory: alias }), /symlink/)
+    assert.equal(removes, 0)
+  })
+  await t.test("native removal propagates owner failure and preserves the worktree", async () => {
+    const directory = join(root, "work", "worktrees", "project", "feature-race")
+    failRemove = true
+    await assert.rejects(run({ action: "remove", directory }), /Native owner unavailable/)
+    assert.equal(await git(directory, "branch", "--show-current"), "feature/race")
+    failRemove = false
+  })
+  await t.test("removal requests its own permission and stops before native removal when denied", async () => {
+    const directory = join(root, "work", "worktrees", "project", "feature-race")
+    const before = removes
+    denied = true
+    await assert.rejects(run({ action: "remove", directory, force: true }), /Denied/)
+    denied = false
+    assert.equal(removes, before)
+    assert.deepEqual(approvals.at(-1).resources, ["remove"])
+    assert.deepEqual(approvals.at(-1).metadata, { directory, force: true })
+  })
+  await t.test("removes through native API after handoff without deleting the task branch", async () => {
+    const directory = join(root, "work", "worktrees", "project", "feature-race")
+    await writeFile(join(directory, "untracked-cleanup.txt"), "requires discard consent")
+    await assert.rejects(run({ action: "remove", directory }), /modified or untracked files/)
+    // Simulate the cleanup skill having obtained the required discard approval.
+    const result = await run({ action: "remove", directory, force: true })
+    assert.equal(result.removed, true)
+    assert.equal(result.branchDeleted, false)
+    assert.equal(await git(canonical, "rev-parse", "--verify", "refs/heads/feature/race"), await git(canonical, "rev-parse", "HEAD"))
+    assert.ok(!inventory.some((entry) => entry.directory === directory))
   })
 })

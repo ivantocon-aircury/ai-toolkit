@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process"
 import { cp, lstat, realpath } from "node:fs/promises"
 import { homedir } from "node:os"
-import { basename, join, resolve } from "node:path"
+import { basename, isAbsolute, join, relative, resolve } from "node:path"
 import { promisify } from "node:util"
 
 const exec = promisify(execFile)
@@ -23,14 +23,15 @@ export async function setup(ctx) {
   await ctx.tool.transform((editor) => {
     editor.add({
       name: "task_worktree",
-      description: "Inspect native task worktrees, prepare a named branch/worktree, or select an inspected existing worktree and move this session there. Never removes worktrees.",
+      description: "Inspect, prepare, or select native task worktrees. Leave moves the session to the canonical checkout for explicitly requested cleanup. Remove deletes exactly one registered task worktree only after the v2 cleanup skill's authorization, runtime, and data-loss checks; it never deletes the branch.",
       input: {
         type: "object",
         properties: {
-          action: { type: "string", enum: ["inspect", "prepare", "select"] },
+          action: { type: "string", enum: ["inspect", "prepare", "select", "leave", "remove"] },
           branch: { type: "string", description: "Task branch for prepare; follows repository naming conventions." },
           base: { type: "string", description: "Optional starting ref for a new branch; defaults to canonical HEAD." },
-          directory: { type: "string", description: "Absolute registered worktree path for select, after ownership/status inspection." },
+          directory: { type: "string", description: "Absolute registered worktree path for select or explicitly authorized remove, after ownership/status inspection." },
+          force: { type: "boolean", description: "Remove only: false by default; true only after cleanup policy explicitly permits discarding the verified target contents." },
         },
         required: ["action"],
         additionalProperties: false,
@@ -41,8 +42,9 @@ export async function setup(ctx) {
           agent: context.agent,
           source: { type: "tool", messageID: context.messageID, id: context.id },
           action: "task_worktree",
-          resources: ["*"],
-          save: ["*"],
+          resources: [input.action],
+          save: [input.action],
+          metadata: { directory: input.directory, force: input.force ?? false },
         })
         const git = async (directory, ...args) => {
           const result = await exec("git", args, { cwd: directory, signal: context.signal })
@@ -64,9 +66,17 @@ export async function setup(ctx) {
           }
           return { content: JSON.stringify({ canonical, current, parent, worktrees }) }
         }
-        if (input.action === "select") {
+        if (input.action === "leave") {
+          await ctx.session.move({ sessionID: context.sessionID, directory: canonical })
+          return { content: JSON.stringify({ directory: canonical, moved: true, verifyLocationBeforeCleanup: true }) }
+        }
+        if (input.action === "select" || input.action === "remove") {
           if (!input.directory || resolve(input.directory) !== input.directory) {
-            throw new Error("Select requires an absolute worktree directory.")
+            throw new Error("Select/remove requires an absolute worktree directory.")
+          }
+          const info = await lstat(input.directory)
+          if (info.isSymbolicLink()) {
+            throw new Error("A worktree target cannot be a symlink.")
           }
           const directory = await realpath(input.directory)
           if (directory === await realpath(canonical)) {
@@ -74,6 +84,21 @@ export async function setup(ctx) {
           }
           if (!inventory.some((entry) => entry.directory === directory)) {
             throw new Error("Directory is not registered to this project. Inspect and refresh first.")
+          }
+          if (input.action === "remove") {
+            const currentPath = await realpath(current)
+            const fromTarget = relative(directory, currentPath)
+            if (fromTarget === "" || (!isAbsolute(fromTarget) && fromTarget !== ".." && !fromTarget.startsWith("../"))) {
+              throw new Error("Session is inside the target. Use leave, wait for the next step boundary, and verify the session location before removal.")
+            }
+            // The cleanup skill performs runtime/ownership/consent checks before this native operation.
+            await ctx.worktree.remove({ projectID: project.id, directory, force: input.force ?? false })
+            await ctx.worktree.refresh({ projectID: project.id })
+            const remaining = await ctx.worktree.list({ projectID: project.id })
+            if (await exists(directory) || remaining.some((entry) => entry.directory === directory)) {
+              throw new Error("Native removal returned but the target or its inventory entry remains. Inspect before continuing branch cleanup.")
+            }
+            return { content: JSON.stringify({ directory, removed: true, branchDeleted: false }) }
           }
           await ctx.session.move({ sessionID: context.sessionID, directory })
           return { content: JSON.stringify({ directory, moved: true, verifyLocationBeforeEditing: true }) }
