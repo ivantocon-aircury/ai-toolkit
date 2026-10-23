@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
+  "update": "notify",
+  "snapshots": true,
+  "formatter": true,
+  "lsp": false,
+  // V2 drops variants from the root selection; use an overridable model default.
+  "model": "openai/gpt-6.1-sol",
+  "providers": {
+    "openai": {
+      "models": {
+        "gpt-6.1-sol": { "settings": { "reasoningEffort": "low" } }
+      }
+    }
+  },
+  // The native task_worktree adapter appends the canonical project name.
+  // Direct UI/API creation without the adapter uses this shared parent as-is.
+  "worktree": { "directory": "~/work/worktrees" },
+  "instructions": [
+    "~/.config/opencode/instructions/language.md",
+    "~/.config/opencode/instructions/development.md",
+    "~/.config/opencode/instructions/subagent-delegation.md",
+    "~/.config/opencode/instructions/native-worktrees.md"
+  ],
+  "compaction": { "auto": true, "prune": true },
+  "watcher": {
+    "ignore": [
+      "**/node_modules/**", "**/vendor/**", "**/var/**", "**/.next*/**",
+      "**/.phpunit.cache/**", "**/.phpunit.result.cache", "**/playwright-report/**",
+      "**/test-results/**", "**/coverage/**", "**/tsconfig.tsbuildinfo", "**/.idea/**"
+    ]
+  },
+  "permissions": [
+    { "action": "read", "resource": "*", "effect": "allow" },
+    { "action": "read", "resource": ".env*", "effect": "ask" },
+    { "action": "read", "resource": "**/.env", "effect": "ask" },
+    { "action": "read", "resource": "**/.env*", "effect": "ask" },
+    { "action": "edit", "resource": "*", "effect": "allow" },
+    { "action": "edit", "resource": ".env*", "effect": "ask" },
+    { "action": "edit", "resource": "**/.env", "effect": "ask" },
+    { "action": "edit", "resource": "**/.env*", "effect": "ask" },
+    { "action": "glob", "resource": "*", "effect": "allow" },
+    { "action": "grep", "resource": "*", "effect": "allow" },
+    { "action": "list", "resource": "*", "effect": "allow" },
+    { "action": "subagent", "resource": "*", "effect": "allow" },
+    { "action": "task_worktree", "resource": "*", "effect": "allow" },
+    { "action": "todowrite", "resource": "*", "effect": "allow" },
+    { "action": "question", "resource": "*", "effect": "allow" },
+    { "action": "webfetch", "resource": "*", "effect": "allow" },
+    { "action": "websearch", "resource": "*", "effect": "allow" },
+    { "action": "lsp", "resource": "*", "effect": "allow" },
+    { "action": "doom_loop", "resource": "*", "effect": "allow" },
+    { "action": "skill", "resource": "*", "effect": "allow" },
+    { "action": "shell", "resource": "*", "effect": "allow" },
+    { "action": "shell", "resource": "git reset --hard *", "effect": "deny" },
+    { "action": "shell", "resource": "git reset --hard", "effect": "deny" },
+    { "action": "shell", "resource": "git clean *", "effect": "deny" },
+    { "action": "shell", "resource": "docker system prune *", "effect": "deny" },
+    { "action": "shell", "resource": "docker system prune", "effect": "deny" },
+    { "action": "shell", "resource": "rm -rf *", "effect": "deny" },
+    { "action": "shell", "resource": "rm -rf", "effect": "deny" },
+    { "action": "shell", "resource": "cat .env", "effect": "deny" },
+    { "action": "shell", "resource": "cat .env*", "effect": "deny" },
+    { "action": "shell", "resource": "source .env", "effect": "deny" },
+    { "action": "shell", "resource": "source .env*", "effect": "deny" },
+    { "action": "shell", "resource": "env", "effect": "deny" },
+    { "action": "shell", "resource": "printenv", "effect": "deny" },
+    { "action": "shell", "resource": "printenv *", "effect": "deny" },
+    { "action": "shell", "resource": "set", "effect": "deny" },
+    { "action": "shell", "resource": "sudo *", "effect": "deny" },
+    // Preserve the original external-directory boundaries and rule order.
+    { "action": "external_directory", "resource": "*", "effect": "ask" },
+    { "action": "external_directory", "resource": "~/.agents/skills/**", "effect": "allow" },
+    { "action": "external_directory", "resource": "~/work/worktrees/**", "effect": "allow" },
+    { "action": "external_directory", "resource": "~/work/**/.env", "effect": "ask" },
+    { "action": "external_directory", "resource": "~/work/**/.env*", "effect": "ask" },
+    { "action": "external_directory", "resource": "/mnt/c/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/mnt/d/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "~/.ssh/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "~/.aws/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "~/.config/opencode/**", "effect": "deny" }
+  ],
+  "plugins": ["opencode-wakatime"],
+  "mcp": {
+    "servers": {
+      "context7": {
+        "type": "local",
+        "command": ["npx", "-y", "@upstash/context7-mcp@4.0.3"]
+      }
+    }
+  }
+}
