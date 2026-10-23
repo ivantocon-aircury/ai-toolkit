@@ -18,7 +18,7 @@ commands, versions, issue-reference format, or demonstrated conventions.
 
 ## Profiles
 
-Both profile directories contain the same development instructions and agents.
+The original auto and normal profiles share development instructions and agents.
 Install the desired profile as `~/.config/opencode` and expose this repository's
 `.agents/skills` as `~/.agents/skills`; OpenCode discovers that location natively.
 This repository intentionally does not prescribe a copy or installation script.
@@ -32,6 +32,10 @@ This repository intentionally does not prescribe a copy or installation script.
   unrelated files. Native project inspection is available, but edits, shell
   commands, web or MCP documentation access, and external paths retain
   conservative approval rules. Environment-file edits are denied.
+- `.opencode-auto-v2` is the separate OpenCode v2 auto profile.
+  It defaults to GPT-6.1 Sol with low reasoning effort and uses the native
+  worktree adapter with the `opencode-v2-*` skills described below.
+  Install the complete profile, including `plugins/` and `instructions/`.
 
 The auto-only Wakatime plugin and permission differences are intentional. Other
 models, MCP configuration, instructions, and agent definitions stay aligned.
@@ -80,6 +84,50 @@ instructions should provide those overrides.
 - `push-branch`: safely publishes an intended branch without implicit force push.
 - `create-pull-request`: verifies and creates or locates a GitHub pull request.
 - `development-lifecycle`: composes the requested Git endpoint from atomic skills.
+
+### OpenCode V2 Worktrees
+
+Keep the existing Git skills installed for older profiles.
+The separately named v2 skills coexist under `.agents/skills/git/`:
+
+- `opencode-v2-worktree-workflow`: decides isolation and reuses task worktrees.
+- `opencode-v2-create-worktree`: prepares or selects a native worktree and
+  verifies session handoff.
+- `opencode-v2-clean-worktree`: explicitly cleans one task worktree using
+  native removal, with the original cleanup safety policy.
+
+Expose the complete `.agents/skills` tree as `~/.agents/skills`, as above.
+Unique skill IDs avoid discovery collisions; no renaming or uninstalling is
+needed when switching profiles.
+The v2 profile denies the three legacy worktree skill IDs and routes shared
+lifecycle references to their v2 counterparts.
+The v2 skills require `task_worktree`; older profiles continue using the
+original skills and do not automatically invoke the v2 procedures.
+Inspection, verification, commits, pushing, and PR skills stay shared.
+
+The agent initiates native worktree creation when isolation is required.
+The user does not need to create a worktree manually.
+The adapter preserves `~/work/worktrees/<project>/<branch-with-slashes-as-hyphens>`,
+attaches the task branch after native detached creation, copies dependencies
+for new worktrees, and requests native session movement.
+Direct UI/API creation without the adapter uses the configured shared parent
+without the per-project adapter conventions.
+
+For cleanup, explicitly select `opencode-v2-clean-worktree` or mention it as
+`@opencode-v2-clean-worktree` in the v2 UI.
+The old ID is denied in this profile; it is not a native alias.
+Cleanup first moves the active session outside the target and verifies handoff,
+then performs the shared runtime and consent checks before native removal.
+The profile requests permission for native removal, with the target and force
+flag shown; other native worktree operations retain their automatic flow.
+It deletes the verified local branch only after folder and registrations are gone.
+Unregistered leftover folders or damaged Git metadata require reported,
+targeted recovery outside the adapter; it does not bypass native ownership or
+the profile's recursive-deletion restrictions.
+No implementation, commit, or PR completion implicitly authorizes cleanup.
+
+Run adapter checks with
+`node --test .opencode-auto-v2/tests/task-worktrees.test.mjs`.
 
 ### Project Knowledge
 

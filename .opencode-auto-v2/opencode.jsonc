@@ -45,6 +45,7 @@
     { "action": "list", "resource": "*", "effect": "allow" },
     { "action": "subagent", "resource": "*", "effect": "allow" },
     { "action": "task_worktree", "resource": "*", "effect": "allow" },
+    { "action": "task_worktree", "resource": "remove", "effect": "ask" },
     { "action": "todowrite", "resource": "*", "effect": "allow" },
     { "action": "question", "resource": "*", "effect": "allow" },
     { "action": "webfetch", "resource": "*", "effect": "allow" },
@@ -52,6 +53,9 @@
     { "action": "lsp", "resource": "*", "effect": "allow" },
     { "action": "doom_loop", "resource": "*", "effect": "allow" },
     { "action": "skill", "resource": "*", "effect": "allow" },
+    { "action": "skill", "resource": "worktree-workflow", "effect": "deny" },
+    { "action": "skill", "resource": "create-worktree", "effect": "deny" },
+    { "action": "skill", "resource": "clean-worktree", "effect": "deny" },
     { "action": "shell", "resource": "*", "effect": "allow" },
     { "action": "shell", "resource": "git reset --hard *", "effect": "deny" },
     { "action": "shell", "resource": "git reset --hard", "effect": "deny" },
@@ -81,7 +85,7 @@
     { "action": "external_directory", "resource": "~/.aws/**", "effect": "deny" },
     { "action": "external_directory", "resource": "~/.config/opencode/**", "effect": "deny" }
   ],
-  "plugins": ["opencode-wakatime"],
+  "plugins": ["opencode-wakatime", "./plugins/task-worktrees"],
   "mcp": {
     "servers": {
       "context7": {

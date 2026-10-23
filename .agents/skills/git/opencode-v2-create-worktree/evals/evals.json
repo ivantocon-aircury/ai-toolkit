@@ -1,0 +1,23 @@
+{
+  "skill_name": "opencode-v2-create-worktree",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Dry run only. Isolation was selected for adding search to /home/ivan/work/api. Use branch feature/search, with no work reference. Local main is behind origin/main and the project wants origin/main as the base. Explain tool calls and handoff.",
+      "expected_output": "Inspect, explicitly prepare branch feature/search with base origin/main, report ~/work/worktrees/api/feature-search, let the adapter attach the branch and seed dependencies, then verify the moved session at the next step boundary. Never pass the task branch as the native API starting ref or invent a reference.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Dry run only. feature/search is already checked out in a registered worktree containing edits whose ownership is unknown. The session is in main. Can you reuse it automatically?",
+      "expected_output": "Inspect and ask about ownership before selecting; do not prepare a second tree, overwrite, stash, or discard edits. An unused existing branch would instead be prepared without a new base.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Dry run only. Native creation succeeded at /home/ivan/work/worktrees/api/feature-search, but branch attachment failed after another process created feature/search. The worktree is detached. Explain recovery without deleting anything.",
+      "expected_output": "Inspect status and branch ownership, switch to the verified existing branch if safe, select the preserved native worktree, and verify handoff. No prepare retry against the existing destination or automatic cleanup.",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "skill_name": "opencode-v2-worktree-workflow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Dry run only. In OpenCode v2, implement an API endpoint and its service. The session is in the canonical checkout on main; status is clean, task_worktree is available, and there is no task worktree. Explain the next steps without executing them.",
+      "expected_output": "Inspect Git and native inventory, decide isolation, delegate to opencode-v2-create-worktree, then verify native session handoff before edits. No raw git worktree add, manual user creation, or publication.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Dry run only. Continue the same task in /home/ivan/work/worktrees/api/feature-search on feature/search. It is a registered linked worktree; its dirty files belong to this task. Should another worktree be created?",
+      "expected_output": "Verify and reuse the active task worktree without another prepare, worktree, branch, or move; task-compatible changes remain intact.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Dry run only. Fix one spelling error in a single tracked README file in a clean primary checkout. The change has no behavioral impact. Explain whether isolation is needed.",
+      "expected_output": "Record the explicit one-file low-risk exception and work in the current checkout after inspection, without native creation or unrelated lifecycle steps.",
+      "files": []
+    }
+  ]
+}
