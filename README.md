@@ -121,9 +121,12 @@ then performs the shared runtime and consent checks before native removal.
 The profile requests permission for native removal, with the target and force
 flag shown; other native worktree operations retain their automatic flow.
 It deletes the verified local branch only after folder and registrations are gone.
-Unregistered leftover folders or damaged Git metadata require reported,
-targeted recovery outside the adapter; it does not bypass native ownership or
-the profile's recursive-deletion restrictions.
+When native removal deregisters a worktree but leaves ignored residue (such as
+`.idea/`, `node_modules/`, or build output), the adapter can remove that exact
+folder only after revalidating its path, mounts, nested repositories/worktrees,
+and a pre-removal ignored-residue snapshot. It never exposes generic recursive
+deletion or uses `rm -rf`. Unregistered leftover folders or damaged Git metadata
+still require reported, targeted recovery outside the adapter.
 No implementation, commit, or PR completion implicitly authorizes cleanup.
 
 Run adapter checks with
