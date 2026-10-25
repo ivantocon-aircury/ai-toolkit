@@ -1,7 +1,8 @@
 import { execFile } from "node:child_process"
-import { cp, lstat, realpath } from "node:fs/promises"
+import { constants } from "node:fs"
+import { cp, lstat, open, readFile, readdir, realpath, rmdir, unlink } from "node:fs/promises"
 import { homedir } from "node:os"
-import { basename, isAbsolute, join, relative, resolve } from "node:path"
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { promisify } from "node:util"
 
 const exec = promisify(execFile)
@@ -13,6 +14,143 @@ async function exists(path) {
     if (error.code === "ENOENT") return undefined
     throw error
   }
+}
+
+function isSameOrDescendant(parent, candidate) {
+  const path = relative(parent, candidate)
+  return path === "" || (!isAbsolute(path) && path !== ".." && !path.startsWith(`..${sep}`))
+}
+
+async function listEntries(directory, prefix = "") {
+  const entries = []
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name)
+    const name = prefix ? join(prefix, entry.name) : entry.name
+    entries.push(name)
+    // Do not follow symlinks while checking or removing residue.
+    if (entry.isDirectory() && !entry.isSymbolicLink()) {
+      entries.push(...await listEntries(path, name))
+    }
+  }
+  return entries
+}
+
+async function mountPoints() {
+  try {
+    const contents = await readFile("/proc/self/mountinfo", "utf8")
+    return contents.split("\n").flatMap((line) => {
+      const fields = line.split(" ")
+      const separator = fields.indexOf("-")
+      if (separator < 6) return []
+      return [fields[4].replace(/\\([0-7]{3})/g, (_, octal) => String.fromCharCode(Number.parseInt(octal, 8)))]
+    })
+  } catch (error) {
+    throw new Error(`Cannot inspect mount points: ${error.message}`)
+  }
+}
+
+export async function assertNoMounts(directory) {
+  const mounts = await mountPoints()
+  if (mounts.some((mount) => isSameOrDescendant(directory, mount))) {
+    throw new Error("A worktree target cannot be a mount point or contain a mount point.")
+  }
+}
+
+async function assertNoNestedRepositories(directory, inventory) {
+  for (const entry of inventory) {
+    if (entry.directory !== directory && isSameOrDescendant(directory, entry.directory)) {
+      throw new Error("A worktree target cannot contain another registered worktree.")
+    }
+  }
+  const entries = await listEntries(directory)
+  if (entries.some((entry) => entry !== ".git" && basename(entry) === ".git")) {
+    throw new Error("A worktree target cannot contain a nested repository or submodule.")
+  }
+}
+
+async function isIgnored(directory, entry) {
+  try {
+    await exec("git", ["check-ignore", "-q", "--", entry], { cwd: directory })
+    return true
+  } catch (error) {
+    if (error.code === 1) return false
+    throw new Error(`Cannot verify ignored residue ${entry}: ${error.message}`)
+  }
+}
+
+async function ignoredResidueSnapshot(directory) {
+  const entries = (await listEntries(directory)).filter((entry) => entry !== ".git")
+  const ignored = new Set()
+  const kinds = new Map()
+  for (const entry of entries) {
+    const info = await lstat(join(directory, entry))
+    kinds.set(entry, info.isDirectory() ? "directory" : info.isSymbolicLink() ? "symlink" : info.isFile() ? "file" : "other")
+    if (await isIgnored(directory, entry)) ignored.add(entry)
+  }
+  return { entries: new Set(entries), ignored, kinds }
+}
+
+async function removeVerifiedResidue(directory, snapshot) {
+  const flags = constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW
+  const targetInfo = await lstat(directory)
+  const parent = await open(dirname(directory), flags)
+  const handles = new Map()
+  const via = (handle, name) => `/proc/self/fd/${handle.fd}/${name}`
+  const kindOf = (info) => info.isDirectory() ? "directory" : info.isSymbolicLink() ? "symlink" : info.isFile() ? "file" : "other"
+  try {
+    const root = await open(via(parent, basename(directory)), flags)
+    handles.set("", root)
+    const rootInfo = await root.stat()
+    if (rootInfo.dev !== targetInfo.dev || rootInfo.ino !== targetInfo.ino) {
+      throw new Error("Residue target changed while opening its verified directory.")
+    }
+    const residue = await listEntries(`/proc/self/fd/${root.fd}`)
+    const unexpected = []
+    for (const entry of residue) {
+      const info = await lstat(join(`/proc/self/fd/${root.fd}`, entry))
+      const kind = kindOf(info)
+      if (!snapshot.entries.has(entry) || !snapshot.ignored.has(entry) || snapshot.kinds.get(entry) !== kind) unexpected.push(entry)
+    }
+    if (unexpected.length) return unexpected
+
+    for (const entry of residue.filter((item) => snapshot.kinds.get(item) === "directory").sort((left, right) => left.split(sep).length - right.split(sep).length)) {
+      const parentEntry = dirname(entry)
+      const parentHandle = handles.get(parentEntry === "." ? "" : parentEntry)
+      const info = await lstat(via(parentHandle, basename(entry)))
+      if (kindOf(info) !== "directory") throw new Error(`Residue changed while opening ${entry}.`)
+      handles.set(entry, await open(via(parentHandle, basename(entry)), flags))
+    }
+
+    // Every destructive operation is descriptor-relative and no-follow. A
+    // raced-in entry or mount leaves its parent non-empty instead of traversing
+    // outside the verified target.
+    for (const entry of residue.sort((left, right) => right.split(sep).length - left.split(sep).length)) {
+      const parentEntry = dirname(entry)
+      const parentHandle = handles.get(parentEntry === "." ? "" : parentEntry)
+      const path = via(parentHandle, basename(entry))
+      const info = await lstat(path)
+      const kind = kindOf(info)
+      if (snapshot.kinds.get(entry) !== kind) throw new Error(`Residue changed while removing ${entry}.`)
+      await assertNoMounts(directory)
+      if (kind === "directory") await rmdir(path)
+      else if (kind === "file" || kind === "symlink") await unlink(path)
+      else throw new Error(`Residue entry ${entry} is not a removable file, symlink, or directory.`)
+    }
+    const currentRoot = await lstat(via(parent, basename(directory)))
+    if (currentRoot.dev !== rootInfo.dev || currentRoot.ino !== rootInfo.ino) {
+      throw new Error("Residue target changed before final directory removal.")
+    }
+    await assertNoMounts(directory)
+    await rmdir(via(parent, basename(directory)))
+    return []
+  } finally {
+    await Promise.all([...handles.values(), parent].map(async (handle) => { await handle.close() }))
+  }
+}
+
+async function worktreeLocked(git, canonical, directory) {
+  const records = (await git(canonical, "worktree", "list", "--porcelain")).split("\n\n")
+  return records.some((record) => record.split("\n").includes(`worktree ${directory}`) && record.split("\n").some((line) => line === "locked" || line.startsWith("locked ")))
 }
 
 export async function setup(ctx) {
@@ -79,26 +217,118 @@ export async function setup(ctx) {
             throw new Error("A worktree target cannot be a symlink.")
           }
           const directory = await realpath(input.directory)
-          if (directory === await realpath(canonical)) {
+          const canonicalDirectory = await realpath(canonical)
+          if (directory === canonicalDirectory) {
             throw new Error("Select a task worktree, not the canonical checkout.")
           }
           if (!inventory.some((entry) => entry.directory === directory)) {
             throw new Error("Directory is not registered to this project. Inspect and refresh first.")
           }
           if (input.action === "remove") {
+            if (directory === resolve(sep) || directory === await realpath(homedir()) || directory === parent) {
+              throw new Error("A worktree target cannot be the filesystem root, home directory, or worktree parent.")
+            }
+            if (!isSameOrDescendant(parent, directory)) {
+              throw new Error("Only task worktrees created beneath the adapter worktree parent can be removed.")
+            }
+            if (inventory.some((entry) => entry.directory !== directory && isSameOrDescendant(directory, entry.directory))) {
+              throw new Error("A worktree target cannot be an ancestor of another registered worktree.")
+            }
             const currentPath = await realpath(current)
             const fromTarget = relative(directory, currentPath)
             if (fromTarget === "" || (!isAbsolute(fromTarget) && fromTarget !== ".." && !fromTarget.startsWith("../"))) {
               throw new Error("Session is inside the target. Use leave, wait for the next step boundary, and verify the session location before removal.")
             }
+            await assertNoMounts(directory)
+            await assertNoNestedRepositories(directory, inventory)
+            if (await worktreeLocked(git, canonical, directory)) {
+              throw new Error("A locked worktree cannot be removed without resolving its exact lock.")
+            }
+            const status = await git(directory, "status", "--porcelain=v1", "--untracked-files=all", "--ignore-submodules=none")
+            if (status && !input.force) {
+              throw new Error("Worktree contains tracked, staged, or untracked changes. Explicit discard consent is required before force removal.")
+            }
+            // Capture every ignored entry before native removal. This is the only
+            // evidence accepted for the narrowly scoped post-removal residue step.
+            const residueSnapshot = await ignoredResidueSnapshot(directory)
             // The cleanup skill performs runtime/ownership/consent checks before this native operation.
             await ctx.worktree.remove({ projectID: project.id, directory, force: input.force ?? false })
             await ctx.worktree.refresh({ projectID: project.id })
             const remaining = await ctx.worktree.list({ projectID: project.id })
-            if (await exists(directory) || remaining.some((entry) => entry.directory === directory)) {
-              throw new Error("Native removal returned but the target or its inventory entry remains. Inspect before continuing branch cleanup.")
+            const registrationRemoved = !remaining.some((entry) => entry.directory === directory)
+            if (!registrationRemoved) {
+              return { content: JSON.stringify({
+                directory,
+                removed: false,
+                registrationRemoved: false,
+                folderRemoved: false,
+                ignoredResidueRemoved: false,
+                branchDeleted: false,
+                reason: "Native removal returned but the exact worktree remains registered.",
+              }) }
             }
-            return { content: JSON.stringify({ directory, removed: true, branchDeleted: false }) }
+            if (!await exists(directory)) {
+              return { content: JSON.stringify({
+                directory,
+                removed: true,
+                registrationRemoved: true,
+                folderRemoved: true,
+                ignoredResidueRemoved: false,
+                branchDeleted: false,
+              }) }
+            }
+            const residueInfo = await lstat(directory)
+            if (residueInfo.isSymbolicLink() || !residueInfo.isDirectory()) {
+              return { content: JSON.stringify({
+                directory,
+                removed: false,
+                registrationRemoved: true,
+                folderRemoved: false,
+                ignoredResidueRemoved: false,
+                branchDeleted: false,
+                reason: "Native removal left an unsafe non-directory or symlink residue.",
+              }) }
+            }
+            try {
+              await assertNoMounts(directory)
+              await assertNoNestedRepositories(directory, remaining)
+              const unexpected = await removeVerifiedResidue(directory, residueSnapshot)
+              if (unexpected.length) {
+                return { content: JSON.stringify({
+                  directory,
+                  removed: false,
+                  registrationRemoved: true,
+                  folderRemoved: false,
+                  ignoredResidueRemoved: false,
+                  branchDeleted: false,
+                  reason: "Native removal left residue that was not verified ignored before removal.",
+                  residue: unexpected,
+                }) }
+              }
+              // This is deliberately not an exposed generic deletion operation:
+              // only the exact, formerly registered target's verified ignored
+              // leaves were removed, followed by its now-empty directory.
+            } catch (error) {
+              return { content: JSON.stringify({
+                directory,
+                removed: false,
+                registrationRemoved: true,
+                folderRemoved: false,
+                ignoredResidueRemoved: false,
+                branchDeleted: false,
+                reason: `Verified ignored residue could not be removed: ${error.message}`,
+              }) }
+            }
+            const folderRemoved = !await exists(directory)
+            return { content: JSON.stringify({
+              directory,
+              removed: folderRemoved,
+              registrationRemoved: true,
+              folderRemoved,
+              ignoredResidueRemoved: folderRemoved,
+              branchDeleted: false,
+              ...(folderRemoved ? {} : { reason: "Verified residue removal returned but the target folder remains." }),
+            }) }
           }
           await ctx.session.move({ sessionID: context.sessionID, directory })
           return { content: JSON.stringify({ directory, moved: true, verifyLocationBeforeEditing: true }) }

@@ -2,10 +2,10 @@ import assert from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 import { test } from "node:test"
 import { promisify } from "node:util"
-import { setup } from "../plugins/task-worktrees/workflow.mjs"
+import { assertNoMounts, setup } from "../plugins/task-worktrees/workflow.mjs"
 
 const exec = promisify(execFile)
 
@@ -23,7 +23,8 @@ test("native task worktrees retain branch, dependency, reuse, and session behavi
   const git = async (cwd, ...args) => (await exec("git", args, { cwd })).stdout.trim()
   await git(canonical, "init", "-b", "main")
   await writeFile(join(canonical, "tracked.txt"), "original\n")
-  await git(canonical, "add", "tracked.txt")
+  await writeFile(join(canonical, ".gitignore"), ".idea/\nnode_modules/\nbuild/\n")
+  await git(canonical, "add", "tracked.txt", ".gitignore")
   await git(canonical, "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-m", "initial")
   await mkdir(join(canonical, "node_modules"))
   await writeFile(join(canonical, "node_modules", "dependency"), "copy me")
@@ -35,8 +36,10 @@ test("native task worktrees retain branch, dependency, reuse, and session behavi
   let failMove = false
   let failAttach = false
   let failRemove = false
+  let residueToLeave = []
   let creates = 0
   let removes = 0
+  let dockerRemoves = 0
   let deferredMove = false
   const approvals = []
   const inventory = [{ directory: canonical }]
@@ -75,9 +78,15 @@ test("native task worktrees retain branch, dependency, reuse, and session behavi
         removes++
         if (failRemove) throw new Error("Native owner unavailable")
         await git(canonical, "worktree", "remove", ...(force ? ["--force"] : []), "--", directory)
+        for (const [path, contents] of residueToLeave) {
+          await mkdir(dirname(join(directory, path)), { recursive: true })
+          await writeFile(join(directory, path), contents)
+        }
+        residueToLeave = []
         inventory.splice(inventory.findIndex((entry) => entry.directory === directory), 1)
       },
     },
+    docker: { remove: async () => { dockerRemoves++ } },
   }
   await setup(ctx)
   const context = { sessionID: "session", messageID: "message", id: "tool", agent: "build", signal: new AbortController().signal }
@@ -140,6 +149,7 @@ test("native task worktrees retain branch, dependency, reuse, and session behavi
     await run({ action: "select", directory })
     assert.equal(current, directory)
     assert.equal(await git(directory, "branch", "--show-current"), "feature/race")
+    failAttach = false
   })
   await t.test("cleanup refuses active targets and waits for a completed session handoff", async () => {
     const target = current
@@ -154,6 +164,17 @@ test("native task worktrees retain branch, dependency, reuse, and session behavi
     const alias = join(root, "target-link")
     await symlink(target, alias)
     await assert.rejects(run({ action: "remove", directory: alias }), /symlink/)
+    inventory.push({ directory: join(root, "work", "worktrees", "project") })
+    await assert.rejects(run({ action: "remove", directory: join(root, "work", "worktrees", "project") }), /worktree parent/)
+    inventory.pop()
+    inventory.push({ directory: "/" })
+    await assert.rejects(run({ action: "remove", directory: "/" }), /filesystem root/)
+    inventory.pop()
+    const unrelated = join(root, "unrelated-worktree")
+    await mkdir(unrelated)
+    inventory.push({ directory: unrelated })
+    await assert.rejects(run({ action: "remove", directory: unrelated }), /adapter worktree parent/)
+    inventory.pop()
     assert.equal(removes, 0)
   })
   await t.test("native removal propagates owner failure and preserves the worktree", async () => {
@@ -173,15 +194,70 @@ test("native task worktrees retain branch, dependency, reuse, and session behavi
     assert.deepEqual(approvals.at(-1).resources, ["remove"])
     assert.deepEqual(approvals.at(-1).metadata, { directory, force: true })
   })
-  await t.test("removes through native API after handoff without deleting the task branch", async () => {
+  await t.test("dirty tracked, staged, and untracked paths require explicit discard consent", async () => {
     const directory = join(root, "work", "worktrees", "project", "feature-race")
+    await writeFile(join(directory, "tracked.txt"), "unstaged\n")
+    await assert.rejects(run({ action: "remove", directory }), /Explicit discard consent/)
+    await git(directory, "restore", "tracked.txt")
+    await writeFile(join(directory, "tracked.txt"), "staged\n")
+    await git(directory, "add", "tracked.txt")
+    await assert.rejects(run({ action: "remove", directory }), /Explicit discard consent/)
+    await git(directory, "restore", "--staged", "tracked.txt")
+    await git(directory, "restore", "tracked.txt")
     await writeFile(join(directory, "untracked-cleanup.txt"), "requires discard consent")
-    await assert.rejects(run({ action: "remove", directory }), /modified or untracked files/)
-    // Simulate the cleanup skill having obtained the required discard approval.
-    const result = await run({ action: "remove", directory, force: true })
+    await assert.rejects(run({ action: "remove", directory }), /Explicit discard consent/)
+    await rm(join(directory, "untracked-cleanup.txt"))
+  })
+  await t.test("rejects mounts, nested repositories, and nested registered worktrees", async () => {
+    const directory = join(root, "work", "worktrees", "project", "feature-race")
+    await assert.rejects(assertNoMounts("/proc"), /mount point/)
+    const nested = join(directory, "nested-repository")
+    await mkdir(nested)
+    await git(nested, "init")
+    await assert.rejects(run({ action: "remove", directory, force: true }), /nested repository/)
+    await rm(nested, { recursive: true, force: true })
+    const submodule = join(directory, "nested-submodule")
+    await mkdir(submodule)
+    await writeFile(join(submodule, ".git"), "gitdir: ../.git/modules/nested-submodule\n")
+    await assert.rejects(run({ action: "remove", directory, force: true }), /nested repository or submodule/)
+    await rm(submodule, { recursive: true, force: true })
+    inventory.push({ directory: join(directory, "nested-worktree") })
+    await assert.rejects(run({ action: "remove", directory, force: true }), /another registered worktree/)
+    inventory.pop()
+  })
+  await t.test("removes only verified ignored .idea and build residue through the native adapter", async () => {
+    const directory = join(root, "work", "worktrees", "project", "feature-race")
+    await mkdir(join(directory, ".idea"), { recursive: true })
+    await writeFile(join(directory, ".idea", "workspace.xml"), "ignored IDE state")
+    await mkdir(join(directory, "node_modules", "package"), { recursive: true })
+    await writeFile(join(directory, "node_modules", "package", "index.js"), "ignored dependency")
+    await mkdir(join(directory, "build"), { recursive: true })
+    await writeFile(join(directory, "build", "output.js"), "ignored output")
+    residueToLeave = [
+      [".idea/workspace.xml", "ignored IDE state"],
+      ["node_modules/package/index.js", "ignored dependency"],
+      ["build/output.js", "ignored output"],
+    ]
+    const result = await run({ action: "remove", directory })
     assert.equal(result.removed, true)
+    assert.equal(result.registrationRemoved, true)
+    assert.equal(result.folderRemoved, true)
+    assert.equal(result.ignoredResidueRemoved, true)
     assert.equal(result.branchDeleted, false)
     assert.equal(await git(canonical, "rev-parse", "--verify", "refs/heads/feature/race"), await git(canonical, "rev-parse", "HEAD"))
     assert.ok(!inventory.some((entry) => entry.directory === directory))
+    assert.ok(inventory.some((entry) => entry.directory === join(root, "work", "worktrees", "project", "feature-second")))
+    assert.equal(dockerRemoves, 0)
+  })
+  await t.test("preserves the branch when native removal leaves unverified residue", async () => {
+    const result = await run({ action: "prepare", branch: "feature/partial" })
+    await run({ action: "leave" })
+    residueToLeave = [["unexpected.txt", "not in the approved ignored snapshot"]]
+    const removal = await run({ action: "remove", directory: result.directory, force: true })
+    assert.equal(removal.registrationRemoved, true)
+    assert.equal(removal.folderRemoved, false)
+    assert.equal(removal.ignoredResidueRemoved, false)
+    assert.match(removal.reason, /not verified ignored/)
+    await git(canonical, "rev-parse", "--verify", "refs/heads/feature/partial")
   })
 })

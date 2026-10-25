@@ -58,34 +58,41 @@ decision in that policy.
 
 Complete shared-policy process, runtime, and separately approved external-data
 cleanup first.
-Immediately before removal, revalidate target identity, Git status against the
-approved snapshot, registration, locks, nested checkouts, and mount points.
-New changes require renewed consent.
+Immediately before removal, revalidate the exact path, Git status against the
+approved snapshot, registration, locks, nested checkouts/submodules, and mount
+points. New changes require renewed consent. Revalidate these same conditions
+when native removal leaves a folder, before asking the adapter to recover
+ignored residue.
 
 For a registered task worktree, call `task_worktree` with `action: remove`, the
 exact absolute `directory`, and `force: false` first.
 Use `force: true` only when required and already authorized by the shared policy;
 do not use it to bypass locks, mounts, unknown ownership, or a failed strategy.
-The adapter calls the native recorded owner's removal operation.
+The adapter calls the native recorded owner's removal operation, verifies that
+the exact target is no longer registered, and then checks whether its folder
+remains. If it does, the adapter may remove it only when every remaining entry
+matches a pre-removal ignored-residue snapshot for that exact formerly
+registered target. This private adapter recovery never follows symlinks and
+rejects mounts, nested repositories/submodules, and nested registered
+worktrees. It is not a generic recursive-delete API.
 The profile asks for native removal permission, including the target and force
 flag; this does not replace the shared policy's separate data-loss checks.
 If the native owner is unavailable or removal fails, stop and report the partial
 result; do not fall back to raw Git removal of a valid registered worktree.
 
-For an unregistered leftover folder or exact stale Git metadata that native
-inventory cannot represent, stop and report the remaining target and recovery
-checks from the shared policy.
-The adapter does not implement recursive leftover-folder or metadata deletion,
-and the v2 profile denies `rm -rf`; do not promise or bypass that capability.
-Request repair of the exact registration/owner or a separately authorized
-recovery environment before resuming native cleanup.
-Never reinterpret an unresolved native-owner failure as an unregistered leftover.
-Distinguish missing resources from inspection failures.
+If the response reports `registrationRemoved: true` but `folderRemoved: false`,
+preserve the local branch and report its precise reason. The adapter has already
+attempted only its verified ignored-residue recovery; do not use raw `rm -rf` or
+reinterpret an unresolved native-owner failure as an unregistered leftover.
+For a genuinely unregistered leftover folder or exact stale Git metadata that
+native inventory cannot represent, stop and report the recovery checks from the
+shared policy. Distinguish missing resources from inspection failures.
 
-Confirm both folder and Git registration are absent, then refresh native
-inventory through `action: inspect` and confirm the target is absent there too.
-Only then delete the verified unchanged local task branch, provided it is not
-checked out elsewhere, using the shared policy's branch cleanup procedure.
+Confirm the native response reports both `registrationRemoved: true` and
+`folderRemoved: true`, then refresh native inventory through `action: inspect`
+and confirm the target is absent there too. Only then delete the verified
+unchanged local task branch, provided it is not checked out elsewhere, using the
+shared policy's branch cleanup procedure.
 A detached worktree needs no branch deletion.
 Preserve remote branches, stashes, caches, and shared services.
 
