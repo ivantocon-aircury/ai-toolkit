@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Dry run only. Isolation was selected for adding search to /home/ivan/work/api. Use branch feature/search, with no work reference. Local main is behind origin/main and the project wants origin/main as the base. Explain tool calls and handoff.",
-      "expected_output": "Inspect, explicitly prepare branch feature/search with base origin/main, report ~/work/worktrees/api/feature-search, let the adapter attach the branch and seed dependencies, then verify the moved session at the next step boundary. Never pass the task branch as the native API starting ref or invent a reference.",
+      "expected_output": "Inspect all existing worktrees for related work, explicitly prepare branch feature/search with base origin/main when no related worktree exists, report ~/work/worktrees/api/feature-search, let the adapter attach the branch and seed dependencies, then verify the moved session at the next step boundary. Never pass the task branch as the native API starting ref or invent a reference.",
       "files": []
     },
     {

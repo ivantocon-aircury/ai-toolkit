@@ -1,5 +1,28 @@
 # Worktree Cleanup Safety Policy
 
+## Native Skill Overrides
+
+For the native `clean-worktree` workflow, explicit invocation authorizes loss of
+all files inside the uniquely resolved target and its verified local task branch.
+This includes staged, unstaged, untracked, and ignored files.
+Summarize the scope and record a snapshot without a redundant dirty-file prompt.
+An `audit-worktrees` delegation is authorized only after the user approves exact
+targets and this discard scope. An audit alone remains read-only.
+The skill accepts folder, branch, or worktree name; ambiguous names need a choice.
+Without an argument, capture the active linked worktree before moving away.
+
+These rules supersede the routine dirty-file and unresolved-Compose prompts
+below. Changed snapshots, locks, nested repositories, mounts, and separately
+scoped external data retain their safety checks.
+When Docker is shared, not worktree-safe, unavailable, or unverifiable, preserve
+all Docker-related resources, warn, and continue the remaining cleanup steps.
+For the native workflow, targets must be registered linked worktrees;
+unregistered orphan folders and damaged metadata require a separate recovery
+decision. The generic leftover-folder procedures below do not authorize bypassing
+the native adapter or its permission boundaries.
+A demonstrable live mount or active writer is still a folder-removal blocker.
+Never claim skipped Docker cleanup succeeded.
+
 ## Activation Boundary
 
 Use this destructive workflow only after an explicit user invocation: selecting
@@ -108,24 +131,26 @@ another runtime, or no runtime, exclusively.
 For Docker, determine the effective daemon from explicit flags, `DOCKER_CONTEXT`,
 `DOCKER_HOST`, context configuration, and project launch instructions. Record and
 pin the resolved endpoint for inspection and cleanup without changing the global
-context. Require a usable daemon when Docker is applicable. If it cannot be
-inspected, stop before deletion. If launch evidence points to another context,
+context. If a required daemon cannot be inspected, warn, skip all Docker-related
+deletion, and continue the folder, registration, and local-branch steps.
+If launch evidence points to another context,
 inspect that specific context rather than concluding there are no resources on
-the current daemon. Ask if the intended endpoint is ambiguous; do not sweep all
+the current daemon. If the intended endpoint is ambiguous, preserve Docker
+resources and report that ambiguity; do not sweep all
 contexts. A remote daemon's bind-mount paths belong to its host, not the client.
 
 Attempt to resolve the target's Compose configuration, including project name,
 config-file list, non-external networks, and non-external volumes. Missing files,
 missing environment values, unavailable includes, or invalid configuration can
 prevent resolution. If it fails, show the reason without exposing secrets and
-warn that some Docker dependencies may be left behind. Ask through the native
-question tool whether to continue with verified Docker cleanup and removal of
-the worktree/folder, or cancel. Wait for consent before any destructive action.
-This confirmation does not authorize deleting resources of uncertain ownership.
+warn that Docker dependencies may be left behind. Skip Docker-related cleanup
+when worktree isolation or ownership cannot be established, and complete the
+remaining approved steps without requiring a continue-or-cancel prompt.
+This never authorizes deleting resources of uncertain ownership.
 Only treat Compose as inapplicable after Docker inspection confirms there are no
 target-labelled resources and no evidence of an expected Compose configuration.
-Missing configuration with target-labelled containers is an unresolved
-configuration and requires the confirmation above.
+Missing configuration with target-labelled containers is unresolved;
+preserve and report those Docker resources while continuing the other steps.
 
 List all containers, including stopped containers, before deleting anything.
 Build and retain an inventory of container IDs, labels, mounts, and networks:
@@ -135,14 +160,14 @@ Build and retain an inventory of container IDs, labels, mounts, and networks:
 - With resolved configuration, require project and config-file labels to agree
   with it for current resources. Also inventory every exact-target-path container
   from older project names and config-file lists. Group these by historical
-  configuration identity and verify each separately using consistent labels and
-  available launch/configuration evidence. Apply the unresolved-configuration
-  confirmation to historical groups that cannot be resolved; do not silently
+   configuration identity and verify each separately using consistent labels and
+   available launch/configuration evidence. Warn and preserve historical groups
+   that cannot be resolved; do not silently
   preserve them just because they differ from today's configuration. Preserve
   genuinely conflicting or partial ownership matches and report them.
-- With unresolved configuration and consent to continue, use consistent Compose
-  labels with the exact target path to identify containers. Do not infer ownership
-  from a folder basename or project name alone.
+- With unresolved configuration, inventory exact-target Compose labels for the
+  warning, but preserve resources when ownership or worktree isolation cannot be
+  established. Do not infer ownership from a basename or project name alone.
 - For each candidate project, inspect every container with its project label.
   A container belonging to another path or with ambiguous ownership means the
   project cannot establish exclusive ownership of its volumes or networks.
@@ -168,7 +193,8 @@ absence of remaining Docker resources.
 ## Processes and External Dependencies
 
 Complete discovery, resolve hard blockers (locks, nested registered worktrees,
-mounts, and runtime access), and obtain required consent before stopping anything.
+mounts, and verified active writers), and obtain required consent before stopping
+anything. Unavailable Docker access alone is not a folder-cleanup blocker.
 Do not stop processes while folder cleanup is blocked. Inspect host
 development servers, watchers, workers, test runners, and project supervisors.
 Require ownership evidence such as an exact working directory under the target
@@ -286,7 +312,8 @@ what evidence or action is needed to finish a retry.
 - Explicit invocation authorized exactly one validated target.
 - Commands ran outside the target; primary and unrelated checkouts were protected.
 - Uncommitted or uninspectable changes required discard-or-cancel consent.
-- Unresolved Compose configuration required continue-or-cancel consent.
+- Unresolved or shared Docker configuration was preserved with a warning while
+  remaining approved cleanup continued.
 - Docker ownership was verified; shared and external resources were preserved.
 - Historical Compose groups and resources without containers were considered.
 - Runtime endpoint was pinned; only verified host processes were stopped.

@@ -28,6 +28,8 @@ An existing branch retains its current tip; omit `base` when reusing it.
 
 The adapter defaults to
 `~/work/worktrees/<canonical-project-name>/<branch-with-slashes-as-hyphens>`.
+Keep this persistent location rather than `/tmp`, which may be cleared during
+unfinished work. Preserve existing legacy paths when reusing worktrees.
 Inspect the reported parent and destination before creation.
 If project instructions require a different layout, stop and reconcile it with
 the adapter configuration rather than silently ignoring project instructions.
@@ -35,6 +37,8 @@ the adapter configuration rather than silently ignoring project instructions.
 ## Prepare Or Select
 
 1. Call `task_worktree` with `action: inspect` and inspect Git state.
+   Search every registered worktree and the system worktree root for related
+   work, not only an exact branch match. Establish ownership before reuse.
 2. If already in the intended task worktree, verify it and return it unchanged.
 3. If the branch has another worktree, establish task ownership and inspect its
    changes before calling `action: select` with its absolute `directory`.

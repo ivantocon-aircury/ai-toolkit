@@ -1,6 +1,6 @@
 ---
 name: clean-worktree
-description: Use ONLY when the user explicitly invokes or selects clean-worktree with task_worktree. Removes exactly one authorized task worktree through native APIs after runtime and data-loss checks. Never trigger for general cleanup, mentions, task completion, or PR creation.
+description: Explicitly clean one worktree by folder, branch, or worktree name, defaulting to the active linked worktree. Discard all its files, remove its local branch and exclusively owned runtime resources. Also accepts exact targets explicitly approved through audit-worktrees. Never infer cleanup from task completion.
 compatibility: OpenCode v2 with the toolkit task_worktree plugin.
 ---
 
@@ -17,7 +17,14 @@ A mention in discussion or a general cleanup request does not authorize removal.
 Capture exactly one target before moving the session.
 Without a target, use the chat session's active linked worktree, never the
 canonical checkout or an arbitrary inventory entry.
-Resolve an explicit branch only when it identifies exactly one linked worktree.
+Accept a folder, branch, or worktree basename only when it identifies exactly one
+linked worktree. Resolve relative folders against the original session directory.
+Reject ambiguous matches and show the candidates; never guess from a basename.
+An explicit invocation authorizes discarding all files within that exact target,
+including staged, unstaged, untracked, and ignored files, and deleting its verified
+local task branch even if unmerged. Summarize this scope before proceeding.
+An audit delegation must include the user's explicit approval of that exact target
+and discard scope; merely loading either skill is not consent.
 
 Read `reference/safety-policy.md` as the shared safety-policy reference.
 Apply its sections on scope, resumability, target inspection and consent,
@@ -27,13 +34,20 @@ This skill replaces its activation, session handoff, and registered-worktree
 removal mechanics with the native sequence below.
 
 In particular, preserve its checks for dirty/uninspectable files, locks, nested
-repositories, mount points, runtime access, historical Compose resources,
+repositories, mount points, historical Compose resources,
 shared volumes/networks, external data, branch identity, and retry state.
-Ask the documented discard-or-cancel question before destroying changes.
+The explicit discard scope above replaces the policy's routine dirty-file
+confirmation for the selected folder. Ask again for changed ownership, newly
+observed writes after the snapshot, locks, or separately scoped external data.
 Resolve hard blockers and obtain applicable approvals before stopping processes
 or removing runtime resources.
-Do not treat this skill's invocation as approval for every separate data-loss
-decision in that policy.
+Do not treat this invocation as approval to delete shared or external resources.
+If Docker configuration is shared, unsuitable for worktrees, unavailable, or
+cannot establish exclusive ownership, skip Docker cleanup, warn precisely what
+is retained and why, and complete folder, registration, and local-branch cleanup.
+Do not let a Docker inspection/configuration failure alone block those steps.
+Do not remove a folder containing live mounts or demonstrably active writers;
+report that concrete safety blocker rather than pretending cleanup succeeded.
 
 ## Native Session Handoff
 
@@ -58,7 +72,7 @@ Immediately before removal, revalidate the exact path, Git status against the
 approved snapshot, registration, locks, nested checkouts/submodules, and mount
 points. New changes require renewed consent. Revalidate these same conditions
 when native removal leaves a folder, before asking the adapter to recover
-ignored residue.
+authorized residue.
 
 For a registered task worktree, call `task_worktree` with `action: remove`, the
 exact absolute `directory`, and `force: false` first.
@@ -67,8 +81,9 @@ do not use it to bypass locks, mounts, unknown ownership, or a failed strategy.
 The adapter calls the native recorded owner's removal operation, verifies that
 the exact target is no longer registered, and then checks whether its folder
 remains. If it does, the adapter may remove it only when every remaining entry
-matches a pre-removal ignored-residue snapshot for that exact formerly
-registered target. This private adapter recovery never follows symlinks and
+matches a pre-removal authorized snapshot for that exact formerly
+registered target (all entries when `force: true`, ignored entries otherwise).
+This private adapter recovery never follows symlinks and
 rejects mounts, nested repositories/submodules, and nested registered
 worktrees. It is not a generic recursive-delete API.
 The profile asks for native removal permission, including the target and force
@@ -78,7 +93,7 @@ result; do not fall back to raw Git removal of a valid registered worktree.
 
 If the response reports `registrationRemoved: true` but `folderRemoved: false`,
 preserve the local branch and report its precise reason. The adapter has already
-attempted only its verified ignored-residue recovery; do not use raw `rm -rf` or
+attempted only its verified authorized-residue recovery; do not use raw `rm -rf` or
 reinterpret an unresolved native-owner failure as an unregistered leftover.
 For a genuinely unregistered leftover folder or exact stale Git metadata that
 native inventory cannot represent, stop and report the recovery checks from the
