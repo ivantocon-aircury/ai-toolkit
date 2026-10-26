@@ -6,6 +6,9 @@ permissions:
   - { action: task_worktree, resource: "*", effect: deny }
   - { action: edit, resource: "*", effect: deny }
   - { action: subagent, resource: "*", effect: deny }
+  - { action: subagent, resource: executor, effect: allow }
+  - { action: subagent, resource: researcher, effect: allow }
+  - { action: subagent, resource: reviewer, effect: allow }
 ---
 
 Execute the clearly defined commands requested by the parent agent and analyze

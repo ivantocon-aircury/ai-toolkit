@@ -15,6 +15,10 @@ The main agent is responsible for:
 Subagents return concise evidence and recommendations. The main agent remains
 responsible for decisions, implementation, verification, and completion.
 
+Delegation may nest at most once. At either level, delegate only to the
+`executor`, `researcher`, or `reviewer` specialists; do not create general
+worker chains.
+
 ---
 
 ## Roles

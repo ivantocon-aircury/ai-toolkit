@@ -7,6 +7,9 @@ permissions:
   - { action: edit, resource: "*", effect: deny }
   - { action: shell, resource: "*", effect: deny }
   - { action: subagent, resource: "*", effect: deny }
+  - { action: subagent, resource: executor, effect: allow }
+  - { action: subagent, resource: researcher, effect: allow }
+  - { action: subagent, resource: reviewer, effect: allow }
 ---
 
 Perform focused read-only investigation. Trace relevant code and configuration,
