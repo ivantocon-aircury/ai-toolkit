@@ -1,86 +1,73 @@
 ---
 name: create-worktree
-description: Use only after a decision has been made to create or reuse a Git worktree for a task. Determines a repository-conventional branch name, safely creates or selects the worktree, verifies it, and establishes that all subsequent work must run there. It does not decide whether a task needs isolation.
+description: Use with task_worktree after deciding to create or reuse task isolation. Resolve a conventional branch and base, prepare or select a native worktree, and verify session handoff. Does not decide whether isolation is needed.
+compatibility: OpenCode v2 with the toolkit task_worktree plugin.
 ---
 
 # Create Worktree
 
-Use this atomic skill to execute worktree creation or reuse. The caller owns the decision to use a worktree; this skill owns branch naming, collision checks, creation, verification, and the handoff to the selected path.
+Use `worktree-workflow` for the isolation decision.
+Use `inspect-git-state` before creation and after session handoff.
+Do not execute raw `git worktree add` or replace the native Git strategy.
+If `task_worktree` is unavailable, report an incomplete installation and stop.
 
-## Related Skills
+## Resolve Branch, Base, And Location
 
-- Use `inspect-git-state` before and after creation.
-- Use `worktree-workflow` to decide whether isolation is appropriate.
-- Return the selected branch and path to `development-lifecycle` or the calling implementation workflow.
+Prefer an explicit branch, then repository conventions, then a short
+`feature/`, `fix/`, or `refactor/` name.
+Preserve a supplied work reference in the repository's format.
+Never invent or require one when none was supplied.
 
-## Resolve The Branch And Base
+Use an explicit starting ref when supplied.
+Otherwise infer it from project instructions, remote default, current branch,
+upstream, and task context.
+Verify the ref and make any local/remote difference explicit.
+Pass the selected base explicitly for a new branch so canonical `HEAD` is not
+accidentally used when another ref was intended.
+An existing branch retains its current tip; omit `base` when reusing it.
 
-- Prefer an explicit user-supplied branch name, then repository instructions and
-  demonstrated history, then the global fallback `feature/`, `fix/`, or
-  `refactor/` with a short lowercase kebab-case description.
-- Do not invent an issue reference. Preserve a supplied reference according to the target repository's demonstrated convention.
-- If no local convention exists, choose the narrowest sensible global fallback.
-  Ask only when multiple materially different choices remain plausible.
-- Use an explicit base when supplied. Otherwise infer it from repository
-  instructions, the remote default branch, current branch and upstream, and task
-  context. Ask only when that evidence remains ambiguous; never reset or switch
-  the primary checkout.
-- Verify that the selected base resolves locally or as a remote-tracking ref. If local and remote-tracking versions differ, make the selected starting point explicit.
+The adapter defaults to
+`~/work/worktrees/<canonical-project-name>/<branch-with-slashes-as-hyphens>`.
+Inspect the reported parent and destination before creation.
+If project instructions require a different layout, stop and reconcile it with
+the adapter configuration rather than silently ignoring project instructions.
 
-## Resolve The Location
+## Prepare Or Select
 
-Unless the repository documents another location, create task worktrees under
-the shared worktree root:
+1. Call `task_worktree` with `action: inspect` and inspect Git state.
+2. If already in the intended task worktree, verify it and return it unchanged.
+3. If the branch has another worktree, establish task ownership and inspect its
+   changes before calling `action: select` with its absolute `directory`.
+   Ask if ownership is unclear.
+4. Otherwise call `action: prepare` with `branch` and, for a new branch, `base`.
+   The adapter creates through OpenCode, then attaches the named task branch.
+   The native API's `branch` argument is a starting ref, not a new branch name;
+   leave that API translation to the adapter.
+5. Treat an existing destination as a collision unless verified for reuse.
+   Do not remove it, invent another branch, or accept a suffixed directory just
+   to bypass the collision.
 
-```text
-~/work/worktrees/<project>/<branch-or-task>
-```
+Creation copies non-symlink `node_modules/` and `vendor/` from the active
+session checkout only for new worktrees.
+Copies remain independent; internal dependency symlinks are preserved.
+Do not repeat seeding on reuse or copy environment files, caches, or user changes.
+Report absent dependencies or copy warnings and use project installation
+commands when necessary.
 
-Derive `<project>` from the repository root folder and replace slashes in the
-branch or task name with hyphens. For `/work/my-app` and
-`feature/user-settings`, use
-`~/work/worktrees/my-app/feature-user-settings`.
+## Verify Handoff And Recover
 
-## Create Or Reuse Safely
+Prepare and select request a native session move.
+Wait for the next step boundary, then inspect the active directory again.
+Verify canonical repository identity, linked-worktree registration, task branch,
+`HEAD`, starting ancestry, and compatible Git status before continuing.
+Report the absolute path, branch, base, and dependency-copy outcome.
+Run all subsequent task operations there, including explicit `workdir` values.
 
-1. Load `inspect-git-state` and inspect the repository, all registered worktrees, the proposed branch, and the destination path.
-2. If the current session is already in the worktree for the selected branch, verify its status and return it without creating another worktree.
-3. If the selected branch is checked out in another worktree, reuse that path only when it is the intended task worktree. Report existing changes and ask before continuing when ownership is unclear.
-4. If the branch exists but is not checked out, create the worktree from that branch without creating another branch.
-5. If the branch does not exist, create it with the worktree from the verified base ref, for example `git worktree add -b <branch> <path> <base-ref>`.
-6. If the destination exists but is not the matching registered worktree, stop. Never delete it or choose an alternate branch or path merely to bypass a collision.
-7. Do not move, copy, stash, discard, or commit pre-existing changes as part of worktree creation. Return control to the caller if changes must be assigned or migrated first.
-
-## Seed Runtime Dependencies
-
-After creating a new worktree, copy dependency directories from the checkout that invoked this skill so the new worktree is runnable immediately.
-This applies only to newly created worktrees; never overwrite dependencies in a reused worktree.
-
-- If the source checkout has a non-symlink `node_modules/` directory, copy it into the new worktree with `cp -a --reflink=auto -- <source-path>/node_modules <worktree-path>/`.
-- If the source checkout has a non-symlink `vendor/` directory, copy it into the new worktree with `cp -a --reflink=auto -- <source-path>/vendor <worktree-path>/`.
-- Use copies, not symlinks or hard links, so package-manager writes in one worktree cannot modify another. `--reflink=auto` uses copy-on-write storage when the filesystem supports it and otherwise performs a normal independent copy. Preserve internal dependency symlinks, such as executable shims, because they remain local to the copied directory.
-- Do not copy other ignored files, caches, environment files, build outputs, or generated artifacts. Those may be branch-specific or contain secrets.
-- If either directory is absent, continue without it. If a copy fails, report the failure and continue creating the worktree; the caller can install dependencies using the target project's documented command.
-- This dependency seeding is not migration of Git changes and is the sole exception to the no-copy rule above.
-
-## Verify And Handoff
-
-After creation or reuse:
-
-- Load `inspect-git-state` for the selected path.
-- Verify that its repository root, branch, `HEAD`, base ancestry, and registration in `git worktree list` match the intended result.
-- Report whether `node_modules/` and `vendor/` were seeded or absent, including any copy failure.
-- Report the absolute worktree path, branch, and base ref.
-- Require every subsequent analysis, edit, test, build, commit, push, and PR command for the task to use the selected worktree as its working directory.
-- Do not continue task work from the checkout that invoked this skill. A shell `cd` is not a persistent handoff; callers must pass the worktree path as `workdir` or equivalent on every operation.
-
-Never remove a worktree or delete its branch as part of this skill.
-
-## Review Checklist
-
-- Branch naming follows explicit or demonstrated repository conventions.
-- The base ref and any local/remote difference were made explicit.
-- No branch or path collision was bypassed.
-- The worktree is registered, on the intended branch, and based on the intended ref.
-- Available `node_modules/` and `vendor/` directories were copied independently into a newly created worktree.
-- The caller has the absolute path and will continue all task work there.
+A failed branch attachment leaves a registered detached worktree.
+Inspect its status and branch ownership, attach the intended existing branch
+with `git switch`, or create it with `git switch -c` only if it is still absent,
+then use `action: select`.
+A failed move leaves a prepared worktree; inspect and select it again.
+Do not retry prepare against the existing destination or automatically remove
+partial worktrees.
+This skill never authorizes cleanup, commits, or remote publication.

@@ -18,27 +18,18 @@ commands, versions, issue-reference format, or demonstrated conventions.
 
 ## Profiles
 
-The original auto and normal profiles share development instructions and agents.
-Install the desired profile as `~/.config/opencode` and expose this repository's
+Install `.opencode-auto-v2` as `~/.config/opencode` and expose this repository's
 `.agents/skills` as `~/.agents/skills`; OpenCode discovers that location natively.
 This repository intentionally does not prescribe a copy or installation script.
 
-- `.opencode-auto` is intended for isolated development environments. It allows
-  normal repository edits, commands, delegation, verification, and task worktrees
-  under `~/work/worktrees`. It denies common destructive command forms and native
-  access to credential directories, but it is not an OS sandbox: broad Bash access
-  can bypass path-based rules. Use this profile only in an isolated environment.
-- `.opencode-normal` is intended for environments containing personal or
-  unrelated files. Native project inspection is available, but edits, shell
-  commands, web or MCP documentation access, and external paths retain
-  conservative approval rules. Environment-file edits are denied.
-- `.opencode-auto-v2` is the separate OpenCode v2 auto profile.
-  It defaults to GPT-6.1 Sol with low reasoning effort and uses the native
-  worktree adapter with the `opencode-v2-*` skills described below.
+- `.opencode-auto-v2` is intended for isolated development environments. It
+  defaults to GPT-6.1 Sol with low reasoning effort and uses the native worktree
+  adapter described below. It allows normal repository edits, commands,
+  delegation, verification, and task worktrees under `~/work/worktrees`. It denies
+  common destructive command forms and native access to credential directories,
+  but it is not an OS sandbox: broad Bash access can bypass path-based rules.
+  Use this profile only in an isolated environment.
   Install the complete profile, including `plugins/` and `instructions/`.
-
-The auto-only Wakatime plugin and permission differences are intentional. Other
-models, MCP configuration, instructions, and agent definitions stay aligned.
 
 Restart OpenCode after installing or changing a profile because configuration,
 agents, and skills are loaded at startup.
@@ -73,9 +64,10 @@ instructions should provide those overrides.
 ### Git Workflows
 
 - `inspect-git-state`: read-only repository and publication inspection.
-- `worktree-workflow`: decides whether modifying work benefits from isolation.
-- `create-worktree`: safely creates or reuses task worktrees under
-  `~/work/worktrees/<project>/<branch-or-task>`.
+- `worktree-workflow`: decides whether modifying work benefits from native task
+  isolation.
+- `create-worktree`: prepares or selects a native task worktree under
+  `~/work/worktrees/<project>/<branch-or-task>` and verifies session handoff.
 - `clean-worktree`: explicitly removes one task worktree or leftover folder,
   its verified Docker containers, volumes, networks, and eligible local branch.
   Asks before discarding changes or continuing with unresolved Compose config.
@@ -85,26 +77,6 @@ instructions should provide those overrides.
 - `create-pull-request`: verifies and creates or locates a GitHub pull request.
 - `development-lifecycle`: composes the requested Git endpoint from atomic skills.
 
-### OpenCode V2 Worktrees
-
-Keep the existing Git skills installed for older profiles.
-The separately named v2 skills coexist under `.agents/skills/git/`:
-
-- `opencode-v2-worktree-workflow`: decides isolation and reuses task worktrees.
-- `opencode-v2-create-worktree`: prepares or selects a native worktree and
-  verifies session handoff.
-- `opencode-v2-clean-worktree`: explicitly cleans one task worktree using
-  native removal, with the original cleanup safety policy.
-
-Expose the complete `.agents/skills` tree as `~/.agents/skills`, as above.
-Unique skill IDs avoid discovery collisions; no renaming or uninstalling is
-needed when switching profiles.
-The v2 profile denies the three legacy worktree skill IDs and routes shared
-lifecycle references to their v2 counterparts.
-The v2 skills require `task_worktree`; older profiles continue using the
-original skills and do not automatically invoke the v2 procedures.
-Inspection, verification, commits, pushing, and PR skills stay shared.
-
 The agent initiates native worktree creation when isolation is required.
 The user does not need to create a worktree manually.
 The adapter preserves `~/work/worktrees/<project>/<branch-with-slashes-as-hyphens>`,
@@ -113,9 +85,8 @@ for new worktrees, and requests native session movement.
 Direct UI/API creation without the adapter uses the configured shared parent
 without the per-project adapter conventions.
 
-For cleanup, explicitly select `opencode-v2-clean-worktree` or mention it as
-`@opencode-v2-clean-worktree` in the v2 UI.
-The old ID is denied in this profile; it is not a native alias.
+For cleanup, explicitly select `clean-worktree` or mention it as
+`@clean-worktree` in the UI.
 Cleanup first moves the active session outside the target and verifies handoff,
 then performs the shared runtime and consent checks before native removal.
 The profile requests permission for native removal, with the target and force
