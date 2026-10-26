@@ -64,13 +64,16 @@ instructions should provide those overrides.
 ### Git Workflows
 
 - `inspect-git-state`: read-only repository and publication inspection.
-- `worktree-workflow`: decides whether modifying work benefits from native task
-  isolation.
+- `worktree-workflow`: isolates every modifying task, first checking for related
+  existing worktrees to reuse.
 - `create-worktree`: prepares or selects a native task worktree under
   `~/work/worktrees/<project>/<branch-or-task>` and verifies session handoff.
-- `clean-worktree`: explicitly removes one task worktree or leftover folder,
+- `clean-worktree`: explicitly removes one registered task worktree folder,
   its verified Docker containers, volumes, networks, and eligible local branch.
-  Asks before discarding changes or continuing with unresolved Compose config.
+  Explicit invocation discards all target files, including ignored files.
+  Shared or unverifiable Docker resources are preserved with a warning.
+- `audit-worktrees`: checks every project under `~/work/worktrees` against
+  main, master, preview, and staging; delegates explicitly approved cleanup.
 - `verify-changes`: reviews the complete diff and runs discovered project checks.
 - `commit-changes`: creates coherent commits using project message conventions.
 - `push-branch`: safely publishes an intended branch without implicit force push.
@@ -79,7 +82,8 @@ instructions should provide those overrides.
 
 The agent initiates native worktree creation when isolation is required.
 The user does not need to create a worktree manually.
-The adapter preserves `~/work/worktrees/<project>/<branch-with-slashes-as-hyphens>`,
+The adapter uses
+`~/work/worktrees/<project>/<branch-with-slashes-as-hyphens>`,
 attaches the task branch after native detached creation, copies dependencies
 for new worktrees, and requests native session movement.
 Direct UI/API creation without the adapter uses the configured shared parent
@@ -95,7 +99,8 @@ It deletes the verified local branch only after folder and registrations are gon
 When native removal deregisters a worktree but leaves ignored residue (such as
 `.idea/`, `node_modules/`, or build output), the adapter can remove that exact
 folder only after revalidating its path, mounts, nested repositories/worktrees,
-and a pre-removal ignored-residue snapshot. It never exposes generic recursive
+and a pre-removal authorized snapshot (all files when discard is approved).
+It never exposes generic recursive
 deletion or uses `rm -rf`. Unregistered leftover folders or damaged Git metadata
 still require reported, targeted recovery outside the adapter.
 No implementation, commit, or PR completion implicitly authorizes cleanup.

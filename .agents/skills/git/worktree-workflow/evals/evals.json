@@ -16,7 +16,7 @@
     {
       "id": 3,
       "prompt": "Dry run only. Fix one spelling error in a single tracked README file in a clean primary checkout. The change has no behavioral impact. Explain whether isolation is needed.",
-      "expected_output": "Record the explicit one-file low-risk exception and work in the current checkout after inspection, without native creation or unrelated lifecycle steps.",
+      "expected_output": "Inspect existing worktrees for related work, then reuse verified task isolation or create a dedicated worktree even for one spelling fix. No primary-checkout exception or unrelated lifecycle steps.",
       "files": []
     }
   ]

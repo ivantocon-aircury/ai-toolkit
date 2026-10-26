@@ -7,6 +7,11 @@ Use the native worktree skills from the installed toolkit:
 - Only on explicit cleanup invocation: `clean-worktree`.
 
 Users must explicitly invoke or select `clean-worktree` for cleanup.
+An explicitly requested `audit-worktrees` cleanup selection may delegate exact
+approved targets to `clean-worktree`; an audit alone never authorizes deletion.
+Every modifying task uses its own worktree, without a small-change exception.
+Search for related existing worktrees before creation and reuse verified matches.
+New paths use `~/work/worktrees/<project>/<branch-with-slashes-as-hyphens>`.
 
 The `task_worktree` plugin supplies native operations; the skills own workflow
 decisions, task ownership, handoff verification, and cleanup consent.

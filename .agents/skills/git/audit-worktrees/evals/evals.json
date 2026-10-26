@@ -1,0 +1,23 @@
+{
+  "skill_name": "audit-worktrees",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Dry run only. Audit ~/work/worktrees containing three projects. A clean feature tip is an ancestor of staging but not main. Another worktree has dirty and ignored files although its commits are in preview. An orphan folder has no valid .git. Describe the report and cleanup consent.",
+      "expected_output": "Inspect all projects and all four integration branch names, identify staging integration as sufficient evidence, flag dirty and ignored files independently, report the orphan as unresolved, and request exact-target discard approval before delegating clean-worktree. No deletion on audit alone.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Dry run only. A task was squash merged to main then partly reverted. git cherry reports some equivalent commits. Remote main may be stale. Can audit-worktrees remove it?",
+      "expected_output": "Do not treat partial patch equivalence as full integration; inspect aggregate task effect and current relevant file contents, flag revert and freshness uncertainty, offer authorized fetch if needed, and preserve until resolved and explicitly approved.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Dry run only. User approved full discard of two exact integrated worktrees in different projects. The second tip changes before cleanup. How should audit-worktrees execute?",
+      "expected_output": "Delegate sequentially through clean-worktree in each verified owning project, revalidate integration and tip/status, clean the unchanged approved target, pause the changed target for renewed review, and report per-target results without a global sweep.",
+      "files": []
+    }
+  ]
+}

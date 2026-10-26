@@ -78,14 +78,14 @@ async function isIgnored(directory, entry) {
   }
 }
 
-async function ignoredResidueSnapshot(directory) {
+async function ignoredResidueSnapshot(directory, discardAll = false) {
   const entries = (await listEntries(directory)).filter((entry) => entry !== ".git")
   const ignored = new Set()
   const kinds = new Map()
   for (const entry of entries) {
     const info = await lstat(join(directory, entry))
     kinds.set(entry, info.isDirectory() ? "directory" : info.isSymbolicLink() ? "symlink" : info.isFile() ? "file" : "other")
-    if (await isIgnored(directory, entry)) ignored.add(entry)
+    if (discardAll || await isIgnored(directory, entry)) ignored.add(entry)
   }
   return { entries: new Set(entries), ignored, kinds }
 }
@@ -248,9 +248,11 @@ export async function setup(ctx) {
             if (status && !input.force) {
               throw new Error("Worktree contains tracked, staged, or untracked changes. Explicit discard consent is required before force removal.")
             }
-            // Capture every ignored entry before native removal. This is the only
+            // Capture authorized entries before native removal: ignored entries
+            // normally, or all entries with explicit full-discard authorization.
+            // This is the only
             // evidence accepted for the narrowly scoped post-removal residue step.
-            const residueSnapshot = await ignoredResidueSnapshot(directory)
+            const residueSnapshot = await ignoredResidueSnapshot(directory, input.force === true)
             // The cleanup skill performs runtime/ownership/consent checks before this native operation.
             await ctx.worktree.remove({ projectID: project.id, directory, force: input.force ?? false })
             await ctx.worktree.refresh({ projectID: project.id })
@@ -301,7 +303,7 @@ export async function setup(ctx) {
                   folderRemoved: false,
                   ignoredResidueRemoved: false,
                   branchDeleted: false,
-                  reason: "Native removal left residue that was not verified ignored before removal.",
+                  reason: "Native removal left residue outside the authorized pre-removal snapshot.",
                   residue: unexpected,
                 }) }
               }
