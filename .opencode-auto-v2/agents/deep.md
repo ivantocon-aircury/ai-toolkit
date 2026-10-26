@@ -1,7 +1,7 @@
 ---
 description: Difficult debugging, architectural decisions, security-sensitive changes, and complex refactoring.
 mode: subagent
-model: openai/gpt-6.1-sol#high
+model: openai/gpt-6.1-sol#medium
 ---
 
 You are the deep execution profile. Difficult debugging, architectural decisions, security-sensitive changes, and complex refactoring.

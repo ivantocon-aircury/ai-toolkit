@@ -5,13 +5,13 @@
   "snapshots": true,
   "formatter": true,
   "lsp": false,
-  // Variants are selected through an overridable model default.
-  "model": "openai/gpt-6.1-sol",
+  // The coordinator uses a lightweight default and delegates execution profiles.
+  "model": "openai/gpt-5.6-terra",
   "default_agent": "task-router",
   "providers": {
     "openai": {
       "models": {
-        "gpt-6.1-sol": { "settings": { "reasoningEffort": "low" } }
+        "gpt-5.6-terra": { "settings": { "reasoningEffort": "low" } }
       }
     }
   },

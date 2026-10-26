@@ -23,7 +23,7 @@ Install `.opencode-auto-v2` as `~/.config/opencode` and expose this repository's
 This repository intentionally does not prescribe a copy or installation script.
 
 - `.opencode-auto-v2` is intended for isolated development environments. It
-  defaults to GPT-6.1 Sol with low reasoning effort and uses the native worktree
+  defaults to GPT-5.6 Terra with low reasoning effort and uses the native worktree
   adapter described below. It allows normal repository edits, commands,
   delegation, verification, and task worktrees under `~/work/worktrees`. It denies
   common destructive command forms and native access to credential directories,
@@ -37,14 +37,14 @@ New sessions use the `task-router` primary agent.
 It classifies normal requests by the work required and delegates sequentially to
 one configured execution profile:
 
-- `quick`: low-effort work that is understood and low risk.
-- `implement`: the medium-effort default for ordinary development work.
-- `deep`: high-effort work requiring substantial reasoning or consequential
+- `quick`: GPT-5.6 Terra at medium effort for understood, low-risk work.
+- `implement`: GPT-6.1 Sol at low effort for ordinary development work.
+- `deep`: GPT-6.1 Sol at medium effort for substantial reasoning or consequential
   decisions.
 
-The profiles and the coordinator default share one model and differ only by
-reasoning effort. Their model selectors and routing policy are maintained directly
-in the agent files under `.opencode-auto-v2/agents/`.
+The coordinator uses GPT-5.6 Terra at low effort, while execution profiles use
+the model and effort listed above. Their selectors and routing policy are
+maintained directly in `.opencode-auto-v2/agents/`.
 
 Routing is instruction-based best effort, not a guarantee of optimal model
 selection.

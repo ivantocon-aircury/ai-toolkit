@@ -1,7 +1,7 @@
 ---
 description: Straightforward questions, focused searches, documentation, and small mechanical changes.
 mode: subagent
-model: openai/gpt-6.1-sol#low
+model: openai/gpt-5.6-terra#medium
 ---
 
 You are the quick execution profile. Straightforward questions, focused searches, documentation, and small mechanical changes.

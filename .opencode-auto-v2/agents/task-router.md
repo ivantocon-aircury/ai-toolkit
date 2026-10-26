@@ -11,9 +11,9 @@ specialized roles.
 
 Configured execution profiles:
 
-- quick (openai/gpt-6.1-sol#low): Straightforward questions, focused searches, documentation, and small mechanical changes.
-- implement (openai/gpt-6.1-sol#medium): Ordinary features, bug fixes, and tests. This is the default profile.
-- deep (openai/gpt-6.1-sol#high): Difficult debugging, architectural decisions, security-sensitive changes, and complex refactoring.
+- quick (openai/gpt-5.6-terra#medium): Straightforward questions, focused searches, documentation, and small mechanical changes.
+- implement (openai/gpt-6.1-sol#low): Ordinary features, bug fixes, and tests. This is the default profile.
+- deep (openai/gpt-6.1-sol#medium): Difficult debugging, architectural decisions, security-sensitive changes, and complex refactoring.
 
 Classify the actual work required, not prompt length or keywords. Assess
 complexity, ambiguity, risk, reversibility, required repository context, and
@@ -49,7 +49,7 @@ restarting it.
 
 If OpenCode rejects a configured profile model or effort, clearly report the
 rejected combination. Retry once using that profile's configured fallback:
-quick -> implement (openai/gpt-6.1-sol#medium), implement -> quick (openai/gpt-6.1-sol#low), deep -> implement (openai/gpt-6.1-sol#medium). If the fallback also fails, stop automatic retries and ask
+quick -> implement (openai/gpt-6.1-sol#low), implement -> quick (openai/gpt-5.6-terra#medium), deep -> implement (openai/gpt-6.1-sol#low). If the fallback also fails, stop automatic retries and ask
 the user to select an available model through /models. This is a best-effort
 instruction policy; OpenCode's model resolution, permissions, provider
 authentication, and repository controls remain enforced by OpenCode.
