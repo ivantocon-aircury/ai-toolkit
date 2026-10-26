@@ -28,11 +28,43 @@ This repository intentionally does not prescribe a copy or installation script.
   delegation, verification, and task worktrees under `~/work/worktrees`. It denies
   common destructive command forms and native access to credential directories,
   but it is not an OS sandbox: broad Bash access can bypass path-based rules.
-  Use this profile only in an isolated environment.
-  Install the complete profile, including `plugins/` and `instructions/`.
+   Use this profile only in an isolated environment.
+   Install the complete profile, including `plugins/` and `instructions/`.
 
-Restart OpenCode after installing or changing a profile because configuration,
-agents, and skills are loaded at startup.
+### Automatic task routing
+
+New sessions use the `task-router` primary agent.
+It classifies normal requests by the work required and delegates sequentially to
+one configured execution profile:
+
+- `quick`: low-effort work that is understood and low risk.
+- `implement`: the medium-effort default for ordinary development work.
+- `deep`: high-effort work requiring substantial reasoning or consequential
+  decisions.
+
+The profiles and the coordinator default share one model and differ only by
+reasoning effort. Their model selectors and routing policy are maintained directly
+in the agent files under `.opencode-auto-v2/agents/`.
+
+Routing is instruction-based best effort, not a guarantee of optimal model
+selection.
+The coordinator respects an explicit profile, model, or effort selection, asks
+for missing requirements rather than escalating, and can escalate once when new
+evidence warrants it.
+For an explicit model or effort, select it in OpenCode through `/models` first;
+V2 does not reliably apply a model named only in task text to a configured child
+agent.
+An unavailable configured profile reports its rejected model/effort and retries
+once with its documented fallback (`quick` → `implement`, `implement` → `quick`,
+and `deep` → `implement`); a failed fallback requires user model selection
+through `/models`.
+Delegation changes the worker model, not the coordinator session's model.
+Routing adds one coordinator-to-worker handoff and its associated usage; it
+avoids extra delegation for routine work.
+
+
+OpenCode reloads configuration, agents, and skills after a profile change;
+use `/reload` if a running session does not reflect a change.
 
 ## Global Instructions
 
@@ -51,8 +83,8 @@ agents, and skills are loaded at startup.
 - `reviewer` independently reviews completed work for defects, regressions,
   missed requirements, security issues, convention drift, and missing tests.
 
-Agent files are duplicated between profiles because each directory is a complete,
-independently installable global configuration. Keep their contents aligned.
+The task-router and execution-profile files are maintained directly in the
+installed profile.
 
 ## Skills
 

@@ -12,6 +12,12 @@ The main agent is responsible for:
 - Reviewing and validating delegated results.
 - Producing the final answer.
 
+The `task-router` primary agent is a narrow exception for configured execution
+profiles: it may delegate one complete task sequentially to the selected profile
+so OpenCode can apply that profile's model and reasoning effort. The coordinator
+still owns routing, clarification, escalation, validation, and the final answer;
+the worker must follow the supplied scope and repository instructions.
+
 Subagents return concise evidence and recommendations. The main agent remains
 responsible for decisions, implementation, verification, and completion.
 
