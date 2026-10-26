@@ -24,6 +24,10 @@
     "~/.config/opencode/instructions/native-worktrees.md"
   ],
   "compaction": { "auto": true, "prune": true },
+  "experimental": {
+    // A coordinator may delegate to a worker, which may delegate once more.
+    "subagent_depth": 2
+  },
   "watcher": {
     "ignore": [
       "**/node_modules/**", "**/vendor/**", "**/var/**", "**/.next*/**",
@@ -43,7 +47,11 @@
     { "action": "glob", "resource": "*", "effect": "allow" },
     { "action": "grep", "resource": "*", "effect": "allow" },
     { "action": "list", "resource": "*", "effect": "allow" },
-    { "action": "subagent", "resource": "*", "effect": "allow" },
+    // Keep delegation to the profile's bounded specialist set.
+    { "action": "subagent", "resource": "*", "effect": "deny" },
+    { "action": "subagent", "resource": "executor", "effect": "allow" },
+    { "action": "subagent", "resource": "researcher", "effect": "allow" },
+    { "action": "subagent", "resource": "reviewer", "effect": "allow" },
     { "action": "task_worktree", "resource": "*", "effect": "allow" },
     { "action": "task_worktree", "resource": "remove", "effect": "ask" },
     { "action": "todowrite", "resource": "*", "effect": "allow" },
