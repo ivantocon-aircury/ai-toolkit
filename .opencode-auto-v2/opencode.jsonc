@@ -5,7 +5,7 @@
   "snapshots": true,
   "formatter": true,
   "lsp": false,
-  // V2 drops variants from the root selection; use an overridable model default.
+  // Variants are selected through an overridable model default.
   "model": "openai/gpt-6.1-sol",
   "providers": {
     "openai": {
@@ -53,9 +53,6 @@
     { "action": "lsp", "resource": "*", "effect": "allow" },
     { "action": "doom_loop", "resource": "*", "effect": "allow" },
     { "action": "skill", "resource": "*", "effect": "allow" },
-    { "action": "skill", "resource": "worktree-workflow", "effect": "deny" },
-    { "action": "skill", "resource": "create-worktree", "effect": "deny" },
-    { "action": "skill", "resource": "clean-worktree", "effect": "deny" },
     { "action": "shell", "resource": "*", "effect": "allow" },
     { "action": "shell", "resource": "git reset --hard *", "effect": "deny" },
     { "action": "shell", "resource": "git reset --hard", "effect": "deny" },

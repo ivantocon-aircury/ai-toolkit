@@ -1,10 +1,10 @@
 {
-  "skill_name": "opencode-v2-worktree-workflow",
+  "skill_name": "worktree-workflow",
   "evals": [
     {
       "id": 1,
-      "prompt": "Dry run only. In OpenCode v2, implement an API endpoint and its service. The session is in the canonical checkout on main; status is clean, task_worktree is available, and there is no task worktree. Explain the next steps without executing them.",
-      "expected_output": "Inspect Git and native inventory, decide isolation, delegate to opencode-v2-create-worktree, then verify native session handoff before edits. No raw git worktree add, manual user creation, or publication.",
+      "prompt": "Dry run only. Implement an API endpoint and its service. The session is in the canonical checkout on main; status is clean, task_worktree is available, and there is no task worktree. Explain the next steps without executing them.",
+      "expected_output": "Inspect Git and native inventory, decide isolation, delegate to create-worktree, then verify native session handoff before edits. No raw git worktree add, manual user creation, or publication.",
       "files": []
     },
     {
