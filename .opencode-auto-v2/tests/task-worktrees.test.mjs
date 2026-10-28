@@ -9,6 +9,53 @@ import { assertNoMounts, setup } from "../plugins/task-worktrees/workflow.mjs"
 
 const exec = promisify(execFile)
 
+test("inspect uses inventory repositories and the live session location despite server Git environment", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "toolkit-session-location-"))
+  const originalCwd = process.cwd()
+  const originalGitDir = process.env.GIT_DIR
+  const originalGitWorkTree = process.env.GIT_WORK_TREE
+  t.after(async () => {
+    process.chdir(originalCwd)
+    if (originalGitDir === undefined) delete process.env.GIT_DIR
+    else process.env.GIT_DIR = originalGitDir
+    if (originalGitWorkTree === undefined) delete process.env.GIT_WORK_TREE
+    else process.env.GIT_WORK_TREE = originalGitWorkTree
+    await rm(root, { recursive: true, force: true })
+  })
+  const canonical = join(root, "project")
+  const linked = join(root, "linked")
+  await mkdir(canonical)
+  const git = async (...args) => (await exec("git", ["-C", canonical, ...args])).stdout.trim()
+  await git("init", "-b", "preview")
+  await git("-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "--allow-empty", "-m", "initial")
+  await git("worktree", "add", "-b", "task", linked)
+  let current = canonical
+  let definition
+  const ctx = {
+    location: { directory: root, project: { id: "project", canonical } },
+    permission: { assert: async () => {} },
+    tool: { transform: async (fn) => fn({ add: (value) => { definition = value } }) },
+    session: {
+      get: async () => ({ projectID: "project", location: { directory: current } }),
+      move: async ({ directory }) => { current = directory },
+    },
+    worktree: { refresh: async () => {}, list: async () => [{ directory: canonical }, { directory: linked }] },
+  }
+  await setup(ctx)
+  process.chdir(root)
+  process.env.GIT_DIR = join(root, "not-a-repository")
+  process.env.GIT_WORK_TREE = root
+  const context = { sessionID: "session", messageID: "message", id: "tool", agent: "build", signal: new AbortController().signal }
+  const run = async (input) => JSON.parse((await definition.execute(input, context)).content)
+  const initial = await run({ action: "inspect" })
+  assert.equal(initial.current, canonical)
+  assert.deepEqual(initial.worktrees.map(({ branch }) => branch), ["preview", "task"])
+  await run({ action: "select", directory: linked })
+  const moved = await run({ action: "inspect" })
+  assert.equal(moved.current, linked)
+  assert.deepEqual(moved.worktrees.map(({ branch }) => branch), ["preview", "task"])
+})
+
 test("native task worktrees retain branch, dependency, reuse, and session behavior", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "toolkit-native-worktrees-"))
   const home = process.env.HOME

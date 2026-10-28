@@ -7,6 +7,16 @@ import { promisify } from "node:util"
 
 const exec = promisify(execFile)
 
+// A server can inherit repository-local Git state from its launcher. It must
+// not redirect commands away from the explicitly selected inventory entry.
+async function runGit(directory, args, signal) {
+  const env = { ...process.env }
+  for (const key of ["GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_IMPLICIT_WORK_TREE", "GIT_PREFIX", "GIT_SHALLOW_FILE", "GIT_GRAFT_FILE"]) {
+    delete env[key]
+  }
+  return exec("git", ["-C", directory, ...args], { cwd: directory, env, signal })
+}
+
 async function exists(path) {
   try {
     return await lstat(path)
@@ -70,7 +80,7 @@ async function assertNoNestedRepositories(directory, inventory) {
 
 async function isIgnored(directory, entry) {
   try {
-    await exec("git", ["check-ignore", "-q", "--", entry], { cwd: directory })
+    await runGit(directory, ["check-ignore", "-q", "--", entry])
     return true
   } catch (error) {
     if (error.code === 1) return false
@@ -185,7 +195,7 @@ export async function setup(ctx) {
           metadata: { directory: input.directory, force: input.force ?? false },
         })
         const git = async (directory, ...args) => {
-          const result = await exec("git", args, { cwd: directory, signal: context.signal })
+          const result = await runGit(directory, args, context.signal)
           return result.stdout.trim()
         }
         const session = await ctx.session.get({ sessionID: context.sessionID })
