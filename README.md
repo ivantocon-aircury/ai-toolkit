@@ -31,8 +31,8 @@ This repository intentionally does not prescribe a copy or installation script.
   Use this profile only in an isolated environment.
   Install the complete profile, including `plugins/` and `instructions/`.
 
-Restart OpenCode after installing or changing a profile because configuration,
-agents, and skills are loaded at startup.
+OpenCode reloads configuration, agents, commands, skills, plugins, and MCP
+servers after a profile change. Use `/reload` to force a full reload when needed.
 
 ## Global Instructions
 
@@ -44,12 +44,19 @@ agents, and skills are loaded at startup.
 
 ## Agents
 
+- `build` is the default primary agent and owns implementation, verification,
+  and the final answer for each task.
 - `executor` runs clearly defined commands and analyzes output using the project's
   documented execution environment. It does not author code edits, although an
   explicitly requested formatter, generator, or Git command may change files.
 - `researcher` performs substantial read-only codebase or external investigation.
 - `reviewer` independently reviews completed work for defects, regressions,
   missed requirements, security issues, convention drift, and missing tests.
+
+Subagents are bounded specialists: they cannot delegate further, return their
+results to Build, and default to one active child at a time. The profile keeps
+different model and reasoning-effort choices on those specialists, rather than
+adding an orchestration layer for ordinary implementation work.
 
 Agent files are duplicated between profiles because each directory is a complete,
 independently installable global configuration. Keep their contents aligned.

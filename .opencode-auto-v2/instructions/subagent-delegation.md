@@ -1,7 +1,8 @@
 # Subagent Delegation
 
-Use subagents for focused work that can be delegated without losing important
-implementation context. Run independent investigations in parallel when useful.
+The primary Build agent owns each task from implementation through verification.
+It works directly by default and uses a subagent only for a bounded task whose
+result it can evaluate and apply.
 
 The main agent is responsible for:
 
@@ -12,12 +13,14 @@ The main agent is responsible for:
 - Reviewing and validating delegated results.
 - Producing the final answer.
 
-Subagents return concise evidence and recommendations. The main agent remains
-responsible for decisions, implementation, verification, and completion.
+Subagents return concise evidence, results, and uncertainties to Build. They do
+not own the user task, make final architecture decisions, or claim task
+completion. They must not delegate further.
 
-Delegation may nest at most once. At either level, delegate only to the
-`executor`, `researcher`, or `reviewer` specialists; do not create general
-worker chains.
+Default to at most one active subagent. Do not split ordinary work into a plan,
+research, implementation, and review chain. Use parallel subagents only when
+the primary agent identifies independent, read-only work whose benefit exceeds
+the additional context and usage cost.
 
 ---
 
