@@ -23,8 +23,8 @@ Install `.opencode-auto-v2` as `~/.config/opencode` and expose this repository's
 This repository intentionally does not prescribe a copy or installation script.
 
 - `.opencode-auto-v2` is intended for isolated development environments. It
-  defaults to GPT-6.1 Sol with low reasoning effort and uses the native worktree
-  adapter described below. It allows normal repository edits, commands,
+  defaults to GPT-6.1 Terra with default reasoning effort and uses the native
+  worktree adapter described below. It allows normal repository edits, commands,
   delegation, verification, and task worktrees under `~/work/worktrees`. It denies
   common destructive command forms and native access to credential directories,
   but it is not an OS sandbox: broad Bash access can bypass path-based rules.
@@ -57,6 +57,13 @@ Subagents are bounded specialists: they cannot delegate further, return their
 results to Build, and default to one active child at a time. The profile keeps
 different model and reasoning-effort choices on those specialists, rather than
 adding an orchestration layer for ordinary implementation work.
+
+| Agent | Model | Reasoning effort |
+| --- | --- | --- |
+| Build | GPT-6.1 Terra | Model default |
+| Executor | GPT-6 Luna Fast | Low |
+| Researcher | GPT-6 Luna | Medium |
+| Reviewer | GPT-6.1 Terra | High |
 
 Agent files are duplicated between profiles because each directory is a complete,
 independently installable global configuration. Keep their contents aligned.
