@@ -56,6 +56,43 @@ test("inspect uses inventory repositories and the live session location despite 
   assert.deepEqual(moved.worktrees.map(({ branch }) => branch), ["preview", "task"])
 })
 
+test("inspect reports stale and inaccessible inventory entries without aborting", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "toolkit-stale-worktrees-"))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const canonical = join(root, "project")
+  const missing = join(root, "missing")
+  const invalid = join(root, "invalid")
+  const inaccessible = join(root, "registered-but-missing")
+  await mkdir(canonical)
+  await mkdir(invalid)
+  const git = async (...args) => (await exec("git", ["-C", canonical, ...args])).stdout.trim()
+  await git("init", "-b", "main")
+  await git("-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "--allow-empty", "-m", "initial")
+  await git("worktree", "add", "--detach", inaccessible)
+  await rm(inaccessible, { recursive: true })
+  const inventory = [canonical, missing, invalid, inaccessible].map((directory) => ({ directory }))
+  let definition
+  const ctx = {
+    location: { directory: canonical, project: { id: "project", canonical } },
+    permission: { assert: async () => {} },
+    tool: { transform: async (fn) => fn({ add: (value) => { definition = value } }) },
+    session: { get: async () => ({ projectID: "project", location: { directory: canonical } }) },
+    worktree: { refresh: async () => {}, list: async () => inventory },
+  }
+  await setup(ctx)
+  const context = { sessionID: "session", messageID: "message", id: "tool", agent: "build", signal: new AbortController().signal }
+  const result = JSON.parse((await definition.execute({ action: "inspect" }, context)).content)
+  assert.equal(result.worktrees[0].branch, "main")
+  assert.equal(result.worktrees[0].status, "")
+  for (const entry of result.worktrees.slice(1, 3)) {
+    assert.equal(entry.branch, null)
+    assert.equal(entry.status, null)
+    assert.match(entry.inspectionError, /not registered/i)
+  }
+  assert.match(result.worktrees[3].inspectionError, /Cannot inspect worktree/)
+  assert.equal(inventory.length, 4)
+})
+
 test("native task worktrees retain branch, dependency, reuse, and session behavior", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "toolkit-native-worktrees-"))
   const home = process.env.HOME
