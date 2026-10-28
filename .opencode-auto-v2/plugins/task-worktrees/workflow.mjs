@@ -204,13 +204,24 @@ export async function setup(ctx) {
         await ctx.worktree.refresh({ projectID: project.id })
         const inventory = await ctx.worktree.list({ projectID: project.id })
         if (input.action === "inspect") {
+          const registered = new Set((await git(canonical, "worktree", "list", "--porcelain", "-z"))
+            .split("\0").filter((field) => field.startsWith("worktree ")).map((field) => field.slice(9)))
           const worktrees = []
           for (const entry of inventory) {
-            worktrees.push({
-              ...entry,
-              branch: await git(entry.directory, "branch", "--show-current"),
-              status: await git(entry.directory, "status", "--short"),
-            })
+            if (!registered.has(entry.directory)) {
+              worktrees.push({ ...entry, branch: null, status: null, inspectionError: "Not registered in Git's worktree list; the saved inventory entry may be stale." })
+              continue
+            }
+            try {
+              worktrees.push({
+                ...entry,
+                branch: await git(entry.directory, "branch", "--show-current"),
+                status: await git(entry.directory, "status", "--short"),
+              })
+            } catch (error) {
+              if (context.signal?.aborted) throw error
+              worktrees.push({ ...entry, branch: null, status: null, inspectionError: `Cannot inspect worktree: ${error.message}` })
+            }
           }
           return { content: JSON.stringify({ canonical, current, parent, worktrees }) }
         }
