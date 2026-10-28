@@ -5,17 +5,10 @@
   "snapshots": true,
   "formatter": true,
   "lsp": false,
-  // Variants are selected through an overridable model default.
-  "model": "openai/gpt-6.1-sol",
+  // Use the model's default reasoning effort without an override.
+  "model": "openai/gpt-6.1-terra",
   // Build owns a task from implementation through verification.
   "default_agent": "build",
-  "providers": {
-    "openai": {
-      "models": {
-        "gpt-6.1-sol": { "settings": { "reasoningEffort": "low" } }
-      }
-    }
-  },
   // The native task_worktree adapter appends the canonical project name.
   // Direct UI/API creation without the adapter uses this shared parent as-is.
   "worktree": { "directory": "~/work/worktrees" },

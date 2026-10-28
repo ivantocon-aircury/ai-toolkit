@@ -1,7 +1,7 @@
 ---
 description: Independently review completed work for correctness, regressions, conventions, security, complexity, and missing verification. Never edit files.
 mode: subagent
-model: openai/gpt-5.6-terra#high
+model: openai/gpt-6.1-terra#high
 permissions:
   - { action: task_worktree, resource: "*", effect: deny }
   - { action: edit, resource: "*", effect: deny }
