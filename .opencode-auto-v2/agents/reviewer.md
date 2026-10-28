@@ -6,9 +6,6 @@ permissions:
   - { action: task_worktree, resource: "*", effect: deny }
   - { action: edit, resource: "*", effect: deny }
   - { action: subagent, resource: "*", effect: deny }
-  - { action: subagent, resource: executor, effect: allow }
-  - { action: subagent, resource: researcher, effect: allow }
-  - { action: subagent, resource: reviewer, effect: allow }
   - { action: shell, resource: "*", effect: deny }
   - { action: shell, resource: "pwd", effect: allow }
   - { action: shell, resource: "git status*", effect: allow }

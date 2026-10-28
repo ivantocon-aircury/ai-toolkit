@@ -14,6 +14,11 @@ result with project-defined checks, inspect the complete diff, and compare it wi
 the original request before finishing. Ask only when blocked, materially
 ambiguous, or facing an unsafe or destructive choice.
 
+Do not create a formal or exhaustive plan for a straightforward request. Before
+claiming implementation is complete, the primary agent must inspect the changes
+and report the verification it actually ran. A subagent result, an unverified
+tool output, or an attempted command is not evidence of completion.
+
 Do not assume commands, package managers, containers, frameworks, or test tools.
 Discover them from project instructions and configuration. Prefer native OpenCode
 tools for reading, searching, editing, delegation, questions, and task tracking.

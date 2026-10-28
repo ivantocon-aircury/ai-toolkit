@@ -7,6 +7,8 @@
   "lsp": false,
   // Variants are selected through an overridable model default.
   "model": "openai/gpt-6.1-sol",
+  // Build owns a task from implementation through verification.
+  "default_agent": "build",
   "providers": {
     "openai": {
       "models": {
@@ -23,11 +25,7 @@
     "~/.config/opencode/instructions/subagent-delegation.md",
     "~/.config/opencode/instructions/native-worktrees.md"
   ],
-  "compaction": { "auto": true, "prune": true },
-  "experimental": {
-    // A coordinator may delegate to a worker, which may delegate once more.
-    "subagent_depth": 2
-  },
+  "compaction": { "auto": true },
   "watcher": {
     "ignore": [
       "**/node_modules/**", "**/vendor/**", "**/var/**", "**/.next*/**",
