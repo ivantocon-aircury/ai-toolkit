@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Dry run only. User explicitly invokes clean-worktree without a target. The active session is in a linked task worktree with uncommitted source edits and worktree-owned Docker resources. Describe the required sequence and consent points.",
-      "expected_output": "Capture active target before moving, read shared safety policy and native overrides, summarize that invocation discards all target files without a redundant dirty-file prompt, inspect identities, leave and verify completed native handoff, remove exclusively owned runtime resources and the full folder through native removal. Verify folder/Git/native inventory absence before deleting the verified unchanged local branch.",
+      "expected_output": "Capture the active target before moving, summarize that invocation discards all target files without a redundant dirty-file prompt, inspect identities, leave and verify the native handoff, then use native force removal. The adapter enforces filesystem safety. Preserve runtime resources unless both exclusive ownership and a clearly scoped cleanup command are established. Verify folder/Git/native inventory absence before deleting the verified unchanged local branch.",
       "files": []
     },
     {
@@ -22,7 +22,7 @@
     {
       "id": 4,
       "prompt": "Dry run only. Explicitly clean-worktree feature/search. It resolves uniquely, contains ignored dependencies and dirty files, but Compose uses shared containers with main and Docker is unavailable. What should happen?",
-      "expected_output": "Resolve the exact target, summarize full discard scope, preserve all Docker resources and warn about shared/unavailable Docker, then complete safe folder/registration/local branch removal. Do not block solely on Docker access or run compose down/prune.",
+      "expected_output": "Resolve the exact target, summarize full discard scope, preserve all Docker resources and warn about shared/unavailable Docker, then complete native folder/registration/local branch removal. Do not block solely on Docker access or run compose down/prune.",
       "files": []
     },
     {
@@ -35,6 +35,18 @@
       "id": 6,
       "prompt": "Dry run only. Explicit cleanup of a linked worktree at /home/me/worktrees/app/feature-search completed successfully: its runtime resources, registration, folder, and verified local branch are all gone. The active OpenCode session title is 'Implement search filters'. What is the final completion action and what must be reported?",
       "expected_output": "After every cleanup confirmation succeeds, read the active session ID and title through the OpenCode API, then call the native opencode.session_rename tool with that session ID and the title '🧹 Implement search filters'. Preserve the original title and do not add a second icon if it is already prefixed. Do not attempt this for partial or blocked cleanup; an unreadable or ambiguous active session is reported but does not make an otherwise successful cleanup fail.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Dry run only. Explicit cleanup was approved. After leaving the target, a previously modified source file changes again and a watcher with that worktree as its working directory is found. What happens?",
+      "expected_output": "Recheck the recorded branch tip, Git status, and changed-path content snapshots immediately before removal. The changed source file needs renewed consent, and the proven active writer is a blocker. Do not force-remove the worktree until the writer is resolved and applicable consent is renewed.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Dry run only. A project documents `docker compose down -v` as cleanup, but its Compose volume is also used by main. Can clean-worktree run it?",
+      "expected_output": "No. A documented command is evidence to inspect, not authority to delete shared resources. Preserve and report the shared volume, and continue native worktree cleanup without a Docker sweep.",
       "files": []
     }
   ]

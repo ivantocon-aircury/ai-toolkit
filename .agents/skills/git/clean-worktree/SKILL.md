@@ -1,111 +1,75 @@
 ---
 name: clean-worktree
-description: Explicitly clean one worktree by folder, branch, or worktree name, defaulting to the active linked worktree. Discard all its files, remove its local branch and exclusively owned runtime resources. Also accepts exact targets explicitly approved through audit-worktrees. Never infer cleanup from task completion.
+description: Explicitly clean one worktree by folder, branch, or worktree name, defaulting to the active linked worktree. Discard all its files and verified local branch; remove only runtime resources proven exclusive to it. Also accepts exact targets explicitly approved through audit-worktrees. Never infer cleanup from task completion.
 compatibility: OpenCode v2 with the toolkit task_worktree plugin.
 ---
 
 # Clean Worktree
 
+This is a deliberately short, one-worktree cleanup. The native adapter performs
+the filesystem safety checks, so do not reproduce them with broad Docker,
+process, or recursive filesystem investigations.
+
 If `task_worktree` is unavailable, report an incomplete installation and stop.
 
-## Activation And Shared Safety Policy
+## Authorization And Target
 
-An explicit selection or invocation of this skill authorizes this workflow.
-Use its exact ID, `clean-worktree`, including `@` where the UI uses skill
-mentions.
-A mention in discussion or a general cleanup request does not authorize removal.
-Capture exactly one target before moving the session.
-Without a target, use the chat session's active linked worktree, never the
-canonical checkout or an arbitrary inventory entry.
-Accept a folder, branch, or worktree basename only when it identifies exactly one
-linked worktree. Resolve relative folders against the original session directory.
-Reject ambiguous matches and show the candidates; never guess from a basename.
-An explicit invocation authorizes discarding all files within that exact target,
-including staged, unstaged, untracked, and ignored files, and deleting its verified
-local task branch even if unmerged. Summarize this scope before proceeding.
-An audit delegation must include the user's explicit approval of that exact target
-and discard scope; merely loading either skill is not consent.
+Only an explicit `clean-worktree` invocation/selection, or an `audit-worktrees`
+delegation with the user's approval for this exact target, authorizes deletion.
+A mention, task completion, or PR readiness does not.
 
-Read `reference/safety-policy.md` as the shared safety-policy reference.
-Apply its sections on scope, resumability, target inspection and consent,
-runtime discovery and ownership, processes and external dependencies,
-Docker cleanup, and reporting.
-This skill replaces its activation, session handoff, and registered-worktree
-removal mechanics with the native sequence below.
+Resolve exactly one registered linked worktree from an absolute folder, branch,
+or unique basename. Resolve relative folders from the original session directory.
+If no target is provided, capture the active linked worktree before moving; never
+default to the canonical checkout. Show candidates and ask when resolution is
+ambiguous.
 
-In particular, preserve its checks for dirty/uninspectable files, locks, nested
-repositories, mount points, historical Compose resources,
-shared volumes/networks, external data, branch identity, and retry state.
-The explicit discard scope above replaces the policy's routine dirty-file
-confirmation for the selected folder. Ask again for changed ownership, newly
-observed writes after the snapshot, locks, or separately scoped external data.
-Resolve hard blockers and obtain applicable approvals before stopping processes
-or removing runtime resources.
-Do not treat this invocation as approval to delete shared or external resources.
-If Docker configuration is shared, unsuitable for worktrees, unavailable, or
-cannot establish exclusive ownership, skip Docker cleanup, warn precisely what
-is retained and why, and complete folder, registration, and local-branch cleanup.
-Do not let a Docker inspection/configuration failure alone block those steps.
-Do not remove a folder containing live mounts or demonstrably active writers;
-report that concrete safety blocker rather than pretending cleanup succeeded.
+State the exact folder and branch before removal: all tracked, staged,
+untracked, and ignored target files, plus its local branch, will be discarded.
+This authorization covers ordinary dirty files; do not ask a duplicate
+dirty-file question.
 
-## Native Session Handoff
+## Fast Native Cleanup
 
-1. Load `inspect-git-state` and call `task_worktree` with `action: inspect`.
-   Record canonical project identity, exact target, branch ref/tip, registration,
-   native owner, status, runtime inventory, approvals, and completed operations.
-2. Reject the canonical checkout, primary/standalone repositories, filesystem
-   roots, home directories, symlink targets, and ancestors of retained checkouts.
-3. If the session is in the target or a descendant, call `action: leave`.
-   It requests a move to the canonical checkout; it does not remove anything.
-   Wait for the next step boundary and call inspect again to verify the active
-   session is outside the target.
-4. Run all cleanup commands from that verified safe directory, with explicit
-   `workdir` arguments outside the target.
-   Do not stop the agent, its shell, or unrelated process groups.
+1. Call `task_worktree` with `action: inspect`. Confirm the target is a registered
+   linked worktree in the current project and record its branch, tip, and Git
+   status snapshot using `--untracked-files=all`. For each Git-visible changed or
+   untracked file, also record a content snapshot. Reject the canonical checkout,
+   a symlink, a worktree parent, or an ancestor of another registered worktree.
+2. If the session is inside the target, call `task_worktree` with `action: leave`.
+   At the next step boundary, inspect again and proceed only after the session is
+   outside the target. Use an explicit safe `workdir` for any subsequent Git call.
+3. Immediately before removal, recheck the branch tip, Git status, and recorded
+   changed-path content snapshots. New or changed Git-visible work needs renewed
+   consent; a proven active writer is a blocker. Then call `task_worktree` with
+   `action: remove`, the exact absolute `directory`, and `force: true`. Explicit
+   invocation authorizes this flag. The adapter requests native permission and
+   rejects locks, mounts, nested repositories/worktrees, active session targets,
+   and unsafe residue; never bypass one of those failures with raw Git or
+   `rm -rf`.
+4. Require both `registrationRemoved: true` and `folderRemoved: true`, then call
+   `inspect` again to confirm the target is absent. A failed owner, retained
+   residue, or stale/unregistered folder is a partial result: preserve the branch
+   and report the adapter's reason rather than attempting a fallback deletion.
+5. For a captured non-detached branch, verify its ref still equals the recorded
+   tip and it is not checked out elsewhere. Delete only that local branch. Preserve
+   remote branches, stashes, caches, and shared services.
 
-## Native Removal And Branch Cleanup
+## Runtime And External Resources
 
-Complete shared-policy process, runtime, and separately approved external-data
-cleanup first.
-Immediately before removal, revalidate the exact path, Git status against the
-approved snapshot, registration, locks, nested checkouts/submodules, and mount
-points. New changes require renewed consent. Revalidate these same conditions
-when native removal leaves a folder, before asking the adapter to recover
-authorized residue.
+The fast path preserves runtime resources. Inspect, stop, or remove one only when
+both its exclusive ownership by this exact worktree and the command's exact scope
+are clear. A documented target-specific cleanup command is evidence to inspect,
+not authority to affect shared Compose containers, volumes, networks, bind mounts,
+or external services. Never infer ownership from a port, basename, or Compose
+project name. Ask separately before deleting bind-mounted data or external
+services. Shared, unavailable, or ambiguous Docker/Compose resources are retained
+and reported; they never block native worktree removal.
 
-For a registered task worktree, call `task_worktree` with `action: remove`, the
-exact absolute `directory`, and `force: false` first.
-Use `force: true` only when required and already authorized by the shared policy;
-do not use it to bypass locks, mounts, unknown ownership, or a failed strategy.
-The adapter calls the native recorded owner's removal operation, verifies that
-the exact target is no longer registered, and then checks whether its folder
-remains. If it does, the adapter may remove it only when every remaining entry
-matches a pre-removal authorized snapshot for that exact formerly
-registered target (all entries when `force: true`, ignored entries otherwise).
-This private adapter recovery never follows symlinks and
-rejects mounts, nested repositories/submodules, and nested registered
-worktrees. It is not a generic recursive-delete API.
-The profile asks for native removal permission, including the target and force
-flag; this does not replace the shared policy's separate data-loss checks.
-If the native owner is unavailable or removal fails, stop and report the partial
-result; do not fall back to raw Git removal of a valid registered worktree.
-
-If the response reports `registrationRemoved: true` but `folderRemoved: false`,
-preserve the local branch and report its precise reason. The adapter has already
-attempted only its verified authorized-residue recovery; do not use raw `rm -rf` or
-reinterpret an unresolved native-owner failure as an unregistered leftover.
-For a genuinely unregistered leftover folder or exact stale Git metadata that
-native inventory cannot represent, stop and report the recovery checks from the
-shared policy. Distinguish missing resources from inspection failures.
-
-Confirm the native response reports both `registrationRemoved: true` and
-`folderRemoved: true`, then refresh native inventory through `action: inspect`
-and confirm the target is absent there too. Only then delete the verified
-unchanged local task branch, provided it is not checked out elsewhere, using the
-shared policy's branch cleanup procedure.
-A detached worktree needs no branch deletion.
-Preserve remote branches, stashes, caches, and shared services.
+Do not stop the agent, its shell, or unrelated process groups. Before removal,
+use a targeted process and open-file scan for the target; a proven active writer
+or mount is a hard blocker. Do not perform a broad process or Docker sweep when
+no target-owned runtime evidence exists.
 
 ## Completion Tab Indicator
 
