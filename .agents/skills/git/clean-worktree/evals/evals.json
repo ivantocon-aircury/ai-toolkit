@@ -33,8 +33,8 @@
     },
     {
       "id": 6,
-      "prompt": "Dry run only. Explicit cleanup of a linked worktree at /home/me/worktrees/app/feature-search completed successfully: its runtime resources, registration, folder, and verified local branch are all gone. The agent shell has a writable controlling terminal. What is the final completion action and what must be reported?",
-      "expected_output": "After every cleanup confirmation succeeds, sanitize the captured target basename and write an OSC title sequence to /dev/tty that sets an icon-prefixed title such as '🧹 Worktree cleaned — feature-search'. Report that the tab indicator was applied. Do not attempt this for partial or blocked cleanup; inability to control the terminal title is reported but does not make an otherwise successful cleanup fail.",
+      "prompt": "Dry run only. Explicit cleanup of a linked worktree at /home/me/worktrees/app/feature-search completed successfully: its runtime resources, registration, folder, and verified local branch are all gone. What is the final completion action and what must be reported?",
+      "expected_output": "After every cleanup confirmation succeeds, sanitize the captured target basename and call OpenCode's native opencode.session_rename tool without a sessionID to set an icon-prefixed title such as '🧹 Worktree cleaned — feature-search'. This updates the OpenCode tab without relying on a shell TTY. Do not attempt this for partial or blocked cleanup; a terminal that cannot reflect the title is reported but does not make an otherwise successful cleanup fail.",
       "files": []
     }
   ]
