@@ -107,6 +107,32 @@ shared policy's branch cleanup procedure.
 A detached worktree needs no branch deletion.
 Preserve remote branches, stashes, caches, and shared services.
 
+## Completion Tab Indicator
+
+Only after every successful cleanup confirmation above, including local branch
+cleanup when applicable, set an icon-prefixed terminal tab title to make the
+completed cleanup visible. Do not set this indicator for a partial, blocked, or
+resumable cleanup.
+
+Use the captured target's basename, rather than an untrusted user-supplied
+title. When the agent shell has a writable controlling terminal, sanitize that
+basename and write this OSC title sequence directly to `/dev/tty`:
+
+```sh
+if [ -w /dev/tty ]; then
+    target_name=$(basename -- "$target")
+    safe_target_name=$(printf '%s' "$target_name" | tr -d '\000-\037\177')
+    printf '\033]0;🧹 Worktree cleaned — %s\007' "$safe_target_name" > /dev/tty
+fi
+```
+
+This replaces the terminal title with an icon-prefixed completion title; it
+cannot reliably retrieve and prepend to an existing terminal title. If there is
+no writable controlling terminal, or the terminal does not support OSC title
+sequences, leave the title unchanged and state that the completion indicator
+could not be applied. A title-control failure does not change a successfully
+completed cleanup into a cleanup failure.
+
 Report session destination, target/owner, approvals, runtime cleanup,
 folder/registration/inventory state, branch result, preserved resources,
-and any resumable partial failure.
+tab-indicator result, and any resumable partial failure.
