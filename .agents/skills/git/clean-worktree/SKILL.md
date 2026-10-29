@@ -110,16 +110,22 @@ Preserve remote branches, stashes, caches, and shared services.
 ## Completion Tab Indicator
 
 Only after every successful cleanup confirmation above, including local branch
-cleanup when applicable, use OpenCode's native `opencode.session_rename` tool
-without a `sessionID` to rename the active session/tab. Do not set this
-indicator for a partial, blocked, or resumable cleanup.
+cleanup when applicable, prepend `🧹 ` to the active OpenCode session/tab title.
+Do not set this indicator for a partial, blocked, or resumable cleanup.
 
-Use the captured target's basename, rather than an untrusted user-supplied
-title. Strip C0 control characters and DEL, then rename the session to:
+Read the active session ID with `opencode api get /api/session/active`, then
+read that session with `opencode api get /api/session/<sessionID>`. Preserve the
+returned title exactly and call OpenCode's native `opencode.session_rename` tool
+with that `sessionID` and the new title:
 
 ```text
-🧹 Worktree cleaned — <sanitized target basename>
+🧹 <original title>
 ```
+
+Prefix the icon exactly once: if the existing title already starts with `🧹 `,
+leave it unchanged. If the active session or its title cannot be read uniquely,
+do not guess or replace it with a target-derived title; report that the
+completion indicator could not be applied.
 
 This changes the OpenCode tab directly and does not depend on a shell's
 controlling terminal. The shipped CLI profile enables `terminal.title`, so
