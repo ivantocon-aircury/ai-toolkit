@@ -33,6 +33,8 @@ This repository intentionally does not prescribe a copy or installation script.
 
 OpenCode reloads configuration, agents, commands, skills, plugins, and MCP
 servers after a profile change. Use `/reload` to force a full reload when needed.
+The profile's `cli.json` enables terminal-title updates, so session-title changes
+can also appear in a supporting terminal window or terminal-emulator tab.
 
 ## Global Instructions
 

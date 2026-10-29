@@ -110,28 +110,22 @@ Preserve remote branches, stashes, caches, and shared services.
 ## Completion Tab Indicator
 
 Only after every successful cleanup confirmation above, including local branch
-cleanup when applicable, set an icon-prefixed terminal tab title to make the
-completed cleanup visible. Do not set this indicator for a partial, blocked, or
-resumable cleanup.
+cleanup when applicable, use OpenCode's native `opencode.session_rename` tool
+without a `sessionID` to rename the active session/tab. Do not set this
+indicator for a partial, blocked, or resumable cleanup.
 
 Use the captured target's basename, rather than an untrusted user-supplied
-title. When the agent shell has a writable controlling terminal, sanitize that
-basename and write this OSC title sequence directly to `/dev/tty`:
+title. Strip C0 control characters and DEL, then rename the session to:
 
-```sh
-if [ -w /dev/tty ]; then
-    target_name=$(basename -- "$target")
-    safe_target_name=$(printf '%s' "$target_name" | tr -d '\000-\037\177')
-    printf '\033]0;🧹 Worktree cleaned — %s\007' "$safe_target_name" > /dev/tty
-fi
+```text
+🧹 Worktree cleaned — <sanitized target basename>
 ```
 
-This replaces the terminal title with an icon-prefixed completion title; it
-cannot reliably retrieve and prepend to an existing terminal title. If there is
-no writable controlling terminal, or the terminal does not support OSC title
-sequences, leave the title unchanged and state that the completion indicator
-could not be applied. A title-control failure does not change a successfully
-completed cleanup into a cleanup failure.
+This changes the OpenCode tab directly and does not depend on a shell's
+controlling terminal. The shipped CLI profile enables `terminal.title`, so
+OpenCode also propagates the session title to a supporting terminal window or
+terminal-emulator tab. If a terminal does not support title updates, report that
+limitation without treating an otherwise successful cleanup as failed.
 
 Report session destination, target/owner, approvals, runtime cleanup,
 folder/registration/inventory state, branch result, preserved resources,
