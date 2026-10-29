@@ -71,31 +71,6 @@ use a targeted process and open-file scan for the target; a proven active writer
 or mount is a hard blocker. Do not perform a broad process or Docker sweep when
 no target-owned runtime evidence exists.
 
-## Completion Tab Indicator
-
-Only after every successful cleanup confirmation above, including local branch
-cleanup when applicable, call OpenCode's native `opencode.session_rename` tool
-without a `sessionID`. Do not set this indicator for a partial, blocked, or
-resumable cleanup.
-
-Use the captured target's basename, rather than an untrusted user-supplied
-title. Strip C0 control characters and DEL, then rename the current session to:
-
-```text
-🧹 Worktree cleaned — <sanitized target basename>
-```
-
-Do not use `opencode api get /api/session/active` to select a session. That API
-reports service-wide activity and can identify a tab belonging to another client.
-Omitting `sessionID` makes the native tool rename only the session running this
-cleanup workflow.
-
-This changes the OpenCode tab directly and does not depend on a shell's
-controlling terminal. The shipped CLI profile enables `terminal.title`, so
-OpenCode also propagates the session title to a supporting terminal window or
-terminal-emulator tab. If a terminal does not support title updates, report that
-limitation without treating an otherwise successful cleanup as failed.
-
 Report session destination, target/owner, approvals, runtime cleanup,
 folder/registration/inventory state, branch result, preserved resources,
-tab-indicator result, and any resumable partial failure.
+and any resumable partial failure. Leave the OpenCode session/tab title unchanged.

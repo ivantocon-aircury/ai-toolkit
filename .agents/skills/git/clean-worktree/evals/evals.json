@@ -32,12 +32,6 @@
       "files": []
     },
     {
-      "id": 6,
-      "prompt": "Dry run only. Explicit cleanup of a linked worktree at /home/me/worktrees/app/feature-search completed successfully: its runtime resources, registration, folder, and verified local branch are all gone. What is the final completion action and what must be reported?",
-      "expected_output": "After every cleanup confirmation succeeds, sanitize the captured target basename and call OpenCode's native opencode.session_rename tool without a sessionID to set an icon-prefixed title such as '🧹 Worktree cleaned — feature-search'. Do not call /api/session/active because it can select a different client's tab. Do not attempt this for partial or blocked cleanup; a terminal that cannot reflect the title is reported but does not make an otherwise successful cleanup fail.",
-      "files": []
-    },
-    {
       "id": 7,
       "prompt": "Dry run only. Explicit cleanup was approved. After leaving the target, a previously modified source file changes again and a watcher with that worktree as its working directory is found. What happens?",
       "expected_output": "Recheck the recorded branch tip, Git status, and changed-path content snapshots immediately before removal. The changed source file needs renewed consent, and the proven active writer is a blocker. Do not force-remove the worktree until the writer is resolved and applicable consent is renewed.",
