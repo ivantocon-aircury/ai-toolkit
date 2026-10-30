@@ -112,6 +112,10 @@ then performs the shared runtime and consent checks before native removal.
 The profile requests permission for native removal, with the target and force
 flag shown; other native worktree operations retain their automatic flow.
 It deletes the verified local branch only after folder and registrations are gone.
+Once all applicable cleanup succeeds, the skill requests closure of the
+cleaning session's OpenCode tab without deleting the session.
+The profile's server and UI plugin parts deliver this on a best-effort basis;
+headless, disconnected, or unsupported clients may not close a tab.
 When native removal deregisters a worktree but leaves ignored residue (such as
 `.idea/`, `node_modules/`, or build output), the adapter can remove that exact
 folder only after revalidating its path, mounts, nested repositories/worktrees,
