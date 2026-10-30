@@ -73,13 +73,4 @@ no target-owned runtime evidence exists.
 
 Report session destination, target/owner, approvals, runtime cleanup,
 folder/registration/inventory state, branch result, preserved resources,
-and any resumable partial failure.
-
-Only after all applicable cleanup is complete and verified, including the local
-branch and any authorized runtime cleanup, share the cleanup report in a visible
-message, then call `cleanup_close_tab` as the last action to request closing the
-current session's OpenCode UI tab.
-Do not request closure after a blocked or partial cleanup, or for a dry run.
-The request does not delete the session or rename it.
-UI delivery is not guaranteed; if the tool is unavailable or fails, report that
-the tab could not be confirmed closed without treating cleanup as failed.
+and any resumable partial failure. Leave the OpenCode session/tab title unchanged.
