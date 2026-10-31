@@ -9,9 +9,9 @@ Use this skill as the single source of truth for read-only Git inspection. Repor
 
 ## Delegation
 
-Use OpenCode's native task tool with the `executor` subagent when it is available.
-Tell it the repository or worktree path and the specific inspection goal. Do not
-delegate workflow decisions.
+Inspect directly by default. Delegate a bounded inspection only when independent
+parallel work or specialization justifies the handoff, and pass the worktree path
+and specific goal. Do not delegate workflow decisions.
 
 ## Baseline Inspection
 

@@ -21,7 +21,7 @@ only when they are silent.
 
 ## Run Relevant Checks
 
-Use the native task tool with `executor` for mechanical command execution. Run
+Run commands directly unless a bounded independent handoff is worthwhile. Run
 the smallest relevant checks first, then broader checks when warranted:
 
 1. Focused tests for changed behavior.
@@ -30,15 +30,17 @@ the smallest relevant checks first, then broader checks when warranted:
 4. Linting and formatting checks.
 5. Build, packaging, migration, or smoke checks when the change affects them.
 
-Do not run unrelated expensive checks merely to fill a checklist. Do not suppress
+Do not run unrelated expensive checks merely to fill a checklist. Reuse recorded
+successful results for unchanged code, configuration, and environment; rerun
+checks affected by subsequent changes or required by the project. Do not suppress
 failures. If a check cannot run, record the command, reason, and residual risk.
 
 ## Review And Repeat
 
 After checks, reinspect Git state because formatters, generators, and tests may
 create changes. The main agent owns implementation fixes; the executor does not.
-Fix task-owned problems, rerun affected checks, and request an independent
-`reviewer` pass for substantial or high-risk work.
+Fix task-owned problems and rerun affected checks. Consider an independent
+`reviewer` pass when its benefit justifies the handoff and it is permitted.
 
 Report the reviewed scope, exact checks and results, fixes made, remaining gaps,
 and whether the requested work is ready for its intended endpoint. This skill
