@@ -56,8 +56,9 @@ can also appear in a supporting terminal window or terminal-emulator tab.
   missed requirements, security issues, convention drift, and missing tests.
 
 Subagents are bounded specialists: they cannot delegate further, return their
-results to Build, and default to one active child at a time. The profile keeps
-different model and reasoning-effort choices on those specialists, rather than
+results to Build, and default to one active child at a time. Direct execution is
+the default; a handoff should provide a clear specialization or parallelism benefit.
+The profile keeps different model and reasoning-effort choices on those specialists, rather than
 adding an orchestration layer for ordinary implementation work.
 
 | Agent | Model | Reasoning effort |
@@ -67,8 +68,21 @@ adding an orchestration layer for ordinary implementation work.
 | Researcher | GPT-6 Luna | Medium |
 | Reviewer | GPT-6.1 Terra | High |
 
-Agent files are duplicated between profiles because each directory is a complete,
-independently installable global configuration. Keep their contents aligned.
+These are the profile's configured choices, not an automatic complexity router.
+Use `/models` to select an available session model and the session controls to
+select a supported reasoning variant:
+prefer a fast capable choice for routine work and a stronger choice for difficult
+or high-risk work. Escalate on evidence of stalled progress rather than repeatedly
+switching. Session selections and provider availability take precedence; do not
+assume an agent can change its own model. The catalog may not expose pricing.
+
+OpenCode discovers `.agents/skills` in a project and `~/.agents/skills` globally;
+the global profile's agents and instructions load from `~/.config/opencode`.
+Installing copies means later repository edits require updating those copies;
+reload only after installation. Built-in commands such as `/goal` are not defined
+by this repository. Automatic compaction is enabled; for long tasks, a concise
+checkpoint of the worktree, decisions, progress, checks, and next action helps
+recovery without inventing a separate mandatory tracking system.
 
 ## Skills
 
@@ -165,7 +179,7 @@ Run adapter checks with
 ## Maintenance
 
 - Keep global instructions small and move detailed procedures into skills.
-- Keep both profiles aligned except for intentional security and privacy choices.
+- Keep the installed profile and skill copies aligned with the intended revision.
 - Validate configuration against `https://opencode.ai/config.json`.
 - Keep agent names and skill frontmatter names unique and discoverable.
 - Store evals beside the skill they exercise; do not create aggregate skill names

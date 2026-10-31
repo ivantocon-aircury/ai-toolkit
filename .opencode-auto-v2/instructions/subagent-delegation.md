@@ -1,8 +1,9 @@
 # Subagent Delegation
 
 The primary Build agent owns each task from implementation through verification.
-It delegates bounded mechanical command work to a subagent by default and
-evaluates and applies its result.
+Work directly by default; delegate only when a specialist or independent parallel
+work is likely to save more time or context than the handoff costs. Respect any
+stricter session or project delegation policy.
 
 The main agent is responsible for:
 
@@ -26,22 +27,15 @@ the additional context and usage cost.
 
 ## Command Execution
 
-Use `executor` by default for bounded, command-only work that does not require
-an implementation or architecture decision.
-This includes Git inspection, tests, linters, type checks, builds, formatter
-runs, log collection, and CI diagnostics.
-
-Run a command directly only when it is a single, immediate, context-sensitive
-check required to decide or validate the next implementation edit.
-Do not delegate a command sequence that writes source files or requires the
-parent agent's implementation judgment.
+Run routine Git inspection, tests, linters, and other bounded commands directly.
+Consider `executor` for lengthy independent command work where its results can
+arrive while implementation continues. Do not delegate source edits or decisions.
 
 ## Roles
 
-- Use `executor` for bounded mechanical command work.
-- Use `researcher` for substantial read-only codebase or external investigation
-  before implementation.
-- Use `reviewer` for an independent read-only review of completed work.
+- Consider `executor` for independent mechanical command work.
+- Consider `researcher` for substantial independent read-only investigation.
+- Consider `reviewer` when independent review materially reduces risk.
 
 Do not delegate architecture or implementation decisions. Follow the project's
 documented execution environment; use containers or wrappers when the project
