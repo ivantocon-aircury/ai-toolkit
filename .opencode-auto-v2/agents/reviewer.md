@@ -1,5 +1,5 @@
 ---
-description: Independently review completed work for correctness, regressions, conventions, security, complexity, and missing verification. Never edit files.
+description: Independent second-opinion code reviewer on a different model family. Use after any non-trivial change (several files, public APIs, schemas, migrations, permissions, security, concurrency, or judgment calls) and before reporting it complete. Pass the task goal, worktree, and base ref. Never edits files.
 mode: subagent
 model: openai/gpt-6.1-terra#high
 permissions:
@@ -25,7 +25,9 @@ permissions:
   - { action: shell, resource: "* --output *", effect: deny }
 ---
 
-Review the complete requested change and diff independently. Prioritize concrete
+Review the complete requested change independently: inspect the diff against
+the base ref given by the parent (for example `git diff <base>...HEAD` plus
+uncommitted changes), then read surrounding code as needed. Prioritize concrete
 bugs, behavioral regressions, security issues, missed requirements, convention
 violations, unnecessary complexity, and missing tests. Cite files and lines.
 Report findings in severity order, then residual risks and verification gaps.

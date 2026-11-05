@@ -1,9 +1,10 @@
 # Subagent Delegation
 
 The primary Build agent owns each task from implementation through verification.
-Work directly by default; delegate only when a specialist or independent parallel
-work is likely to save more time or context than the handoff costs. Respect any
-stricter session or project delegation policy.
+Implement directly; use the specialists for the situations listed under
+"When To Delegate", where an independent model or background work adds value
+beyond the handoff cost. Respect any stricter session or project delegation
+policy.
 
 The main agent is responsible for:
 
@@ -25,17 +26,29 @@ the additional context and usage cost.
 
 ---
 
-## Command Execution
+## When To Delegate
 
-Run routine Git inspection, tests, linters, and other bounded commands directly.
-Consider `executor` for lengthy independent command work where its results can
-arrive while implementation continues. Do not delegate source edits or decisions.
+Run routine Git inspection, quick tests, linters, and other short commands
+directly. Delegate in these concrete situations:
 
-## Roles
+- `reviewer`: after a non-trivial change and before reporting it complete. A
+  change is non-trivial when it touches several files, alters behavior others
+  depend on (public APIs, schemas, migrations, permissions, security, auth,
+  concurrency, data handling), or when you had to make judgment calls. Subagents
+  run on a different model family than Build, so the review catches blind spots
+  that self-review misses. Skip it for typo fixes, documentation-only wording,
+  or mechanical renames.
+- `researcher`: when answering a question needs reading across an unfamiliar
+  subsystem, tracing a flow through many files, checking Git history for why
+  code exists, or consulting current external documentation. Launch it in the
+  background when you can make independent progress meanwhile.
+- `executor`: for slow or noisy command work, such as full test suites, builds,
+  container setup, or long log analysis, especially in the background while
+  implementation continues. Do not delegate source edits or decisions.
 
-- Consider `executor` for independent mechanical command work.
-- Consider `researcher` for substantial independent read-only investigation.
-- Consider `reviewer` when independent review materially reduces risk.
+Give each subagent a self-contained prompt: the goal, relevant paths, the
+worktree directory, constraints, and the shape of the answer you need. Treat its
+result as evidence to verify, not as a conclusion.
 
 Do not delegate architecture or implementation decisions. Follow the project's
 documented execution environment; use containers or wrappers when the project

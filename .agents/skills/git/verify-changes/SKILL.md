@@ -39,8 +39,10 @@ failures. If a check cannot run, record the command, reason, and residual risk.
 
 After checks, reinspect Git state because formatters, generators, and tests may
 create changes. The main agent owns implementation fixes; the executor does not.
-Fix task-owned problems and rerun affected checks. Consider an independent
-`reviewer` pass when its benefit justifies the handoff and it is permitted.
+Fix task-owned problems and rerun affected checks. For non-trivial changes
+(several files, public APIs, schemas, migrations, permissions, security, or
+concurrency), run an independent `reviewer` pass when it is permitted, then
+verify and address its findings.
 
 Report the reviewed scope, exact checks and results, fixes made, remaining gaps,
 and whether the requested work is ready for its intended endpoint. This skill
