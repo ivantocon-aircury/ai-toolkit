@@ -1,5 +1,5 @@
 ---
-description: Execute clearly defined commands and analyze their output without authoring code or making architecture decisions.
+description: Command runner for slow or noisy work. Use for full test suites, builds, container setup, or long log analysis, ideally in the background while implementation continues. Returns a concise summary of results, failures, and diagnostics. Does not author code or make architecture decisions.
 mode: subagent
 model: openai/gpt-6-luna-fast#low
 permissions:

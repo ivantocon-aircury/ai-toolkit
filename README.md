@@ -52,13 +52,18 @@ can also appear in a supporting terminal window or terminal-emulator tab.
 - `executor` runs clearly defined commands and analyzes output using the project's
   documented execution environment. It does not author code edits, although an
   explicitly requested formatter, generator, or Git command may change files.
-- `researcher` performs substantial read-only codebase or external investigation.
+- `researcher` performs substantial read-only codebase, Git history, or external
+  investigation.
 - `reviewer` independently reviews completed work for defects, regressions,
   missed requirements, security issues, convention drift, and missing tests.
 
 Subagents are bounded specialists: they cannot delegate further, return their
-results to Build, and default to one active child at a time. Direct execution is
-the default; a handoff should provide a clear specialization or parallelism benefit.
+results to Build, and default to one active child at a time. Build implements
+directly and delegates on concrete triggers defined in
+`instructions/subagent-delegation.md`: a `reviewer` pass after non-trivial
+changes, `researcher` for cross-cutting investigation, and `executor` for slow
+or noisy commands. Because the subagents run on a different model family than
+Build, the review gives a real second opinion rather than self-review.
 The profile keeps different model and reasoning-effort choices on those specialists, rather than
 adding an orchestration layer for ordinary implementation work.
 
