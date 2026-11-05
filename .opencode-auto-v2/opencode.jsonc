@@ -5,8 +5,10 @@
   "snapshots": true,
   "formatter": true,
   "lsp": false,
-  // Use the model's default reasoning effort without an override.
-  "model": "openai/gpt-6.1-terra",
+  // Build runs on Claude Opus 5.5 through the Claude Code integration
+  // (`claude-agent`), whose catalog exposes it only as the `opus` alias.
+  // Uses the model's default reasoning effort. Subagents pin their own GPT models.
+  "model": "claude-agent/opus",
   // Build owns a task from implementation through verification.
   "default_agent": "build",
   // The native task_worktree adapter appends the canonical project name.
