@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Dry run only. User explicitly invokes clean-worktree without a target. The active session is in a linked task worktree with uncommitted source edits and worktree-owned Docker resources. Describe the required sequence and consent points.",
-      "expected_output": "Capture the active target before moving, summarize that invocation discards all target files without a redundant dirty-file prompt, inspect identities, leave and verify the native handoff, then use native force removal. The adapter enforces filesystem safety. Preserve runtime resources unless both exclusive ownership and a clearly scoped cleanup command are established. Verify folder/Git/native inventory absence before deleting the verified unchanged local branch.",
+      "expected_output": "Capture the active target before moving, summarize that invocation discards all target files without a redundant dirty-file prompt, inspect identities, leave and verify the native handoff, recheck Git state before any deletion, remove the worktree-owned Docker containers, volumes, networks, and built images identified by Compose working_dir labels without a separate volume prompt, then use native force removal. The adapter enforces filesystem safety. Preserve shared or ambiguous Docker resources. Verify folder/Git/native inventory absence before deleting the verified unchanged local branch.",
       "files": []
     },
     {
@@ -34,13 +34,25 @@
     {
       "id": 7,
       "prompt": "Dry run only. Explicit cleanup was approved. After leaving the target, a previously modified source file changes again and a watcher with that worktree as its working directory is found. What happens?",
-      "expected_output": "Recheck the recorded branch tip, Git status, and changed-path content snapshots immediately before removal. The changed source file needs renewed consent, and the proven active writer is a blocker. Do not force-remove the worktree until the writer is resolved and applicable consent is renewed.",
+      "expected_output": "Recheck the recorded branch tip, Git status, and changed-path content snapshots immediately before removal. The changed source file needs renewed consent, and the proven active writer is a blocker. Delete no Docker resources and do not force-remove the worktree until the writer is resolved and applicable consent is renewed.",
       "files": []
     },
     {
       "id": 8,
       "prompt": "Dry run only. A project documents `docker compose down -v` as cleanup, but its Compose volume is also used by main. Can clean-worktree run it?",
-      "expected_output": "No. A documented command is evidence to inspect, not authority to delete shared resources. Preserve and report the shared volume, and continue native worktree cleanup without a Docker sweep.",
+      "expected_output": "No. A documented command is evidence to inspect, not authority to delete shared resources. Preserve and report the shared volume, and continue native worktree cleanup without a destructive Docker sweep.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "Dry run only. Explicitly clean-worktree feature/search. Its Compose project feature-search has stopped containers whose working_dir label is the target folder, a named database volume, a default network, and a locally built app image, all labeled with that project. No other folder's containers use the project or those resources. A Redis volume is declared external. What happens?",
+      "expected_output": "Treat the project as target-owned from the working_dir labels. Before folder removal, remove its containers with their anonymous volumes, then its network, named database volume, and built image by exact ID or name, and confirm they are absent. Preserve and report the external Redis volume and build cache. Do not ask a separate volume-deletion question or use prune. Then complete native folder/registration/local branch removal.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "Dry run only. Explicitly clean-worktree feature/search. Its containers were already removed, but volume feature-search_db and network feature-search_default remain, labeled with the project resolved by docker compose config in the target. The canonical checkout's compose.yaml declares feature-search_db as an external volume. An unrelated container started with docker run has no bind mounts. What happens?",
+      "expected_output": "Use the target's resolved Compose project name to find the leftover resources. Remove the network, but preserve and report feature-search_db because another checkout references it by exact name. Do not treat the unrelated container as target-owned, since it has no bind mount inside the target. Do not use compose down or prune.",
       "files": []
     }
   ]

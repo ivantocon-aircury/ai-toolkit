@@ -105,7 +105,8 @@ instructions should provide those overrides.
 - `create-worktree`: prepares or selects a native task worktree under
   `~/work/worktrees/<project>/<branch-or-task>` and verifies session handoff.
 - `clean-worktree`: explicitly removes one registered task worktree folder,
-  its verified Docker containers, volumes, networks, and eligible local branch.
+  its verified Docker containers, volumes, networks, built images, and eligible
+  local branch.
   Explicit invocation discards all target files, including ignored files.
   Shared or unverifiable Docker resources are preserved with a warning.
 - `audit-worktrees`: checks every project under `~/work/worktrees` against
