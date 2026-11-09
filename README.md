@@ -23,7 +23,8 @@ Install `.opencode-auto-v2` as `~/.config/opencode` and expose this repository's
 This repository intentionally does not prescribe a copy or installation script.
 
 - `.opencode-auto-v2` is intended for isolated development environments. It
-  defaults to Claude Opus 5.5 through the Claude Code integration with default
+  reads Build's default model from `OPENCODE_MODEL` (see
+  [Per-machine default model](#per-machine-default-model)) with default
   reasoning effort, keeps GPT models on the subagents, and uses the native
   worktree adapter described below. It allows normal repository edits, commands,
   delegation, verification, and task worktrees under `~/work/worktrees`. It denies
@@ -31,6 +32,27 @@ This repository intentionally does not prescribe a copy or installation script.
   but it is not an OS sandbox: broad Bash access can bypass path-based rules.
   Use this profile only in an isolated environment.
   Install the complete profile, including `plugins/` and `instructions/`.
+
+### Per-machine default model
+
+The profile sets `"model": "{env:OPENCODE_MODEL}"`, so the same files work on
+machines with different providers. Set the variable once per machine on the
+shared background service, which persists it in `~/.config/opencode/service.json`:
+
+```sh
+# Machine with the Claude Code integration
+opencode service set env OPENCODE_MODEL claude-agent/opus
+
+# Machine without Claude
+opencode service set env OPENCODE_MODEL openai/gpt-6.1-sol
+```
+
+Setting service configuration stops the service; the next OpenCode start, or
+`opencode service start`, picks up the value. `service.json` is machine-specific:
+do not overwrite or delete it when installing or syncing the profile. If the
+variable is unset, OpenCode falls back to the newest available supported model.
+The root default keeps no `#variant`, so the model's default reasoning effort
+applies. A model already selected for a session takes precedence.
 
 OpenCode reloads configuration, agents, commands, skills, plugins, and MCP
 servers after a profile change. Use `/reload` to force a full reload when needed.
@@ -69,7 +91,7 @@ adding an orchestration layer for ordinary implementation work.
 
 | Agent | Model | Reasoning effort |
 | --- | --- | --- |
-| Build | Claude Opus 5.5 via Claude Code (`claude-agent/opus`) | Model default |
+| Build | `OPENCODE_MODEL`, e.g. Claude Opus 5.5 via Claude Code (`claude-agent/opus`) or GPT-6.1 Sol (`openai/gpt-6.1-sol`) | Model default |
 | Executor | GPT-6 Luna Fast | Low |
 | Researcher | GPT-6 Luna | Medium |
 | Reviewer | GPT-6.1 Terra | High |
