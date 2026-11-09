@@ -5,10 +5,14 @@
   "snapshots": true,
   "formatter": true,
   "lsp": false,
-  // Build runs on Claude Opus 5.5 through the Claude Code integration
-  // (`claude-agent`), whose catalog exposes it only as the `opus` alias.
-  // Uses the model's default reasoning effort. Subagents pin their own GPT models.
-  "model": "claude-agent/opus",
+  // Build's default model is chosen per machine through the background
+  // service environment, so one profile serves machines with different providers:
+  //   opencode service set env OPENCODE_MODEL claude-agent/opus    # Claude available
+  //   opencode service set env OPENCODE_MODEL openai/gpt-6.1-sol   # no Claude
+  // An unset variable becomes an empty string, and OpenCode then falls back to
+  // the newest available supported model. The root default keeps no `#variant`,
+  // so the model's default reasoning effort applies. Subagents pin their own GPT models.
+  "model": "{env:OPENCODE_MODEL}",
   // Build owns a task from implementation through verification.
   "default_agent": "build",
   // The native task_worktree adapter appends the canonical project name.
