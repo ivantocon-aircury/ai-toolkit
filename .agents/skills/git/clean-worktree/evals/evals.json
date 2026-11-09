@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Dry run only. User explicitly invokes clean-worktree without a target. The active session is in a linked task worktree with uncommitted source edits and worktree-owned Docker resources. Describe the required sequence and consent points.",
-      "expected_output": "Capture the active target before moving, summarize that invocation discards all target files without a redundant dirty-file prompt, inspect identities, leave and verify the native handoff, recheck Git state before any deletion, remove the worktree-owned Docker containers, volumes, networks, and built images identified by Compose working_dir labels without a separate volume prompt, then use native force removal. The adapter enforces filesystem safety. Preserve shared or ambiguous Docker resources. Verify folder/Git/native inventory absence before deleting the verified unchanged local branch.",
+      "expected_output": "Capture the active target before moving, summarize the folder, branch, tip SHA, and unpublished commits and that invocation stops target services and discards all target files without a redundant dirty-file prompt, inspect identities, leave and verify the native handoff, stop target-owned host services, recheck Git state before any deletion, restore ownership of container-created files if needed, remove the worktree-owned Docker containers, volumes, networks, and built images identified by Compose working_dir labels without a separate volume prompt, then use native force removal. The adapter enforces filesystem safety. Preserve shared or ambiguous Docker resources. Verify folder/Git/native inventory absence before deleting the verified unchanged local branch.",
       "files": []
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "id": 7,
-      "prompt": "Dry run only. Explicit cleanup was approved. After leaving the target, a previously modified source file changes again and a watcher with that worktree as its working directory is found. What happens?",
-      "expected_output": "Recheck the recorded branch tip, Git status, and changed-path content snapshots immediately before removal. The changed source file needs renewed consent, and the proven active writer is a blocker. Delete no Docker resources and do not force-remove the worktree until the writer is resolved and applicable consent is renewed.",
+      "prompt": "Dry run only. Explicit cleanup was approved. After leaving the target, a watcher running as the current user with that worktree as its working directory is found, and a process from another folder holds a target source file open for writing. That source file changes again. What happens?",
+      "expected_output": "Stop the target-owned watcher without asking (tool stop command or SIGTERM, SIGKILL only if it survives) and confirm it is gone. Do not stop the outside process; it is an active writer and a blocker. Recheck the recorded branch tip, Git status, and changed-path content snapshots; the source file changed by the outside writer needs renewed consent. Delete no Docker resources and do not force-remove the worktree until the outside writer is resolved and consent is renewed.",
       "files": []
     },
     {
@@ -53,6 +53,30 @@
       "id": 10,
       "prompt": "Dry run only. Explicitly clean-worktree feature/search. Its containers were already removed, but volume feature-search_db and network feature-search_default remain, labeled with the project resolved by docker compose config in the target. The canonical checkout's compose.yaml declares feature-search_db as an external volume. An unrelated container started with docker run has no bind mounts. What happens?",
       "expected_output": "Use the target's resolved Compose project name to find the leftover resources. Remove the network, but preserve and report feature-search_db because another checkout references it by exact name. Do not treat the unrelated container as target-owned, since it has no bind mount inside the target. Do not use compose down or prune.",
+      "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "Dry run only. Explicitly clean-worktree feature/search. In the target, `symfony server:list` shows a server for the target folder, `npm run dev` runs with the target as its working directory, and the OpenCode language server for TypeScript also has its working directory inside the target. What happens?",
+      "expected_output": "Without a separate service question, stop the Symfony server with `symfony server:stop --dir=<target>` and the npm dev server with SIGTERM to its target-owned process group, escalating to SIGKILL only if it survives, and confirm both are gone. Do not stop the OpenCode language server; report it. Then recheck Git state and continue with Docker cleanup and native removal.",
+      "files": []
+    },
+    {
+      "id": 12,
+      "prompt": "Dry run only. Explicitly clean-worktree feature/search. Its Compose containers bind-mount the target and created root-owned `var/cache` and `vendor/` directories. Docker is available. What happens?",
+      "expected_output": "Detect the foreign-owned files with a single targeted find, and before removing the target's containers confirm no filesystem is mounted beneath the target and restore ownership with a throwaway container mounting only the exact target, changing only foreign-owned, non-hard-linked entries to the current uid:gid with chown -h and find -xdev. Do not use sudo or mount any other path. Then remove owned Docker resources and run native force removal. If ownership cannot be restored, report the paths and the partial result instead of falling back to rm -rf.",
+      "files": []
+    },
+    {
+      "id": 13,
+      "prompt": "Dry run only. Explicitly clean-worktree feature/search. The branch has three commits that are not on any remote branch nor on local main, master, preview, or staging. What happens?",
+      "expected_output": "Before removal, state the folder, branch, and tip SHA, list the three unpublished commits, and explain they can be recovered with `git branch feature/search <sha>` until garbage collection. Do not ask a separate commit question; the explicit invocation covers them. After the folder and registration are gone and the ref still equals the recorded tip, delete only the local branch and report the tip SHA.",
+      "files": []
+    },
+    {
+      "id": 14,
+      "prompt": "Dry run only. Explicitly clean-worktree feature/search. A Symfony proxy domain is attached to the target folder, /etc/hosts has an entry for it, and another OpenCode session has the target as its directory. What happens?",
+      "expected_output": "Confirm through `symfony server:list` that the domain's directory is exactly the target, then detach it by name with `symfony proxy:domain:detach <domain>`, report the /etc/hosts entry without editing it, and report the other OpenCode session without deleting or moving it. Continue with the rest of the cleanup.",
       "files": []
     }
   ]

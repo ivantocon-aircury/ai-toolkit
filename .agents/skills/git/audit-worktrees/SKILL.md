@@ -76,8 +76,8 @@ Use absolute working directories throughout and retain the original safe
 session directory for a verified return after the batch, if it still exists.
 Revalidate refs, tip, status, and integration evidence immediately before each
 cleanup. Changed evidence requires renewed review and approval.
-Let `clean-worktree` handle Docker ownership, full-folder removal, local-branch
-deletion, and partial failures. Never implement a second recursive-delete flow.
+Let `clean-worktree` handle stopping target services, Docker ownership, dev
+routing, full-folder removal, local-branch deletion, and partial failures. Never implement a second recursive-delete flow.
 Continue independent approved targets after a failure, retaining a per-target
 result. Report removed, preserved, blocked, and failed resources distinctly.
 Do not remove the audit's active worktree unless it was explicitly selected.

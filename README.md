@@ -127,10 +127,16 @@ instructions should provide those overrides.
 - `create-worktree`: prepares or selects a native task worktree under
   `~/work/worktrees/<project>/<branch-or-task>` and verifies session handoff.
 - `clean-worktree`: explicitly removes one registered task worktree folder,
-  its verified Docker containers, volumes, networks, built images, and eligible
-  local branch.
-  Explicit invocation discards all target files, including ignored files.
-  Shared or unverifiable Docker resources are preserved with a warning.
+  its verified Docker containers, volumes, networks, built images, folder-scoped
+  dev routing (such as Symfony proxy domains), and eligible local branch.
+  It first stops host services started from the folder (processes running
+  there, Symfony CLI servers, pm2 apps, user systemd units), never the agent,
+  OpenCode, or its language servers.
+  Explicit invocation discards all target files, including ignored files, and
+  fixes ownership of container-created root files before removal.
+  It lists unpublished branch commits and the tip SHA for recovery.
+  Shared or unverifiable Docker resources, `/etc/hosts` entries, and other
+  sessions on the folder are preserved and reported.
 - `audit-worktrees`: checks every project under `~/work/worktrees` against
   main, master, preview, and staging; delegates explicitly approved cleanup.
 - `verify-changes`: reviews the complete diff and runs discovered project checks.
@@ -151,7 +157,8 @@ without the per-project adapter conventions.
 For cleanup, explicitly select `clean-worktree` or mention it as
 `@clean-worktree` in the UI.
 Cleanup first moves the active session outside the target and verifies handoff,
-then performs the shared runtime and consent checks before native removal.
+stops the target's services, then performs the runtime and consent checks and
+Docker cleanup before native removal.
 The profile requests permission for native removal, with the target and force
 flag shown; other native worktree operations retain their automatic flow.
 It deletes the verified local branch only after folder and registrations are gone.
