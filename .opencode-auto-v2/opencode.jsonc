@@ -93,6 +93,15 @@
       "context7": {
         "type": "local",
         "command": ["npx", "-y", "@upstash/context7-mcp@4.0.3"]
+      },
+      // Aircury Boards Runtime API. Each board is reached with its own token from
+      // the service environment (BOARDS_TOKEN or <NAME>_BOARD_TOKEN), e.g.
+      //   opencode service set env ENTRELIBROS_BOARD_TOKEN <token>
+      // The fixed cwd resolves the profile copy installed as ~/.config/opencode.
+      "boards": {
+        "type": "local",
+        "command": ["node", ".config/opencode/mcp/boards/server.mjs"],
+        "cwd": "~"
       }
     }
   }
