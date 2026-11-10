@@ -31,7 +31,7 @@ This repository intentionally does not prescribe a copy or installation script.
   common destructive command forms and native access to credential directories,
   but it is not an OS sandbox: broad Bash access can bypass path-based rules.
   Use this profile only in an isolated environment.
-  Install the complete profile, including `plugins/` and `instructions/`.
+  Install the complete profile, including `plugins/`, `mcp/`, and `instructions/`.
 
 ### Per-machine default model
 
@@ -58,6 +58,46 @@ OpenCode reloads configuration, agents, commands, skills, plugins, and MCP
 servers after a profile change. Use `/reload` to force a full reload when needed.
 The profile's `cli.json` enables terminal-title updates, so session-title changes
 can also appear in a supporting terminal window or terminal-emulator tab.
+
+## MCP Servers
+
+- `context7` serves current library documentation.
+- `boards` is a dependency-free local server for the Aircury Boards Runtime API
+  (`mcp/boards/server.mjs`, run with the Node.js that OpenCode finds on `PATH`).
+
+### Boards
+
+Every Boards API token is scoped to exactly one board, so the server discovers
+one board per token from the OpenCode service environment: `BOARDS_TOKEN`
+and any `<NAME>_BOARD_TOKEN`. Add a token per board once per machine:
+
+```sh
+opencode service set env ENTRELIBROS_BOARD_TOKEN <token>
+```
+
+Each token is resolved to its board through the API entry point, so no board id,
+slug, or path is configured. When several tokens exist, tools take a `board`
+selector (slug, id, title, `/b/<slug>` URL, or token variable name); card tools
+accept a card code such as `EL-12`, a UUID, or a `/c/<code>` share link, and
+search every configured board when no selector is given.
+
+The API is hypermedia-driven: each resource advertises the operations the token
+may perform, with a JSON schema per operation. The server follows those links
+instead of hardcoding routes, so it covers every board and new API operations:
+
+| Tool | Purpose |
+| --- | --- |
+| `list_boards`, `get_board` | Configured boards, capabilities, columns, labels, members, settings |
+| `list_cards`, `search_cards`, `get_card` | Board digest or paged column cards, search, card detail with activity, relations, or time |
+| `create_card`, `update_card`, `move_card`, `add_comment` | Common card workflows |
+| `list_events` | Board event log, pageable with `after` |
+| `list_operations`, `get_schema`, `invoke_operation` | Discover and run any advertised operation (archive, assign, labels, checklists, time, links, watch, snooze) |
+| `get_resource` | Follow any API link or URL template |
+
+Tokens are only ever sent to `BOARDS_API_URL` (default
+`https://api.boards.aircury.net/api`); `BOARDS_WEB_URL` sets the web origin
+used for board and card links. File uploads are not supported.
+Run its checks with `node --test .opencode-auto-v2/tests/boards-mcp.test.mjs`.
 
 ## Global Instructions
 
