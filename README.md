@@ -179,6 +179,21 @@ Run adapter checks with
 - `extract-rule`: turns evidence from changes or review corrections into a
   confirmed, discoverable project rule without imposing a global taxonomy.
 
+### Kanban
+
+Use the active project's configured tracker integration and board conventions.
+
+- `@create-card <notes>`: refines the request against project and board context,
+  checks for duplicates, and creates a card with a clear title, description,
+  and matching existing labels. Defaults to `Backlog` unless the repository
+  documents another column or you name one.
+- `@work-on-card [reference or link]`: works on the referenced card or, if
+  omitted, the top card in `Backlog` (or the repository's or your chosen
+  column). Renames the active session to `<card ref> - <card title>` and
+  follows the project's workflow to move the card when work starts. For
+  repository changes, it opens a pull request when the work is ready and
+  moves the card again after the PR is confirmed.
+
 ### Interaction
 
 - `ask-question`: collects a decision or confirmation through the native
