@@ -184,15 +184,19 @@ Run adapter checks with
 Use the active project's configured tracker integration and board conventions.
 
 - `@create-card <notes>`: refines the request against project and board context,
-  checks for duplicates, and creates a card with a clear title, description,
-  and matching existing labels. Defaults to `Backlog` unless the repository
-  documents another column or you name one.
-- `@work-on-card [reference or link]`: works on the referenced card or, if
-  omitted, the top card in `Backlog` (or the repository's or your chosen
-  column). Renames the active session to `<card ref> - <card title>` and
-  follows the project's workflow to move the card when work starts. For
-  repository changes, it opens a pull request when the work is ready and
-  moves the card again after the PR is confirmed.
+  checks for duplicates, and creates a ready-to-work card with a clear title,
+  a description that follows the board's template for the card type (or
+  structured context, goal, scope, and acceptance criteria sections), and
+  matching existing labels. It reviews the board's columns and proposes one
+  before creating, defaulting to the column you name, then the repository's
+  documented column, then `Backlog`.
+- `@work-on-card [reference or link]`: picks the card you reference, otherwise
+  a card created earlier in the session, otherwise the top card in the
+  "to work on" column (the one you name, the repository's documented column,
+  or `Backlog`; if none exists, it lists the board's columns and asks).
+  Renames the active session to `<card ref> - <card title>` and follows the
+  project's workflow. Every board action (moves, comments, field changes),
+  the push, and the pull request require your approval first.
 
 ### Interaction
 
